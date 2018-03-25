@@ -1,3 +1,3 @@
-function generateHouses(map)
-{
+function generateHouses(feature, layer, map) {
+	
 }

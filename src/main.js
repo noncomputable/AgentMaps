@@ -1,15 +1,24 @@
-function agentify (map, geoJSON_data, bounding_box, geoJSON_data_URI) 
-{
+var agentmaps = {
+	mapify: mapify,
+	features: {
+		units: []
+	},
+};
+
+function mapify (map, geoJSON_data, geoJSON_data_URI) {
 	//if (!GeoJSON_data && GeoJSON_data_URI) {}
-	var bounding_box = L.latLngBounds(bounding_box[0], bounding_box[1]);
-	var geo_layer = L.geoJSON(
+	
+	var geoJSON_options = {
+		onEachFeature: generateHouses,
+		style:	{
+			"color": "black",
+			"weight": 1,
+			"opacity": .65
+		}
+	};
+				
+	window.geo_layer = L.geoJSON(
 		geoJSON_data,
-		{
-			style: 
-				{
-				"color": "black",
-				"weight": 1,
-				"opacity": .65
-				},
-	}).addTo(map);
+		geoJSON_options
+	).addTo(map);
 }
