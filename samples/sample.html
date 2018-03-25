@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>AgentMaps Sample App</title>
+<link rel="stylesheet" href="../dependencies/leaflet.css" />
+<script type="text/javascript" src="../dependencies/leaflet.js"></script>
+<!-- <script type="text/javascript" src="../dependencies/pathfinding.js"></script> --!>
+</head>
+<body background="../dependencies/images/background-im.jpg">
+<br />
+<h2 style="text-align: center; font-family: 'Lucida Console';">AgentMaps Simulation Panel</h2>
+<br />
+<div style="text-align: center;">
+<div id="sample_map" style="border: 1px solid white; height: 400px; width: 500px; display: inline-block; vertical-align: top; border-radius: 5px;"></div>
+<div id="commander" style="display: inline-block; margin-left: 10px;">
+<textarea rows="25" cols="50" style="border: 1px solid white; border-radius: 5px;"></textarea>
+<br />
+<button type="Button" id="reset" onclick="document.getElementById('run').textContent = 'Run'">Reset</button>
+<button type="Button" id="run" onclick="this.textContent = this.textContent == 'Run' ? 'Pause' : 'Run'">Run</button>
+</div>
+</div>
+<script type="text/javascript" src="../src/main.js"></script>
+<script type="text/javascript" src="../src/remap.js"></script>
+<script type="text/javascript" src="sample_data.js"></script>
+<script type="text/javascript" src="sample.js"></script>
+</body>
+</html>
