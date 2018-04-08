@@ -1,6 +1,8 @@
 function mapify (map, OSM_data, OSM_data_URI) {
 	//if (!GeoJSON_data && GeoJSON_data_URI) {}
 	
+	var all_features = getAllFeatures(OSM_data);
+	
 	var unit_options = {
 		style: {
 			"color": "green",
@@ -11,27 +13,50 @@ function mapify (map, OSM_data, OSM_data_URI) {
 
 	var unit_feature_collection = { 
 		type: "FeatureCollection", 
-		features: getAllUnitFeatures(OSM_data)
+		features: all_features.units
 	};
 
-	agentmap.layers.agent_units = L.geoJSON(
+	agentmap.layers.units = L.geoJSON(
 		unit_feature_collection,
 		unit_options
 	).addTo(agentmap.map);
+
+	var street_options = {
+		style: {
+			"color": "yellow",
+			"weight": 4,
+			"opacity": .5
+		}
+	};
+
+	var street_feature_collection = {
+		type: "FeatureCollection",
+		features: all_features.streets
+	};
+	
+	agentmap.layers.streets = L.geoJSON(
+		street_feature_collection,
+		street_options
+	).addTo(agentmap.map);
 }
 
-function getAllUnitFeatures(OSM_data) {
-	var all_unit_features = [];
+function getAllFeatures(OSM_data) {
+	var all_features = {
+		units: [],
+		streets: []
+	};
+
 	for (var feature of OSM_data.features) {
 		if (feature.geometry.type == "LineString" && feature.properties.highway) {
 			var proposed_anchors = getUnitAnchors(feature),
 			proposed_unit_features = generateUnitFeatures(proposed_anchors);
 			//unit_features = withoutOverlappedUnits(proposed_unit_specs)
-			all_unit_features = all_unit_features.concat(proposed_unit_features);
+			all_features.units = all_features.units.concat(proposed_unit_features);
+			all_features.streets.push(feature);
 		}
 	}
 
-	return all_unit_features;
+	return all_features;
 }
 
 //Given two anchors, find four nearby points on either side
