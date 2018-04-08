@@ -87,8 +87,8 @@ function getUnitSpecs(unit_anchors) {
 		};
 		unit_spec.geometry.coordinates[0][0] = turf.destination(anchor_a, street_buffer, new_angle).geometry.coordinates,
 		unit_spec.geometry.coordinates[0][1] = turf.destination(anchor_b, street_buffer, new_angle).geometry.coordinates,
-		unit_spec.geometry.coordinates[0][2] = turf.destination(anchor_a, street_buffer + house_depth, new_angle).geometry.coordinates,
-		unit_spec.geometry.coordinates[0][3] = turf.destination(anchor_b, street_buffer + house_depth, new_angle).geometry.coordinates;
+		unit_spec.geometry.coordinates[0][2] = turf.destination(anchor_b, street_buffer + house_depth, new_angle).geometry.coordinates,
+		unit_spec.geometry.coordinates[0][3] = turf.destination(anchor_a, street_buffer + house_depth, new_angle).geometry.coordinates;
 		unit_specs.push(unit_spec);
 	}
 
