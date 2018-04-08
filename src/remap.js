@@ -2,7 +2,7 @@ function mapify (map, geoJSON_data, geoJSON_data_URI) {
 	//if (!GeoJSON_data && GeoJSON_data_URI) {}
 	
 	var geoJSON_options = {
-	//	onEachFeature: generateUnits,
+		onEachFeature: generateUnits,
 		style:	{
 			"color": "black",
 			"weight": 1,
@@ -13,31 +13,47 @@ function mapify (map, geoJSON_data, geoJSON_data_URI) {
 	agentmap.layers.OSM_features = L.geoJSON(
 		geoJSON_data,
 		geoJSON_options
-	).addTo(map);
+	).addTo(agentmap.map);
+
+	agentmap.layers.agent_units = L.geoJSON(
+		agentmap.layers.agent_units
+	).addTo(agentmap.map);
 }
 
-function generateUnits(feature, layer) {
-	if (feature.geometry.type == "LineString") {
-		var nodes = feature.geometry.coordinates;
-
-		var unit_anchors = getUnitAnchors(prev_node, next_node);
-//		var unit_specs = getUnitSpecs(unit_anchors);
-		agentmaps.features.units = agentmaps.features.units.concat(unit_specs)
+function generateUnits(street_feature, street_layer) {
+	if (street_feature.geometry.type == "LineString" && street_feature.properties.highway) {
+		var unit_anchors = getUnitAnchors(street_feature);
+		//var unit_specs = getUnitSpecs(unit_anchors);
+		//var new_units_layer = L.geoJSON(unit_specs);
+		var new_units_layer = unit_anchors;
+		agentmap.layers.agent_units.features = agentmap.layers.agent_units.features.concat(new_units_layer);
 	}
 }
 
 //Find anchors for potential units. Anchors are the pairs of start 
 //and end points along the street from which units may be constructed.
-function getUnitAnchors(prev_node, next_node, start_proposal = prev_node) {
-	var dist_to_next_node = start_proposal.distanceTo(next_node);
-	if (dist_to_next_node >= 7) {
-		end_proposal = getLinePosAhead(start_proposal, next_node, 7);
+function getUnitAnchors(street) {
+	var unit_anchors = [],
+	unit_length = 14 / 1000, //kilometers
+	unit_buffer = 3 / 1000, //distance between units, kilometers
+	endpoint = street.geometry.coordinates[street.geometry.coordinates.length - 1],
+	start_anchor = street.geometry.coordinates[0],
+	end_anchor = turf.along(street, unit_length),
+	distance_along = unit_length;
+	console.log("one", endpoint);
+	
+	while (end_anchor.geometry.coordinates != endpoint) {
+		console.log(end_anchor);
+		unit_anchors = unit_anchors.concat([start_anchor, end_anchor]);
+		
+		//Find next pair of anchors
+		start_anchor = turf.along(street, distance_along + unit_buffer);
+		end_anchor = turf.along(street, distance_along + unit_buffer + unit_length);
+		
+		distance_along += unit_buffer + unit_length
 	}
-	else {
-		var left_over_dist = 7 - dist_to_next_node;
-		//somehow search through the remaining segments of the street until finding one with dist_to_next_node >= left_over_dist and
-		//add set the end_proposal to the appropriate point
-	}
+
+	return unit_anchors;
 }
 
 //Given two anchors, find four nearby points on either side

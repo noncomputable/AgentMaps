@@ -4,9 +4,9 @@ var agentmap = {
 	layers: {
 		OSM_tiles: undefined,
 		OSM_features: undefined,
-		generated: undefined
+		agent_units: { 
+			type: "FeatureCollection", 
+			features: []
+		}
 	},
-	features: {
-		units: []
-	}
 };
