@@ -72,24 +72,26 @@ function getUnitAnchors(street) {
 function getUnitSpecs(unit_anchors) {
 	var unit_specs = [];
 	for (var anchor_pair of unit_anchors) {
-		var anchor_a = anchor_pair[0].geometry.coordinates,
-		anchor_b = anchor_pair[1].geometry.coordinates,
-		street_buffer = 6 / 1000, //distance between center of street and start of unit
-		house_depth = 10 / 1000,
-		angle = turf.bearing(anchor_a, anchor_b),
-		new_angle = angle <= 90 ? angle + 90 : angle - 90, //angle of line perpendicular to the anchor segment
-		unit_spec = { 
-			type: "Feature",
-			geometry: {
-				type: "Polygon",
-				coordinates: [[]]
-			}
-		};
-		unit_spec.geometry.coordinates[0][0] = turf.destination(anchor_a, street_buffer, new_angle).geometry.coordinates,
-		unit_spec.geometry.coordinates[0][1] = turf.destination(anchor_b, street_buffer, new_angle).geometry.coordinates,
-		unit_spec.geometry.coordinates[0][2] = turf.destination(anchor_b, street_buffer + house_depth, new_angle).geometry.coordinates,
-		unit_spec.geometry.coordinates[0][3] = turf.destination(anchor_a, street_buffer + house_depth, new_angle).geometry.coordinates;
-		unit_specs.push(unit_spec);
+		for (var i of [1, -1]) {
+			var anchor_a = anchor_pair[0].geometry.coordinates,
+			anchor_b = anchor_pair[1].geometry.coordinates,
+			street_buffer = 6 / 1000, //distance between center of street and start of unit
+			house_depth = 10 / 1000,
+			angle = turf.bearing(anchor_a, anchor_b),
+			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //angle of line perpendicular to the anchor segment
+			unit_spec = { 
+				type: "Feature",
+				geometry: {
+					type: "Polygon",
+					coordinates: [[]]
+				}
+			};
+			unit_spec.geometry.coordinates[0][0] = turf.destination(anchor_a, street_buffer, new_angle).geometry.coordinates,
+			unit_spec.geometry.coordinates[0][1] = turf.destination(anchor_b, street_buffer, new_angle).geometry.coordinates,
+			unit_spec.geometry.coordinates[0][2] = turf.destination(anchor_b, street_buffer + house_depth, new_angle).geometry.coordinates,
+			unit_spec.geometry.coordinates[0][3] = turf.destination(anchor_a, street_buffer + house_depth, new_angle).geometry.coordinates;
+			unit_specs.push(unit_spec);
+		}
 	}
 
 	return unit_specs;
