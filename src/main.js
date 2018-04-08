@@ -1,24 +1,12 @@
-var agentmaps = {
+var agentmap = {
+	map: undefined,
 	mapify: mapify,
+	layers: {
+		OSM_tiles: undefined,
+		OSM_features: undefined,
+		generated: undefined
+	},
 	features: {
 		units: []
-	},
+	}
 };
-
-function mapify (map, geoJSON_data, geoJSON_data_URI) {
-	//if (!GeoJSON_data && GeoJSON_data_URI) {}
-	
-	var geoJSON_options = {
-		onEachFeature: generateHouses,
-		style:	{
-			"color": "black",
-			"weight": 1,
-			"opacity": .65
-		}
-	};
-				
-	window.geo_layer = L.geoJSON(
-		geoJSON_data,
-		geoJSON_options
-	).addTo(map);
-}

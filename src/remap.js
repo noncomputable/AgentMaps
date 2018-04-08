@@ -1,20 +1,33 @@
+function mapify (map, geoJSON_data, geoJSON_data_URI) {
+	//if (!GeoJSON_data && GeoJSON_data_URI) {}
+	
+	var geoJSON_options = {
+	//	onEachFeature: generateUnits,
+		style:	{
+			"color": "black",
+			"weight": 1,
+			"opacity": .65
+		}
+	};
+				
+	agentmap.layers.OSM_features = L.geoJSON(
+		geoJSON_data,
+		geoJSON_options
+	).addTo(map);
+}
+
 function generateUnits(feature, layer) {
 	if (feature.geometry.type == "LineString") {
 		var nodes = feature.geometry.coordinates;
 
-		//Skip last node of street
-		for (var i = 0; i < nodes.length - 1; i++) {
-			var prev_node = nodes[i];
-			var next_node = nodes[i + 1];
-			var unit_anchors = getUnitAnchors(prev_node, next_node);
-//			var unit_specs = getUnitSpecs(unit_anchors);
-			agentmaps.features.units = agentmaps.features.units.concat(unit_specs)
-		}
+		var unit_anchors = getUnitAnchors(prev_node, next_node);
+//		var unit_specs = getUnitSpecs(unit_anchors);
+		agentmaps.features.units = agentmaps.features.units.concat(unit_specs)
 	}
 }
 
-//Find anchors for potential units. Anchors are the start and
-//end points along the street off of which units are specified.
+//Find anchors for potential units. Anchors are the pairs of start 
+//and end points along the street from which units may be constructed.
 function getUnitAnchors(prev_node, next_node, start_proposal = prev_node) {
 	var dist_to_next_node = start_proposal.distanceTo(next_node);
 	if (dist_to_next_node >= 7) {
