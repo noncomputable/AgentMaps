@@ -1,25 +1,26 @@
+//Here we define mapify and all other functions it relies on.
+
 /**
  * @typedef {object} Feature
  * @property {string} type - Should be Feature.
  * @property {object} properties - Non-geometric properties describing the map feature.
  * @property {object} geometry - Specification of the feature's geometry.
  * @property {string} geometry.type - The feature's GeoJSON geometry type
- * @property {Array<>} geometry.coordinates - The coordinates specifying the feature's geometry.
+ * @property {Array} geometry.coordinates - The coordinates specifying the feature's geometry.
  * @see {@link http://geojson.org/}
  */
 
 /**
  * Generate and setup the desired map features (e.g. streets, houses).
  *
- * @param {Object} map - A Leaflet Map object.
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
- * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
  * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
  */
-function mapify (map, bounding_box, OSM_data, OSM_data_URL) {
+function mapify (bounding_box, OSM_data, OSM_data_URL) {
 	//if (!GeoJSON_data && GeoJSON_data_URL) {}
 	
-	var all_features = getAllFeatures(OSM_data);
+	var all_features = getAllFeatures(OSM_data, bounding_box);
 	
 	var unit_options = {
 		style: {
@@ -33,11 +34,11 @@ function mapify (map, bounding_box, OSM_data, OSM_data_URL) {
 		type: "FeatureCollection", 
 		features: all_features.units
 	};
-
-	agentmap.layers.units = L.geoJSON(
+	
+	this.layers.units = L.geoJSON(
 		unit_feature_collection,
 		unit_options
-	).addTo(agentmap.map);
+	).addTo(this.map);
 
 	var street_options = {
 		style: {
@@ -52,17 +53,17 @@ function mapify (map, bounding_box, OSM_data, OSM_data_URL) {
 		features: all_features.streets
 	};
 	
-	agentmap.layers.streets = L.geoJSON(
+	this.layers.streets = L.geoJSON(
 		street_feature_collection,
 		street_options
-	).addTo(agentmap.map);
+	).addTo(this.map);
 }
 
 /**
- * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features of the bounding box.
- * @returns {Object<string, Array<Feature>>} - An object whose properties are arrays of features of different kinds.
+ * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @returns {Object<string, Array<Feature>>} - An object each of whose properties are an array of features of a different kind.
  */
-function getAllFeatures(OSM_data) {
+function getAllFeatures(OSM_data, bounding_box) {
 	var all_features = {
 		units: [],
 		streets: []
@@ -70,7 +71,7 @@ function getAllFeatures(OSM_data) {
 
 	for (var feature of OSM_data.features) {
 		if (feature.geometry.type == "LineString" && feature.properties.highway) {
-			var proposed_anchors = getUnitAnchors(feature),
+			var proposed_anchors = getUnitAnchors(feature, bounding_box),
 			proposed_unit_features = generateUnitFeatures(proposed_anchors);
 			//unit_features = withoutOverlappedUnits(proposed_unit_specs)
 			all_features.units = all_features.units.concat(proposed_unit_features);
@@ -125,19 +126,29 @@ function generateUnitFeatures(unit_anchors) {
  * @param {Feature} street_feature - A GeoJSON feature object representing a street.
  * @returns {Array<Array<Feature>>} - An array of pairs of points around which to anchor units along a street.  
  */
-function getUnitAnchors(street_feature) {
+function getUnitAnchors(street_feature, bounding_box) {
 	var unit_anchors = [],
-	unit_length = 14 / 1000, //kilometers
-	unit_buffer = 3 / 1000, //distance between units, kilometers
+	unit_length = 14 / 1000, //Kilometers.
+	unit_buffer = 3 / 1000, //Distance between units, kilometers.
 	endpoint = street_feature.geometry.coordinates[street_feature.geometry.coordinates.length - 1],
 	start_anchor = turf.along(street_feature, 0),
 	end_anchor = turf.along(street_feature, unit_length),
 	distance_along = unit_length;
 	
 	while (end_anchor.geometry.coordinates != endpoint) {
-		unit_anchors.push([start_anchor, end_anchor]);
-		
-		//Find next pair of anchors
+		//Exclude proposed anchors if they're outside of the bounding box.
+		//Formatting woes: L.geoJSON will auto-reverse the coordinate orders, as
+		//it expects geoJSON to be lngLat. However, methods like latLngBounds.contains
+		//expect standard latLng pairs and won't auto-reverse, so we have to do that
+		//manually if we're preprocessing the geoJSON before passing it to L.geoJSON.
+		start_coord = [start_anchor.geometry.coordinates[1], start_anchor.geometry.coordinates[0]],
+		end_coord = [end_anchor.geometry.coordinates[1], end_anchor.geometry.coordinates[0]];
+		if (L.latLngBounds(bounding_box).contains(start_coord) &&
+			L.latLngBounds(bounding_box).contains(end_coord)) {
+				unit_anchors.push([start_anchor, end_anchor]);
+		}
+
+		//Find next pair of anchors.
 		start_anchor = turf.along(street_feature, distance_along + unit_buffer);
 		end_anchor = turf.along(street_feature, distance_along + unit_buffer + unit_length);
 		

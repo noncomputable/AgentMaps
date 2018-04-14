@@ -1,11 +1,12 @@
-var bounding_box = L.latLngBounds([40.6573, -73.5289], [40.6387, -73.5146]);
-agentmap.map = L.map("sample_map").setView([40.6451, -73.5218], 15);
-agentmap.layers.OSM_tiles = L.tileLayer(
+var bounding_box = [[40.6469, -73.5255], [40.6390, -73.5183]];
+var sample_map = L.map("sample_map").fitBounds(bounding_box).setZoom(16);
+L.tileLayer(
 	"http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 	{
 		attribution: "Thanks to <a href=\"http://openstreetmap.org\">OpenStreetMap</a> community",
 		maxZoom: 18,
 	}
-).addTo(agentmap.map);
+).addTo(sample_map);
 
-agentmap.mapify(agentmap.map, bounding_box, sample_data);
+var sample_agentmap = new Agentmap(sample_map);
+sample_agentmap.mapify(bounding_box, sample_data);

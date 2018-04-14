@@ -13,6 +13,8 @@ Session.vim
 # Auto-generated tag files
 tags
 
+#DevUtil
+*_devutil.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
