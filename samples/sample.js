@@ -8,4 +8,4 @@ agentmap.layers.OSM_tiles = L.tileLayer(
 	}
 ).addTo(agentmap.map);
 
-agentmap.mapify(agentmap.map, sample_data);
+agentmap.mapify(agentmap.map, bounding_box, sample_data);

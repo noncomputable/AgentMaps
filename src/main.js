@@ -3,7 +3,7 @@ var agentmap = {
 	mapify: mapify,
 	layers: {
 		units: undefined,
-		streets: undefined
+		streets: undefined,
 		agents: undefined
 	},
 	agentify: agentify,

@@ -1,5 +1,23 @@
-function mapify (map, OSM_data, OSM_data_URI) {
-	//if (!GeoJSON_data && GeoJSON_data_URI) {}
+/**
+ * @typedef {object} Feature
+ * @property {string} type - Should be Feature.
+ * @property {object} properties - Non-geometric properties describing the map feature.
+ * @property {object} geometry - Specification of the feature's geometry.
+ * @property {string} geometry.type - The feature's GeoJSON geometry type
+ * @property {Array<>} geometry.coordinates - The coordinates specifying the feature's geometry.
+ * @see {@link http://geojson.org/}
+ */
+
+/**
+ * Generate and setup the desired map features (e.g. streets, houses).
+ *
+ * @param {Object} map - A Leaflet Map object.
+ * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
+ * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
+ */
+function mapify (map, bounding_box, OSM_data, OSM_data_URL) {
+	//if (!GeoJSON_data && GeoJSON_data_URL) {}
 	
 	var all_features = getAllFeatures(OSM_data);
 	
@@ -40,6 +58,10 @@ function mapify (map, OSM_data, OSM_data_URI) {
 	).addTo(agentmap.map);
 }
 
+/**
+ * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features of the bounding box.
+ * @returns {Object<string, Array<Feature>>} - An object whose properties are arrays of features of different kinds.
+ */
 function getAllFeatures(OSM_data) {
 	var all_features = {
 		units: [],
@@ -59,8 +81,13 @@ function getAllFeatures(OSM_data) {
 	return all_features;
 }
 
-//Given two anchors, find four nearby points on either side
-//of the street appropriate to form a unit.
+/**
+ * Given two anchors, find four nearby points on either side
+ * of the street appropriate to build a unit(s) on.
+ *
+ * @param {Array<Array<Feature>>} unit_anchors - An array of pairs of points around which to anchor units along a street.
+ * @returns {Array<Feature>} unit_features - An array of features representing real estate units.
+ */
 function generateUnitFeatures(unit_anchors) {
 	var unit_features = [];
 	
@@ -91,8 +118,13 @@ function generateUnitFeatures(unit_anchors) {
 	return unit_features;
 }
 
-//Find anchors for potential units. Anchors are the pairs of start 
-//and end points along the street from which units may be constructed.
+/**
+ * Find anchors for potential units. Anchors are the pairs of start 
+ * and end points along the street from which units may be constructed.
+ * 
+ * @param {Feature} street_feature - A GeoJSON feature object representing a street.
+ * @returns {Array<Array<Feature>>} - An array of pairs of points around which to anchor units along a street.  
+ */
 function getUnitAnchors(street_feature) {
 	var unit_anchors = [],
 	unit_length = 14 / 1000, //kilometers
