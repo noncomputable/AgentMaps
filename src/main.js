@@ -1,5 +1,5 @@
 /**
- * The main class for building, storing, and manipulating agent-based models on Leaflet maps.
+ * The main class for building, storing, simulating, and manipulating agent-based models on Leaflet maps.
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map object.

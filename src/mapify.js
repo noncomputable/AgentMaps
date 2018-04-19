@@ -1,4 +1,4 @@
-//Here we define mapify and all other functions it relies on.
+/* Here we define mapify and all other functions and definitions it relies on. */
 
 /**
  * @typedef {object} Feature
@@ -20,9 +20,9 @@
 function mapify (bounding_box, OSM_data, OSM_data_URL) {
 	//if (!GeoJSON_data && GeoJSON_data_URL) {}
 	
-	var all_features = getAllFeatures(OSM_data, bounding_box);
+	let all_features = getAllFeatures(OSM_data, bounding_box);
 	
-	var unit_options = {
+	let unit_options = {
 		style: {
 			"color": "green",
 			"weight": 1,
@@ -30,7 +30,7 @@ function mapify (bounding_box, OSM_data, OSM_data_URL) {
 		}
 	};
 
-	var unit_feature_collection = { 
+	let unit_feature_collection = { 
 		type: "FeatureCollection", 
 		features: all_features.units
 	};
@@ -40,7 +40,7 @@ function mapify (bounding_box, OSM_data, OSM_data_URL) {
 		unit_options
 	).addTo(this.map);
 
-	var street_options = {
+	let street_options = {
 		style: {
 			"color": "yellow",
 			"weight": 4,
@@ -48,7 +48,7 @@ function mapify (bounding_box, OSM_data, OSM_data_URL) {
 		}
 	};
 
-	var street_feature_collection = {
+	let street_feature_collection = {
 		type: "FeatureCollection",
 		features: all_features.streets
 	};
@@ -60,20 +60,22 @@ function mapify (bounding_box, OSM_data, OSM_data_URL) {
 }
 
 /**
+ * Generate all appropriate roads and units within the desired bounding box.
+ *
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @returns {Object<string, Array<Feature>>} - An object each of whose properties are an array of features of a different kind.
+ * @returns {Object<string, Array<Feature>>} - An object each of whose properties is an array of features of a different kind.
  */
 function getAllFeatures(OSM_data, bounding_box) {
-	var all_features = {
+	let all_features = {
 		units: [],
 		streets: []
 	};
 
-	for (var feature of OSM_data.features) {
+	for (let feature of OSM_data.features) {
 		if (feature.geometry.type == "LineString" && feature.properties.highway) {
-			var proposed_anchors = getUnitAnchors(feature, bounding_box),
-			proposed_unit_features = generateUnitFeatures(proposed_anchors);
-			//unit_features = withoutOverlappedUnits(proposed_unit_specs)
+			let proposed_anchors = getUnitAnchors(feature, bounding_box),
+			all_proposed_units_so_far = all_features.units;
+			proposed_unit_features = generateUnitFeatures(proposed_anchors, all_proposed_units_so_far);
 			all_features.units = all_features.units.concat(proposed_unit_features);
 			all_features.streets.push(feature);
 		}
@@ -87,19 +89,20 @@ function getAllFeatures(OSM_data, bounding_box) {
  * of the street appropriate to build a unit(s) on.
  *
  * @param {Array<Array<Feature>>} unit_anchors - An array of pairs of points around which to anchor units along a street.
+ * @param {Array<Feature>} proposed_unit_features - An array of features representing real estate units already proposed for construction.
  * @returns {Array<Feature>} unit_features - An array of features representing real estate units.
  */
-function generateUnitFeatures(unit_anchors) {
-	var unit_features = [];
+function generateUnitFeatures(unit_anchors, proposed_unit_features) {
+	let unit_features = [];
 	
-	for (var anchor_pair of unit_anchors) {
-		for (var i of [1, -1]) {
-			var anchor_a = anchor_pair[0].geometry.coordinates,
+	for (let anchor_pair of unit_anchors) {
+		for (let i of [1, -1]) {
+			let anchor_a = anchor_pair[0].geometry.coordinates,
 			anchor_b = anchor_pair[1].geometry.coordinates,
-			street_buffer = 6 / 1000, //distance between center of street and start of unit
+			street_buffer = 6 / 1000, //Distance between center of street and start of unit.
 			house_depth = 18 / 1000,
 			angle = turf.bearing(anchor_a, anchor_b),
-			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //angle of line perpendicular to the anchor segment
+			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //Angle of line perpendicular to the anchor segment.
 			unit_feature = { 
 				type: "Feature",
 				geometry: {
@@ -111,8 +114,13 @@ function generateUnitFeatures(unit_anchors) {
 			unit_feature.geometry.coordinates[0][1] = turf.destination(anchor_b, street_buffer, new_angle).geometry.coordinates,
 			unit_feature.geometry.coordinates[0][2] = turf.destination(anchor_b, street_buffer + house_depth, new_angle).geometry.coordinates,
 			unit_feature.geometry.coordinates[0][3] = turf.destination(anchor_a, street_buffer + house_depth, new_angle).geometry.coordinates;
-			unit_feature.geometry.coordinates[0][4] = turf.destination(anchor_a, street_buffer, new_angle).geometry.coordinates,
-			unit_features.push(unit_feature);
+			unit_feature.geometry.coordinates[0][4] = turf.destination(anchor_a, street_buffer, new_angle).geometry.coordinates;
+
+			//Exclude the unit if it overlaps with any of the other proposed units.
+			var all_proposed_unit_features = unit_features.concat(proposed_unit_features); 
+			if (noOverlaps(unit_feature, all_proposed_unit_features)) {
+				unit_features.push(unit_feature);
+			}
 		}
 	}
 
@@ -127,7 +135,7 @@ function generateUnitFeatures(unit_anchors) {
  * @returns {Array<Array<Feature>>} - An array of pairs of points around which to anchor units along a street.  
  */
 function getUnitAnchors(street_feature, bounding_box) {
-	var unit_anchors = [],
+	let unit_anchors = [],
 	unit_length = 14 / 1000, //Kilometers.
 	unit_buffer = 3 / 1000, //Distance between units, kilometers.
 	endpoint = street_feature.geometry.coordinates[street_feature.geometry.coordinates.length - 1],
@@ -137,12 +145,8 @@ function getUnitAnchors(street_feature, bounding_box) {
 	
 	while (end_anchor.geometry.coordinates != endpoint) {
 		//Exclude proposed anchors if they're outside of the bounding box.
-		//Formatting woes: L.geoJSON will auto-reverse the coordinate orders, as
-		//it expects geoJSON to be lngLat. However, methods like latLngBounds.contains
-		//expect standard latLng pairs and won't auto-reverse, so we have to do that
-		//manually if we're preprocessing the geoJSON before passing it to L.geoJSON.
-		start_coord = [start_anchor.geometry.coordinates[1], start_anchor.geometry.coordinates[0]],
-		end_coord = [end_anchor.geometry.coordinates[1], end_anchor.geometry.coordinates[0]];
+		start_coord = reversedCoordinates(start_anchor.geometry.coordinates), 
+		end_coord = reversedCoordinates(end_anchor.geometry.coordinates);
 		if (L.latLngBounds(bounding_box).contains(start_coord) &&
 			L.latLngBounds(bounding_box).contains(end_coord)) {
 				unit_anchors.push([start_anchor, end_anchor]);
@@ -158,18 +162,52 @@ function getUnitAnchors(street_feature, bounding_box) {
 	return unit_anchors;
 }
 
-function withoutOverlappedUnits(proposed_units_specs) {
-	var units_specs = units.slice();
-	for (var unit of units.slice(0,500)) {
-		var index = units.indexOf(feature);
-		var bounds = L.latLngBounds([unit.geometry.coordinates[0], unit.geometry.coordinates[3]]);
-		for (var alt_unit of units.slice(0,500)) {
-			var alt_bounds = L.latLngBounds([alt_unit.geometry.coordinates[0], alt_unit.geometry.coordinates[3]]);
-			if (bounds.intersects(alt_bounds) && bounds != alt_bounds) {
-				units.splice(index, 1);
-			}
+/**
+ * Check whether a polygon overlaps with any member of an array of polygons.
+ *
+ * @param {Feature} polygon_feature - A geoJSON polygon feature.
+ * @param {Array<Feature>} polygon_feature_array - An array of geoJSON polygon features.
+ * @returns {boolean} - Whether the polygon_feature overlaps with any one in the array.
+ */	
+function noOverlaps(reference_polygon_feature, polygon_feature_array) {
+	for (feature_array_element of polygon_feature_array) {
+		let el_polygon = feature_array_element.geometry.coordinates,
+		ref_polygon = reference_polygon_feature.geometry.coordinates,
+		el_box = L.latLngBounds(reversedCoordinates(el_polygon)).pad(-.2),
+		ref_box = L.latLngBounds(reversedCoordinates(ref_polygon)).pad(-.2),
+		intersection_exists = ref_box.overlaps(el_box);
+
+		if (intersection_exists) {
+			window.poly1.push(el_box);
+			window.poly2.push(ref_box);
+			return false;
 		}
 	}
+	return true;
+}
 
-	return units_specs;
+/**
+ * Given a geoJSON geometry object's coordinates, return the object, but with
+ * all the coordinates reversed.
+ * 
+ * Why? L.geoJSON will auto-reverse the order of a geoJSON object's coordinates, as
+ * it expects geoJSON coordinates to be lngLat. However, methods like latLngBounds.contains
+ * expect standard latLng pairs and won't auto-reverse, so we have to do that
+ * manually if we're preprocessing the geoJSON before passing it to L.geoJSON.
+ * 
+ * @param {Array<number|Array<number|Array<number>>> coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ * @returns {Array<number|Array<number|Array<number>>> - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ */
+function reversedCoordinates(coordinates) {
+	let reversed = coordinates.slice();
+	if (typeof coordinates[0] != "number") {
+		for (let inner_coordinates of coordinates) {
+			reversed.splice(reversed.indexOf(inner_coordinates), 1, reversedCoordinates(inner_coordinates));
+		}
+	}
+	else {
+		reversed = [coordinates[1], coordinates[0]];
+	}
+
+	return reversed;
 }
