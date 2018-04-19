@@ -171,18 +171,12 @@ function getUnitAnchors(street_feature, bounding_box) {
  */	
 function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 	for (feature_array_element of polygon_feature_array) {
-		let el_polygon = feature_array_element.geometry.coordinates,
-		ref_polygon = reference_polygon_feature.geometry.coordinates,
-		el_box = L.latLngBounds(reversedCoordinates(el_polygon)).pad(-.2),
-		ref_box = L.latLngBounds(reversedCoordinates(ref_polygon)).pad(-.2),
-		intersection_exists = ref_box.overlaps(el_box);
-
+		intersection_exists = turf.intersect(reference_polygon_feature, feature_array_element);
 		if (intersection_exists) {
-			window.poly1.push(el_box);
-			window.poly2.push(ref_box);
 			return false;
 		}
 	}
+
 	return true;
 }
 
