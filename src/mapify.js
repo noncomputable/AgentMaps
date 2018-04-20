@@ -27,7 +27,7 @@ function mapify (bounding_box, OSM_data, OSM_data_URL) {
 			"color": "green",
 			"weight": 1,
 			"opacity": .87
-		}
+		},
 	};
 
 	let unit_feature_collection = { 
@@ -45,7 +45,7 @@ function mapify (bounding_box, OSM_data, OSM_data_URL) {
 			"color": "yellow",
 			"weight": 4,
 			"opacity": .5
-		}
+		},
 	};
 
 	let street_feature_collection = {
@@ -81,6 +81,8 @@ function getAllFeatures(OSM_data, bounding_box) {
 		}
 	}
 
+	all_features.units = unitsOutOfStreets(all_features.units, all_features.streets);
+
 	return all_features;
 }
 
@@ -92,7 +94,7 @@ function getAllFeatures(OSM_data, bounding_box) {
  * @param {Array<Feature>} proposed_unit_features - An array of features representing real estate units already proposed for construction.
  * @returns {Array<Feature>} unit_features - An array of features representing real estate units.
  */
-function generateUnitFeatures(unit_anchors, proposed_unit_features) {
+function generateUnitFeatures(unit_anchors, proposed_unit_features, street_features) {
 	let unit_features = [];
 	
 	for (let anchor_pair of unit_anchors) {
@@ -118,7 +120,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features) {
 
 			//Exclude the unit if it overlaps with any of the other proposed units.
 			var all_proposed_unit_features = unit_features.concat(proposed_unit_features); 
-			if (noOverlaps(unit_feature, all_proposed_unit_features)) {
+			if (noOverlaps(unit_feature, all_proposed_unit_features, street_features)) {
 				unit_features.push(unit_feature);
 			}
 		}
@@ -163,6 +165,30 @@ function getUnitAnchors(street_feature, bounding_box) {
 }
 
 /**
+ * Check whether any unit in an array intersects with a street.
+ *
+ * @param {Array<Feature>} unit_features - Array of features representing units.
+ * @param {Array<Feature>} street_features - Array of features representing streets.
+ * @returns {Array<Feature>} - unit_features, but with all units that intersect any streets removed.
+ */
+function unitsOutOfStreets(unit_features, street_features) {
+	let processed_unit_features = unit_features.slice();
+	for (let street_feature of street_features) {
+		for (let unit_feature of processed_unit_features) {
+			let intersection_exists = turf.lineIntersect(street_feature, unit_feature).features.length > 0;
+			if (intersection_exists) {
+				processed_unit_features.splice(processed_unit_features.indexOf(unit_feature), 1, null);
+			}
+		}	
+	
+		processed_unit_features = processed_unit_features.filter(feature => feature == null ? false : true);
+	}
+	
+
+	return processed_unit_features;
+}
+
+/**
  * Check whether a polygon overlaps with any member of an array of polygons.
  *
  * @param {Feature} polygon_feature - A geoJSON polygon feature.
@@ -171,12 +197,11 @@ function getUnitAnchors(street_feature, bounding_box) {
  */	
 function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 	for (feature_array_element of polygon_feature_array) {
-		intersection_exists = turf.intersect(reference_polygon_feature, feature_array_element);
-		if (intersection_exists) {
+		let overlap_exists = turf.intersect(reference_polygon_feature, feature_array_element);
+		if (overlap_exists) {
 			return false;
 		}
 	}
-
 	return true;
 }
 
