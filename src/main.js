@@ -16,7 +16,7 @@ function Agentmap(map) {
 				null,
 				{
 					pointToLayer: function(feature, latlng) {
-						return L.circleMarker(latlng, {radius: 1, color: "red", fillColor: "red"});
+						return L.circleMarker(latlng, {radius: 1, color: "red", fillColor: "red", renderer: L.canvas()});
 					}
 				}
 			).addTo(this.map)
