@@ -17,7 +17,7 @@
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
  * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
  */
-function mapify (bounding_box, OSM_data, OSM_data_URL) {
+function mapify(bounding_box, OSM_data, OSM_data_URL) {
 	//if (!GeoJSON_data && GeoJSON_data_URL) {}
 	
 	let all_features = getAllFeatures(OSM_data, bounding_box);
@@ -165,7 +165,7 @@ function getUnitAnchors(street_feature, bounding_box) {
 }
 
 /**
- * Check whether any unit in an array intersects with a street.
+ * Get an array of units excluding units that overlap with streets.
  *
  * @param {Array<Feature>} unit_features - Array of features representing units.
  * @param {Array<Feature>} street_features - Array of features representing streets.
@@ -207,15 +207,15 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 
 /**
  * Given a geoJSON geometry object's coordinates, return the object, but with
- * all the coordinates reversed.
+ * all the coordinates reversed. <br />
  * 
  * Why? L.geoJSON will auto-reverse the order of a geoJSON object's coordinates, as
  * it expects geoJSON coordinates to be lngLat. However, methods like latLngBounds.contains
  * expect standard latLng pairs and won't auto-reverse, so we have to do that
  * manually if we're preprocessing the geoJSON before passing it to L.geoJSON.
  * 
- * @param {Array<number|Array<number|Array<number>>> coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
- * @returns {Array<number|Array<number|Array<number>>> - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ * @param {Array<number|Array<number|Array<number>>>} coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ * @returns {Array<number|Array<number|Array<number>>>} - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
  */
 function reversedCoordinates(coordinates) {
 	let reversed = coordinates.slice();
