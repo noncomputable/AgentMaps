@@ -2,17 +2,17 @@
 
 /**
  * @typedef {Feature} Point
- * @property {Array} geometry.coordinates - This should be a single array with 2 elements, the point coordinates.
+ * @property {Array} geometry.coordinates - This should be a single array with 2 elements: the point's coordinates.
  *
  * An extension of {@link Feature} for points.
  */
 
 /**
- * Callback that gives feature with appropriate geometry and properties to represent an agent.
+ * Callback that gives a feature with appropriate geometry and properties to represent an agent.
  *
  * @callback agentFeatureMaker
  * @param {number} i - A number used to determine the agent's coordinates and other properties.
- * @returns {Point} - A GeoJSON point feature with properties and coordinates for agent i.
+ * @returns {Point} - A GeoJSON Point feature with properties and coordinates for agent i.
  */
 
 /**
@@ -37,11 +37,13 @@ function seqUnitAgentMaker(i) {
 function agentify(count, agentFeatureMaker) {
 	let agentmap = this,
 	agents_existing = agentmap.agents.length;
-	for (let i = agents_existing + 1; i <= agents_existing + count; i++) {
+	for (let i = agents_existing; i < agents_existing + count; i++) {
+		//Callback function aren't automatically bound to the agentmap.
 		let boundFeatureMaker = agentFeatureMaker.bind(agentmap),
 		feature = boundFeatureMaker(i),
 		new_agent = new Agent(feature, i, agentmap);
 		this.layers.agents.addData(new_agent.feature, i);
+		new_agent.layer = Object.values(agentmap.layers.agents._layers)[new_agent.id];
 		this.agents.push(new_agent);
 	}
 }
@@ -61,7 +63,8 @@ function Agent(feature, id, agentmap) {
 	this.feature = feature,
 	this.feature.AgentMap_id = id,
 	this.id = id,
-	this.agentmap = agentmap;
+	this.agentmap = agentmap,
+	this.layer = null;
 }
 
 /**
@@ -69,4 +72,6 @@ function Agent(feature, id, agentmap) {
  */
 Agent.prototype.delete = function() {
 	delete this.agentmap.agents[this.id];
+	console.log(this.layer);
+	this.agentmap.layers.agents.removeLayer(this.layer);
 };
