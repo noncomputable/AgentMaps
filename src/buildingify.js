@@ -17,7 +17,7 @@
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
  * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
  */
-function mapify(bounding_box, OSM_data, OSM_data_URL) {
+function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 	//if (!GeoJSON_data && GeoJSON_data_URL) {}
 	
 	let all_features = getAllFeatures(OSM_data, bounding_box);
@@ -72,7 +72,7 @@ function getAllFeatures(OSM_data, bounding_box) {
 	};
 
 	for (let feature of OSM_data.features) {
-		if (feature.geometry.type == "LineString" && feature.properties.highway) {
+		if (feature.geometry.type === "LineString" && feature.properties.highway) {
 			let proposed_anchors = getUnitAnchors(feature, bounding_box),
 			all_proposed_units_so_far = all_features.units;
 			proposed_unit_features = generateUnitFeatures(proposed_anchors, all_proposed_units_so_far);
@@ -181,7 +181,7 @@ function unitsOutOfStreets(unit_features, street_features) {
 			}
 		}	
 	
-		processed_unit_features = processed_unit_features.filter(feature => feature == null ? false : true);
+		processed_unit_features = processed_unit_features.filter(feature => feature === null ? false : true);
 	}
 	
 
@@ -196,6 +196,7 @@ function unitsOutOfStreets(unit_features, street_features) {
  * @returns {boolean} - Whether the polygon_feature overlaps with any one in the array.
  */	
 function noOverlaps(reference_polygon_feature, polygon_feature_array) {
+	return true;
 	for (feature_array_element of polygon_feature_array) {
 		let overlap_exists = turf.intersect(reference_polygon_feature, feature_array_element);
 		if (overlap_exists) {

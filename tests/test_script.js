@@ -10,5 +10,5 @@ L.tileLayer(
 ).addTo(map);
 
 let agentmap = new Agentmap(map);
-agentmap.mapify(bounding_box, sample_data);
+agentmap.buildingify(bounding_box, sample_data);
 agentmap.agentify(100, agentmap.seqUnitAgentMaker);
