@@ -64,8 +64,8 @@ function agentify(count, agentFeatureMaker) {
  * @property {boolean} travel_state.traveling - Whether the agent is currently on a trip.
  * @property {?Point} travel_state.current_point - The point where the agent is currently located.
  * @property {?Point} travel_state.goal_point - The point where the agent is traveling to.
- * @property {?number} travel_state.lat_dir - -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
- * @property {?number} travel_state.lng_dir - -1 if traveling to lesser longitude (left), 1 if traveling to greater longitude (right).
+ * @property {?number} travel_state.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
+ * @property {?number} travel_state.lng_dir - The longitudinal direction. -1 if traveling to lesser longitude (left), 1 if traveling to greater longitude (right).
  * @property {?number} travel_state.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
  */
 function Agent(feature, id, agentmap) {
@@ -128,8 +128,9 @@ Agent.prototype.setTravelTo = function(goal_point) {
  * up with some precision (agentmap.settings.movement_precision) into some number of parts (steps_inbetween) 
  * and moving slightly for each of them, for more precise collision detection than just doing it after each 
  * call to moveDirectly from requestAnimationFrame (max, 60 times per second) would allow. Limiting movements to
- * each requestAnimationFrame calls was causing each agent to skip too far ahead at each call, causing moveDirectly
- * to not be able to catch when the agent is within 1 meter of the goal_point... making intermediary calls fixes that.
+ * each requestAnimationFrame call was causing each agent to skip too far ahead at each call, causing moveDirectly
+ * to not be able to catch when the agent is within 1 meter of the goal_point... splitting the interval since the last
+ * call up and making intermediary calls fixes that.
  *
  * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
  */
@@ -198,4 +199,18 @@ function getUnitDoor(unit_id) {
 	door = 	L.latLngBounds(side_a, side_b).getCenter();
 	
 	return door;
+}
+
+/**
+ * Get the point on the adjacent street in front of the unit's door.
+ *
+ * @param {number} unit_id - The unique id of the unit whose door's corresponding point on the street you want.
+ * @returns {Point} - The point of the adjacent street directly in front of unit's door.
+ */
+function getStreetNearDoor(unit_id) {
+	let unit_anchors = reversedCoordinates(Object.values(this.layers.units._layers)[unit_id].feature.properties.street_anchors.map(
+		anchor => anchor.geometry.coordinates)),
+	street_point = L.latLngBounds(...unit_anchors).getCenter();
+	
+	return street_point;
 }

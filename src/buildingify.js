@@ -75,7 +75,7 @@ function getAllFeatures(OSM_data, bounding_box) {
 		if (feature.geometry.type === "LineString" && feature.properties.highway) {
 			let proposed_anchors = getUnitAnchors(feature, bounding_box),
 			all_proposed_units_so_far = all_features.units;
-			proposed_unit_features = generateUnitFeatures(proposed_anchors, all_proposed_units_so_far);
+			proposed_unit_features = generateUnitFeatures(proposed_anchors, all_proposed_units_so_far, feature.id);
 			all_features.units = all_features.units.concat(proposed_unit_features);
 			all_features.streets.push(feature);
 		}
@@ -92,9 +92,10 @@ function getAllFeatures(OSM_data, bounding_box) {
  *
  * @param {Array<Array<Feature>>} unit_anchors - An array of pairs of points around which to anchor units along a street.
  * @param {Array<Feature>} proposed_unit_features - An array of features representing real estate units already proposed for construction.
+ * @param {string} street_feature_id - The OpenStreetMap ID of the street feature along which the unit is being constructed..
  * @returns {Array<Feature>} unit_features - An array of features representing real estate units.
  */
-function generateUnitFeatures(unit_anchors, proposed_unit_features, street_features) {
+function generateUnitFeatures(unit_anchors, proposed_unit_features, street_feature_id) {
 	let unit_features = [];
 	
 	for (let anchor_pair of unit_anchors) {
@@ -107,6 +108,9 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //Angle of line perpendicular to the anchor segment.
 			unit_feature = { 
 				type: "Feature",
+				properties: {
+					street: "none"
+				},
 				geometry: {
 					type: "Polygon",
 					coordinates: [[]]
@@ -120,7 +124,10 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 
 			//Exclude the unit if it overlaps with any of the other proposed units.
 			var all_proposed_unit_features = unit_features.concat(proposed_unit_features); 
-			if (noOverlaps(unit_feature, all_proposed_unit_features, street_features)) {
+			if (noOverlaps(unit_feature, all_proposed_unit_features)) {
+				unit_feature.properties.street = street_feature_id,
+				unit_feature.properties.street_anchors = anchor_pair;
+
 				unit_features.push(unit_feature);
 			}
 		}

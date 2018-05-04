@@ -46,7 +46,8 @@ Agentmap.prototype.Agent = Agent,
 Agentmap.prototype.agentify = agentify,
 Agentmap.prototype.seqUnitAgentMaker = seqUnitAgentMaker,
 Agentmap.prototype.buildingify = buildingify,
-Agentmap.prototype.getUnitDoor = getUnitDoor;
+Agentmap.prototype.getUnitDoor = getUnitDoor,
+Agentmap.prototype.getStreetNearDoor = getStreetNearDoor;
 
 /**
  * Get an animation frame, have the agents update & get ready to be drawn, and keep doing that until paused or reset.
