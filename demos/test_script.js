@@ -9,6 +9,6 @@ L.tileLayer(
 	}
 ).addTo(map);
 
-let agentmap = new Agentmap(map);
+let agentmap = L.A.agentmap(map);
 agentmap.buildingify(bounding_box, sample_data);
-agentmap.agentify(100, agentmap.seqUnitAgentMaker);
+agentmap.agentify(100, agentmap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
