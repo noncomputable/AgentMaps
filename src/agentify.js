@@ -105,7 +105,7 @@
 	 * @property {?number} travel_state.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
 	 * @property {?number} travel_state.lng_dir - The longitudinal direction. -1 if traveling to lesser longitude (left), 1 if traveling to greater longitude (right).
 	 * @property {?number} travel_state.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
-	 * @property {Array} travel_state.path - A sequence of pairs of LatLngs, such that the second latLng of a pair is the first latLng of the pair that comes after it. The agent will move between one pair, then the pair will be popped off, then move between the next pair, and so on, until there are no pairs left and the trip along the path is complete; or, until the travel_state is changed/reset.
+	 * @property {Array} travel_state.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the travel_state is changed/reset.
 	 * @property {?function} update_func - Function to be called on each update.
 	 */
 	Agent.initialize = function(latLng, options, agentmap) {
@@ -130,7 +130,8 @@
 	 */
 	Agent.resetTravelState = function() {
 		for (let key in this.travel_state) {
-			this.travel_state[key] = key === "traveling" ? false : 
+			this.travel_state[key] = 
+				key === "traveling" ? false : 
 				key === "path" ? [] :
 				null;
 		}
@@ -189,35 +190,53 @@
 	 * Set the agent up to travel to a point along a street, via streets.
 	 *
 	 * @param {number} goal_street_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
-	 * @param {number} distance - The distance into the street that the agent should travel.
+	 * @param {number} distance - The distance into the street that the agent should travel in meters.
 	 * @param {LatLng} street_point - The coordinates of a point on a street to which the agent should travel; null by default, otherwise "distance" will be ignored; if point is provided, street_id is optional; if not provided, it will search through all streets for the point; if provided, it will search that particular street.
 	 */
-	Agent.setTravelToStreet = function(street_id, distance, street_point = null) {
+	Agent.setTravelToStreet = function(street_oid, distance, street_point = null) {
+		distance *= .001; //Convert to kilometers.
+	
 		if (street_point === null) {
-			let street_id;
+			let street_id,
+			next_starting_point;
 
 			if (typeof(this.place.unit) === "number") {
-				street_id = this.agentmap.units.getLayer(this.place.unit).feature.properties.street_id;
+				street_id = this.agentmap.units.getLayer(this.place.unit).street_id;
 				
-				let current_coords = this.getLatLng(),
 				unit_door = this.agentmap.getUnitDoor(this.place.unit), 
-				current_to_door = [current_coords, unit_door],
+				this.travel_state.path.push(unit_door);	
+				
 				unit_street_door = this.agentmap.getStreetNearDoor(this.place.unit),
-				door_to_street = [unit_door, unit_street_door];
-				this.travel_state.path.push(current_to_door, door_to_street);	
+				street_starting_point = [unit_street_door.lng, unit_street_door.lat];
 			}
-			else {
-				street_id = this.place.street;
+			else if (typeof(this.place.street) === "number") {
+				street_id = this.place.street,
+				current_point = this.getLatLng(),
+				street_starting_point = [current_point.lng, current_point.lat];
 			}
-			let street = this.agentmap.streets.getLayer(street_id);
-			console.log(street_id, street, distance);
-			goal_street_point = turf.along(street, distance).geometry.coordinates,
-			street_segment = [unit_street_door, goal_street_point];
-			this.travel_state.path.push(street_segment);
+
+			let street_feature = this.agentmap.streets.getLayer(street_id).feature,
+			goal_street_point = turf.along(street_feature, distance).geometry.coordinates,
+			//turf.lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
+			//as the original lineString array. So, if the goal point comes earlier in the array (e.g. it's on the far left),
+			//it'll end up being the first point in the path, instead of the last, and the agent will move to it directly,
+			//ignoring the street, and then travel along the street from the goal point to its original point (backwards).
+			//To fix this, I'm reversing the order of the coordinates in the segment if the last point in the line is closer
+			//to the agent's starting point than the first point on the line (implying it's a situation of the kind described above). 
+			goal_street_line_unordered = turf.lineSlice(street_starting_point, goal_street_point, street_feature).geometry.coordinates,
+			goal_street_line = L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[0])) <
+				L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[goal_street_line_unordered.length - 1])) ?
+				goal_street_line_unordered :
+				goal_street_line_unordered.reverse(),
+			goal_street_path = goal_street_line.map(point => L.latLng(L.A.reversedCoordinates(point)));
+			goal_street_path[0].new_place = {street: street_id};
+			this.travel_state.path.push(...goal_street_path);
 		}
 		else {
 			return;
 		}
+
+		this.setTravelTo(this.travel_state.path[0]);
 	};
 
 	/**
@@ -239,10 +258,14 @@
 		//Fraction of the number of ticks since the last call to move the agent forward by.
 		//Only magnitudes smaller than hundredths will be added to the lat/lng at a time, so that it doesn't leap ahead too far;
 		//as the tick_interval is usually < 1, and the magnitude will be the leap_fraction multiplied by the tick_interval.
-		const leap_fraction = .001;
-
+		const leap_fraction = .0001;
+		
 		let move = (function(tick_interval) {
 			if (state.goal_point.distanceTo(state.current_point) < 1) {
+				if (typeof(state.path[0].new_place) === "object") {
+					this.place = state.path[0].new_place;
+				}	
+				
 				state.path.shift();
 				
 				if (state.path.length === 0) {
@@ -250,7 +273,7 @@
 					return;
 				}
 				else {
-					this.setTravelTo(this.getLatLng(), state.path[0][1]);
+					this.setTravelTo(state.path[0]);
 				}
 			}
 

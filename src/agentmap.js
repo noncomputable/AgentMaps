@@ -159,7 +159,7 @@
 	 */
 	Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 		let unit = this.units.getLayer(unit_id),
-		unit_anchors = A.reversedCoordinates(unit.feature.properties.street_anchors),
+		unit_anchors = A.reversedCoordinates(unit.street_anchors),
 		street_point = L.latLngBounds(...unit_anchors).getCenter();
 		
 		return street_point;
