@@ -142,7 +142,7 @@
 	 *
 	 * @param {latLng} goal_point - The point to which the agent should travel.
 	 */
-	Agent.setTravelTo = function(goal_point) {
+	Agent.travelTo = function(goal_point) {
 		let state = this.travel_state;
 		state.traveling = true,
 		state.current_point = this.getLatLng(),
@@ -153,6 +153,18 @@
 		state.lng_dir = Math.sign(- (state.current_point.lng - state.goal_point.lng)),
 		
 		state.slope = Math.abs(((state.current_point.lat - state.goal_point.lat) / (state.current_point.lng - state.goal_point.lng)));
+	};
+
+	/**
+	 * Start a trip along the path specified in the agent's travel_state.
+	 */
+	Agent.startTrip = function() {
+		if (this.travel_state.path.length > 0) {
+			this.travelTo(this.travel_state.path[0]);
+		}
+		else {
+			throw new Error("The travel state's path is empty! There's no path to take a trip along!");
+		}
 	};
 
 	/**
@@ -167,7 +179,22 @@
 	 * @param {number} unit_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
 	 */
 	Agent.setTravelToUnit = function(unit_id) {
-		return;
+		//If there's already a path in queue, start the new path from the end of the existing one.
+		if (this.travel_state.path.length === 0) {
+			start_place = this.place;
+		}
+		else {
+			start_place = this.travel_state.path[this.travel_state.path.length - 1].new_place;
+		}
+
+		if (start_place.unit === unit_id) {
+			return;			
+		}
+
+		let street_lat_lng = this.agentmap.getStreetNearDoor(unit_id),
+		street_point = [street_lat_lng.lng, street_lat_lng.lat];
+
+		this.setTravelToStreet(null, null, street_point);
 	};
 
 	/**
@@ -182,7 +209,8 @@
 	
 		//NEED TO GET IT TO CONTAIN THE DOOR
 		//if (turf.booleanPointInPolygon(point_feature, poly_feature)) {
-			this.setTravelTo(point_latLng);
+			point_latLng.new_place = this.place;
+			this.travel_state.path.push(point_latLng);
 	//	}
 	};
 
@@ -195,48 +223,63 @@
 	 */
 	Agent.setTravelToStreet = function(street_oid, distance, street_point = null) {
 		distance *= .001; //Convert to kilometers.
-	
-		if (street_point === null) {
-			let street_id,
-			next_starting_point;
+		
+		let start_place,
+		street_id,
+		next_starting_point;
 
-			if (typeof(this.place.unit) === "number") {
-				street_id = this.agentmap.units.getLayer(this.place.unit).street_id;
-				
-				unit_door = this.agentmap.getUnitDoor(this.place.unit), 
-				this.travel_state.path.push(unit_door);	
-				
-				unit_street_door = this.agentmap.getStreetNearDoor(this.place.unit),
-				street_starting_point = [unit_street_door.lng, unit_street_door.lat];
-			}
-			else if (typeof(this.place.street) === "number") {
-				street_id = this.place.street,
-				current_point = this.getLatLng(),
-				street_starting_point = [current_point.lng, current_point.lat];
-			}
-
-			let street_feature = this.agentmap.streets.getLayer(street_id).feature,
-			goal_street_point = turf.along(street_feature, distance).geometry.coordinates,
-			//turf.lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
-			//as the original lineString array. So, if the goal point comes earlier in the array (e.g. it's on the far left),
-			//it'll end up being the first point in the path, instead of the last, and the agent will move to it directly,
-			//ignoring the street, and then travel along the street from the goal point to its original point (backwards).
-			//To fix this, I'm reversing the order of the coordinates in the segment if the last point in the line is closer
-			//to the agent's starting point than the first point on the line (implying it's a situation of the kind described above). 
-			goal_street_line_unordered = turf.lineSlice(street_starting_point, goal_street_point, street_feature).geometry.coordinates,
-			goal_street_line = L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[0])) <
-				L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[goal_street_line_unordered.length - 1])) ?
-				goal_street_line_unordered :
-				goal_street_line_unordered.reverse(),
-			goal_street_path = goal_street_line.map(point => L.latLng(L.A.reversedCoordinates(point)));
-			goal_street_path[0].new_place = {street: street_id};
-			this.travel_state.path.push(...goal_street_path);
+		//If there's already a path in queue, start the new path from the end of the existing one.
+		if (this.travel_state.path.length === 0) {
+			start_place = this.place;
 		}
 		else {
-			return;
+			start_place = this.travel_state.path[this.travel_state.path.length - 1].new_place;
 		}
 
-		this.setTravelTo(this.travel_state.path[0]);
+		if (typeof(start_place.unit) === "number") {
+			street_id = this.agentmap.units.getLayer(this.place.unit).street_id;
+			
+			unit_door = this.agentmap.getUnitDoor(this.place.unit), 
+			this.travel_state.path.push(unit_door);	
+			
+			unit_street_door = this.agentmap.getStreetNearDoor(this.place.unit),
+			street_starting_point = [unit_street_door.lng, unit_street_door.lat];
+		}
+		else if (typeof(start_place.street) === "number") {
+			street_id = this.place.street,
+			current_point = this.getLatLng(),
+			street_starting_point = [current_point.lng, current_point.lat];
+		}
+		
+		let street_feature = this.agentmap.streets.getLayer(street_id).feature;
+
+		if (street_point === null) {
+			goal_street_point = turf.along(street_feature, distance).geometry.coordinates;
+		}
+		else {
+			if (A.isPointCoordinates(street_point)) {
+				goal_street_point = turf.nearestPointOnLine(street_feature, street_point);		
+			}
+			else {
+				throw new Error("Invalid feature returned from agentFeatureMaker: geometry.coordinates must be a 2-element array of numbers.");	
+			}
+		}
+		
+		//turf.lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
+		//as the original lineString array. So, if the goal point comes earlier in the array (e.g. it's on the far left),
+		//it'll end up being the first point in the path, instead of the last, and the agent will move to it directly,
+		//ignoring the street, and then travel along the street from the goal point to its original point (backwards).
+		//To fix this, I'm reversing the order of the coordinates in the segment if the last point in the line is closer
+		//to the agent's starting point than the first point on the line (implying it's a situation of the kind described above). 
+		let goal_street_line_unordered = turf.lineSlice(street_starting_point, goal_street_point, street_feature).geometry.coordinates,
+		goal_street_line = L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[0])) <
+			L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[goal_street_line_unordered.length - 1])) ?
+			goal_street_line_unordered :
+			goal_street_line_unordered.reverse(),
+		goal_street_path = goal_street_line.map(point => L.latLng(L.A.reversedCoordinates(point)));
+		goal_street_path[0].new_place = {street: street_id},
+		goal_street_path[goal_street_path.length - 1].new_place = {street: street_id};
+		this.travel_state.path.push(...goal_street_path);
 	};
 
 	/**
@@ -273,7 +316,7 @@
 					return;
 				}
 				else {
-					this.setTravelTo(state.path[0]);
+					this.travelTo(state.path[0]);
 				}
 			}
 
