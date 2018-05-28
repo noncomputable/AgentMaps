@@ -142,8 +142,13 @@
 	 * @returns {LatLng} - The coordinates of the center point of the segment of the unit parallel to the street.
 	 */
 	Agentmap.prototype.getUnitDoor = function(unit_id) {
-		let unit = this.units.getLayer(unit_id),
-		unit_spec = unit.getLatLngs()[0],
+		let unit = this.units.getLayer(unit_id);
+		
+		if (typeof(unit) === "undefined") {
+			throw new Error("No unit with the specified ID exists.");
+		}
+		
+		let unit_spec = unit.getLatLngs()[0],
 		side_a = unit_spec[0],
 		side_b = unit_spec[1],
 		door = 	L.latLngBounds(side_a, side_b).getCenter();
@@ -158,8 +163,13 @@
 	 * @returns {LatLng} - The coordinates point of the adjacent street directly in front of unit's door.
 	 */
 	Agentmap.prototype.getStreetNearDoor = function(unit_id) {
-		let unit = this.units.getLayer(unit_id),
-		unit_anchors = A.reversedCoordinates(unit.street_anchors),
+		let unit = this.units.getLayer(unit_id);
+		
+		if (typeof(unit) === "undefined") {
+			throw new Error("No unit with the specified ID exists.");
+		}
+		
+		let unit_anchors = A.reversedCoordinates(unit.street_anchors),
 		street_point = L.latLngBounds(...unit_anchors).getCenter();
 		
 		return street_point;
