@@ -12,8 +12,8 @@
 	 * The main class for building, storing, simulating, and manipulating agent-based models on Leaflet maps.
 	 *
 	 * @class Agentmap
-	 * @param {object} map - A Leaflet Map object.
-	 * @property {object} map - A Leaflet Map object.
+	 * @param {object} map - A Leaflet Map instance.
+	 * @property {object} map - A Leaflet Map instance.
 	 * @property {featureGroup} agents - A featureGroup containing all agents.
 	 * @property {featureGroup} units - A featureGroup containing all units.
 	 * @property {featureGroup} streets - A featureGroup containing all streets.
@@ -175,10 +175,24 @@
 		return street_point;
 	};
 
+	/**
+	 * Generates an agentmap for the given map.
+	 *
+	 * @param {object} map - A Leaflet Map instance.
+	 * @returns {object} - An Agentmap instance.
+	 */
 	function agentmapFactory(map) {
 		return new A.Agentmap(map);
+	}
+
+	/**
+	 * Returns the number of layers in a Leaflet layer group.
+	 */
+	function layerCount() {
+		return this.getLayers().length;
 	}
 	
 	A.Agentmap = Agentmap,
 	A.agentmap = agentmapFactory;
+	L.LayerGroup.include({count: layerCount});
 }(L.A = L.A || {}));

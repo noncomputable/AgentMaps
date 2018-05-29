@@ -48,12 +48,13 @@
 	 * @param {agentFeatureMaker} agentFeatureMaker - A callback that determines an agent i's feature properties and geometry (always a Point).
 	 */
 	function agentify(count, agentFeatureMaker) {
+		let agentmap = this;
+
 		if (!(this.agents instanceof L.LayerGroup)) {
 			this.agents = L.layerGroup().addTo(this.map);
 		}
 
-		let agentmap = this,
-		agents_existing = agentmap.agents.getLayers().length;
+		let agents_existing = agentmap.agents.getLayers().length;
 		for (let i = agents_existing; i < agents_existing + count; i++) {
 			//Callback function aren't automatically bound to the agentmap.
 			let boundFeatureMaker = agentFeatureMaker.bind(agentmap),
@@ -169,24 +170,33 @@
 
 	/**
 	 * Specific methods for traveling between units, within units, and along streets, so as to keep track of where the agent is. Should be used
-	 * to move the agent around, not setTravelTo. If the agent should move in some other way, a wrapper for setTravelTo should be created that
+	 * to move the agent around, not travelTo. If the agent should move in some other way, a wrapper for setTravelTo should be created that
 	 * keeps track of the agent's place at any given time accordingly.
 	 */
 
 	/**
-	 * Set the agent up to travel to a unit, via streets.
-	 *
-	 * @param {number} unit_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
+	 * Given the agent's currently scheduled trips (its path), get the place from which a new trip should start (namely, the end of the current path).
+	 * That is: If there's already a path in queue, start the new path from the end of the existing one.
 	 */
-	Agent.setTravelToUnit = function(unit_id) {
-		//If there's already a path in queue, start the new path from the end of the existing one.
-		if (this.travel_state.path.length === 0) {
+	 Agent.newTripStartPlace = function() {
+		if (this.travel_state.path.length === 0) { 
 			start_place = this.place;
 		}
 		else {
 			start_place = this.travel_state.path[this.travel_state.path.length - 1].new_place;
 		}
 
+		return start_place;
+	}
+
+	/**
+	 * Set the agent up to travel to a unit, via streets.
+	 *
+	 * @param {number} unit_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
+	 */
+	Agent.setTravelNearUnit = function(unit_id) {
+		let start_place = this.newTripStartPlace();
+		
 		if (start_place.unit === unit_id) {
 			return;			
 		}
@@ -194,24 +204,54 @@
 		let street_lat_lng = this.agentmap.getStreetNearDoor(unit_id),
 		street_point = [street_lat_lng.lng, street_lat_lng.lat];
 
-		this.setTravelToStreet(null, null, street_point);
+		this.setTravelAlongStreet(null, null, street_point);
 	};
 
 	/**
 	 * Set the agent up to travel to a point within the unit he is in.
 	 *
-	 * @param {LatLng} point_latLng - LatLng coordinate object for a point in the same unit the agent is in.
+	 * @param {LatLng} goal_lat_lng - LatLng coordinate object for a point in the same unit the agent is in.
 	 */
-	Agent.setTravelInUnit = function(point_latLng) {
-		let point_coordinates = A.pointToCoordinateArray(point_latLng),
-		point_feature = turf.point(point_coordinates),
-		poly_feature = this.agentmap.units.getLayer(this.place.unit).feature;
+	Agent.setTravelInUnit = function(goal_lat_lng) {
+		let goal_point = A.pointToCoordinateArray(goal_lat_lng),
+		//Buffering so that points on the perimeter, like the door, are captured. Might be more
+		//efficient to generate the door so that it's slightly inside the area.
+		goal_polygon = turf.buffer(this.agentmap.units.getLayer(this.place.unit).toGeoJSON(), .001);
 	
-		//NEED TO GET IT TO CONTAIN THE DOOR
-		//if (turf.booleanPointInPolygon(point_feature, poly_feature)) {
+		if (turf.booleanPointInPolygon(goal_point, goal_polygon)) {
 			point_latLng.new_place = this.place;
 			this.travel_state.path.push(point_latLng);
-	//	}
+		}
+		else {
+			throw new Error("The goal_lat_lng is not inside of the polygon of the goal_place!");
+		}
+	};
+
+	/**
+	 * Set the agent up to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+	 *
+	 * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
+	 * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
+	 */
+	Agent.setTravelToPlace = function(goal_place, goal_lat_lng) {
+		let goal_layer = this.agentmap.units.getLayer(goal_place.unit) || this.agentmap.streets.getLayer(goal_place.street);
+
+		if (goal_layer) {
+			let goal_point = A.pointToCoordinateArray(goal_lat_lng),
+			//Buffering so that points on the perimeter, like the door, are captured. Might be more
+			//efficient to generate the door so that it's slightly inside the area.
+			goal_polygon = turf.buffer(goal_layer.toGeoJSON(), .001);
+			if (turf.booleanPointInPolygon(goal_point, goal_polygon)) {
+				goal_lat_lng.new_place = goal_place;
+				this.travel_state.path.push(goal_lat_lng);
+			}
+			else {
+				throw new Error("The goal_lat_lng is not inside of the polygon of the goal_place!");
+			}
+		}
+		else {
+			throw new Error("No place exists matching the specified goal_place!");
+		}
 	};
 
 	/**
@@ -221,20 +261,12 @@
 	 * @param {number} distance - The distance into the street that the agent should travel in meters.
 	 * @param {LatLng} street_point - The coordinates of a point on a street to which the agent should travel; null by default, otherwise "distance" will be ignored; if point is provided, street_id is optional; if not provided, it will search through all streets for the point; if provided, it will search that particular street.
 	 */
-	Agent.setTravelToStreet = function(street_oid, distance, street_point = null) {
+	Agent.setTravelAlongStreet = function(goal_street_id, distance, street_point = null) {
 		distance *= .001; //Convert to kilometers.
 		
-		let start_place,
+		let start_place = this.newTripStartPlace(),
 		street_id,
 		next_starting_point;
-
-		//If there's already a path in queue, start the new path from the end of the existing one.
-		if (this.travel_state.path.length === 0) {
-			start_place = this.place;
-		}
-		else {
-			start_place = this.travel_state.path[this.travel_state.path.length - 1].new_place;
-		}
 
 		if (typeof(start_place.unit) === "number") {
 			street_id = this.agentmap.units.getLayer(this.place.unit).street_id;
@@ -243,12 +275,12 @@
 			this.travel_state.path.push(unit_door);	
 			
 			unit_street_door = this.agentmap.getStreetNearDoor(this.place.unit),
-			street_starting_point = [unit_street_door.lng, unit_street_door.lat];
+			street_starting_point = A.pointToCoordinateArray(unit_street_door);
 		}
 		else if (typeof(start_place.street) === "number") {
 			street_id = this.place.street,
 			current_point = this.getLatLng(),
-			street_starting_point = [current_point.lng, current_point.lat];
+			street_starting_point = A.pointToCoordinateArray(current_point);
 		}
 		
 		let street_feature = this.agentmap.streets.getLayer(street_id).feature;

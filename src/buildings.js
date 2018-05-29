@@ -308,6 +308,9 @@
 
 		return coordinate_array;
 	}
+
+	//TODO: SAVE NEIGHBORS OF BUILDINGS AS WELL AS BUILDING ACROSS THE STREET, FROM THAT IMPLEMENTING ALL OTHER SORTS OF NEIGHBOR RELATION ALGORITHMS
+	//WILL BE EASY
 	
 	A.reversedCoordinates = reversedCoordinates;
 	A.isPointCoordinates = isPointCoordinates;
