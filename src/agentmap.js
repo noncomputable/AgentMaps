@@ -57,10 +57,10 @@
 			let animation_update = (function (rAF_time) {
 				this.update(rAF_time);
 				
-				this.process_state.animation_frame_id = requestAnimationFrame(animation_update);
+				this.process_state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
 			}).bind(this);
 
-			this.animation_frame_id = requestAnimationFrame(animation_update);
+			this.animation_frame_id = L.Util.requestAnimFrame(animation_update);
 		}
 	}
 
@@ -113,7 +113,7 @@
 	* Stop the animation, reset the animation state properties, and delete the agents.
 	*/
 	Agentmap.prototype.reset = function() {
-		cancelAnimationFrame(this.process_state.animation_frame_id);
+		L.Util.cancelAnimFrame(this.process_state.animation_frame_id);
 		this.process_state.running = false,
 		this.process_state.paused = false,
 		this.process_state.animation_frame_id = null,
@@ -130,7 +130,7 @@
 	 * Stop the animation, stop updating the agents.
 	 */
 	Agentmap.prototype.pause = function() {
-		cancelAnimationFrame(this.process_state.animation_frame_id);
+		L.Util.cancelAnimFrame(this.process_state.animation_frame_id);
 		this.process_state.running = false,
 		this.process_state.paused = true;
 	};
