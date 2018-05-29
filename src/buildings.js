@@ -45,6 +45,7 @@
 			street_options
 		).addTo(this.map);
 
+		//Bind getUnitFeatures to this so it can access the agentmap via this keyword.
 		let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 	
 		let unit_options = {
@@ -67,8 +68,23 @@
 
 		this.units.eachLayer(function(layer) {
 			layer.street_id = layer.feature.properties.street_id,
-			layer.street_anchors = layer.feature.properties.street_anchors
-		});
+			layer.street_anchors = layer.feature.properties.street_anchors,
+			layer.neighbors = layer.feature.properties.neighbors.map(function(neighbor) {
+				if (neighbor !== null) {
+					let neighbor_id;
+					this.units.eachLayer(function(neighbor_layer) {
+						if (neighbor_layer.feature.properties.id === neighbor.properties.id) {
+							neighbor_id = this.units.getLayerId(neighbor_layer);
+						}
+					}, this);
+
+					return neighbor_id;
+				}
+				else {
+					return null;
+				}
+			}, this);
+		}, this);
 	}
 
 	/**
@@ -86,7 +102,7 @@
 			proposed_anchors = getUnitAnchors(street_feature, bounding_box);
 
 			new_proposed_unit_features = generateUnitFeatures(proposed_anchors, proposed_unit_features, street_id),
-			proposed_unit_features = proposed_unit_features.concat(new_proposed_unit_features);
+			proposed_unit_features.push(...new_proposed_unit_features);
 		});
 
 		unit_features = unitsOutOfStreets(proposed_unit_features, this.streets);
@@ -125,9 +141,15 @@
 	 * @returns {Array<Feature>} unit_features - An array of features representing real estate units.
 	 */
 	function generateUnitFeatures(unit_anchors, proposed_unit_features, street_feature_id) {
-		let unit_features = [];
+		//One sub-array of unit features for each side of the road.
+		let unit_features = [[],[]],
+		starting_id = proposed_unit_features.length,
+		increment = 1;
 		
 		for (let anchor_pair of unit_anchors) {
+			//Pair of unit_features opposite each other on a street.
+			let unit_pair = [null, null];
+			
 			for (let i of [1, -1]) {
 				let anchor_a = anchor_pair[0].geometry.coordinates,
 				anchor_b = anchor_pair[1].geometry.coordinates,
@@ -150,20 +172,59 @@
 				unit_feature.geometry.coordinates[0][1] = turf.destination(anchor_b, street_buffer, new_angle).geometry.coordinates,
 				unit_feature.geometry.coordinates[0][2] = turf.destination(anchor_b, street_buffer + house_depth, new_angle).geometry.coordinates,
 				unit_feature.geometry.coordinates[0][3] = turf.destination(anchor_a, street_buffer + house_depth, new_angle).geometry.coordinates;
-				unit_feature.geometry.coordinates[0][4] = turf.destination(anchor_a, street_buffer, new_angle).geometry.coordinates;
+				unit_feature.geometry.coordinates[0][4] = unit_feature.geometry.coordinates[0][0];
 
 				//Exclude the unit if it overlaps with any of the other proposed units.
-				var all_proposed_unit_features = unit_features.concat(proposed_unit_features); 
+				let all_proposed_unit_features = unit_features.concat(proposed_unit_features); 
 				if (noOverlaps(unit_feature, all_proposed_unit_features)) { 
-					unit_feature.properties.street_id = street_feature_id,
-					unit_feature.properties.street_anchors = anchor_latLng_pair;
+					//Recode index so that it's useful here.
+					if (i === 1) {
+						i = 0;
+					}
+					else {
+						i = 1;
+					}
 
-					unit_features.push(unit_feature);
+					unit_feature.properties.street_id = street_feature_id,
+					unit_feature.properties.street_anchors = anchor_latLng_pair,	
+					unit_feature.properties.neighbors = [null, null, null],
+					unit_feature.properties.id = starting_id + increment,
+					increment += 1;
+					
+					if (unit_features[i].length !== 0) {
+						//Make previous unit_feature this unit_feature's first neighbor.
+						unit_feature.properties.neighbors[0] = unit_features[i][unit_features[i].length - 1],
+						//Make this unit_feature the previous unit_feature's second neighbor.
+						unit_features[i][unit_features[i].length - 1].properties.neighbors[1] = unit_feature;
+					}
+					
+					if (i === 0) {
+						unit_pair[0] = unit_feature;
+					}
+					else {
+						//Make unit_feature opposite to this unit_feature on the street its third neighbor.
+						unit_feature.properties.neighbors[2] = unit_pair[0],
+						//Make unit_feature opposite to this unit_feature on the street's third neighbor this unit_feature.
+						unit_pair[0].properties.neighbors[2] = unit_feature,
+
+						unit_pair[1] = unit_feature;
+					}
+
+				}
+
+				if (unit_pair[0] !== null) {
+					unit_features[0].push(unit_pair[0]);
+				}
+
+				if (unit_pair[1] !== null) {
+					unit_features[1].push(unit_pair[1]);
 				}
 			}
 		}
-
-		return unit_features;
+	
+		let unit_features_merged = [].concat.apply([], unit_features);
+		
+		return unit_features_merged;
 	}
 
 	/**
@@ -309,9 +370,6 @@
 		return coordinate_array;
 	}
 
-	//TODO: SAVE NEIGHBORS OF BUILDINGS AS WELL AS BUILDING ACROSS THE STREET, FROM THAT IMPLEMENTING ALL OTHER SORTS OF NEIGHBOR RELATION ALGORITHMS
-	//WILL BE EASY
-	
 	A.reversedCoordinates = reversedCoordinates;
 	A.isPointCoordinates = isPointCoordinates;
 	A.pointToCoordinateArray = pointToCoordinateArray;

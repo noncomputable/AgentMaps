@@ -17,13 +17,13 @@
 	 * @property {featureGroup} agents - A featureGroup containing all agents.
 	 * @property {featureGroup} units - A featureGroup containing all units.
 	 * @property {featureGroup} streets - A featureGroup containing all streets.
-	 * @property {object} process_state - Properties detailing the state of the simulation process.
-	 * @property {boolean} process_state.running - Whether the simulation is running or not.
-	 * @property {boolean} process_state.paused - Whether the simulation is paused.
-	 * @property {?number} process_state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
-	 * @property {?number} process_state.current_tick - The number of ticks elapsed since the start of the simulation.
-	 * @property {?number} process_state.prev_tick - The tick (time in seconds) when the last update was started.
-	 * @property {?number} process_state.tick_start_delay - Ticks corresponding to the time of the last animation frame before the trip started. Subtracted from all subsequent tick measurements so that the clock starts at 0, instead of whatever the actual time of that initial animation frame was.
+	 * @property {object} state - Properties detailing the state of the simulation process.
+	 * @property {boolean} state.running - Whether the simulation is running or not.
+	 * @property {boolean} state.paused - Whether the simulation is paused.
+	 * @property {?number} state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
+	 * @property {?number} state.tick - The number of ticks elapsed since the start of the simulation.
+	 * @property {?number} state.prev_tick - The tick (time in seconds) when the last update was started.
+	 * @property {?number} state.tick_start_delay - Ticks corresponding to the time of the last animation frame before the trip started. Subtracted from all subsequent tick measurements so that the clock starts at 0, instead of whatever the actual time of that initial animation frame was.
 	 * @property {object} settings - Settings for the agentmap, filled with defaults.
 	 * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max).
 	 * @property {?function} update_func - Function to be called on each update.
@@ -33,11 +33,11 @@
 		this.units = null,
 		this.streets = null,
 		this.agents = null, 
-		this.process_state = {
+		this.state = {
 			running: false,
 			paused: false,
 			animation_frame_id: null,
-			current_tick: null,
+			tick: null,
 			prev_tick: null,
 			tick_start_delay: null
 		},
@@ -51,13 +51,13 @@
 	 * Get an animation frame, have the agents update & get ready to be drawn, and keep doing that until paused or reset.
 	 */
 	Agentmap.prototype.run = function() {
-		if (this.process_state.running === false) {
-			this.process_state.running = true;
+		if (this.state.running === false) {
+			this.state.running = true;
 			
 			let animation_update = (function (rAF_time) {
 				this.update(rAF_time);
 				
-				this.process_state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
+				this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
 			}).bind(this);
 
 			this.animation_frame_id = L.Util.requestAnimFrame(animation_update);
@@ -74,52 +74,52 @@
 		tick_at_pause = 0,
 		ticks_since_paused = 0;
 		
-		if (this.process_state.current_tick === null) {
-			this.process_state.current_tick = 0,
-			this.process_state.prev_tick = 0,
+		if (this.state.tick === null) {
+			this.state.tick = 0,
+			this.state.prev_tick = 0,
 
 			//requestAnimationFrame doesn't start with timestamp 0; the first timestamp will typically be pretty large; 
 			//we want to store it and subtract it from each newly recieved tick at which we're animating so that ticks 
 			//are counted from 0, not whatever timestamp the original call to rAF happened to return. 
-			this.process_state.tick_start_delay = total_ticks;
+			this.state.tick_start_delay = total_ticks;
 		}
 		else {
-			if (this.process_state.paused) {
-				tick_at_pause = this.process_state.current_tick;
-				this.process_state.paused = false;
+			if (this.state.paused) {
+				tick_at_pause = this.state.tick;
+				this.state.paused = false;
 			}
 			
 			//See the comment immediately above.
-			this.process_state.current_tick = total_ticks - this.process_state.tick_start_delay;
-			ticks_since_paused = this.process_state.paused ? this.process_state.current_tick - tick_at_pause : 0;
-			this.process_state.current_tick -= ticks_since_paused;
-			this.process_state.tick_start_delay += ticks_since_paused;
+			this.state.tick = total_ticks - this.state.tick_start_delay;
+			ticks_since_paused = this.state.paused ? this.state.tick - tick_at_pause : 0;
+			this.state.tick -= ticks_since_paused;
+			this.state.tick_start_delay += ticks_since_paused;
 		}
 
 		this.update_func();
 
 		let movement_precision = this.settings.movement_precision,
-		animation_tick_interval = this.process_state.current_tick - this.process_state.prev_tick,
+		animation_tick_interval = this.state.tick - this.state.prev_tick,
 		steps_inbetween = Math.floor(animation_tick_interval / movement_precision);
 
 		this.agents.eachLayer(function(agent) {
 			agent.update(animation_tick_interval, movement_precision, steps_inbetween);
 		});
 
-		this.process_state.prev_tick = this.process_state.current_tick;
+		this.state.prev_tick = this.state.tick;
 	};
 
 	/**
 	* Stop the animation, reset the animation state properties, and delete the agents.
 	*/
 	Agentmap.prototype.reset = function() {
-		L.Util.cancelAnimFrame(this.process_state.animation_frame_id);
-		this.process_state.running = false,
-		this.process_state.paused = false,
-		this.process_state.animation_frame_id = null,
-		this.process_state.current_tick = null,
-		this.process_state.prev_tick = null,
-		this.process_state.tick_start_delay = null;
+		L.Util.cancelAnimFrame(this.state.animation_frame_id);
+		this.state.running = false,
+		this.state.paused = false,
+		this.state.animation_frame_id = null,
+		this.state.tick = null,
+		this.state.prev_tick = null,
+		this.state.tick_start_delay = null;
 
 		for (agent of this.agents) {
 			agent.delete();
@@ -130,9 +130,9 @@
 	 * Stop the animation, stop updating the agents.
 	 */
 	Agentmap.prototype.pause = function() {
-		L.Util.cancelAnimFrame(this.process_state.animation_frame_id);
-		this.process_state.running = false,
-		this.process_state.paused = true;
+		L.Util.cancelAnimFrame(this.state.animation_frame_id);
+		this.state.running = false,
+		this.state.paused = true;
 	};
 
 	/**

@@ -202,7 +202,7 @@
 		}
 
 		let street_lat_lng = this.agentmap.getStreetNearDoor(unit_id),
-		street_point = [street_lat_lng.lng, street_lat_lng.lat];
+		street_point = A.pointToCoordinateArray(street_lat_lng);
 
 		this.setTravelAlongStreet(null, null, street_point);
 	};

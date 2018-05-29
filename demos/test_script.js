@@ -22,21 +22,26 @@ amap.buildingify(bounding_box, sample_data);
 //Generate 100 agents according to the rules of seqUnitAgentMaker, displaying them as red, .5 meter radius circles.
 amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
 
-//Perform the following actions for each agent.
-amap.agents.eachLayer(function(agent) {
-	//Get a random unit and its ID.
-	let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
-	new_unit_id = amap.units.getLayerId(new_unit);
+//Do the following on each new tick.
+amap.update_func = function() {
+	//Perform the following actions for each agent every 20 ticks.
+	if (amap.state.tick % 40 === 0) {
+		amap.agents.eachLayer(function(agent) {
+			//Get a random unit and its ID.
+			let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
+			new_unit_id = amap.units.getLayerId(new_unit);
 
-	//Schedule the agent move to the spot on the street across of the unit's door.
-	agent.setTravelNearUnit(new_unit_id);
+			//Schedule the agent move to the spot on the street across of the unit's door.
+			agent.setTravelNearUnit(new_unit_id);
 
-	//Then, schedule the agent move to the center of the unit.
-	agent.setTravelToPlace({"unit": new_unit_id}, new_unit.getBounds().getCenter());
+			//Then, schedule the agent move to the center of the unit.
+			agent.setTravelToPlace({"unit": new_unit_id}, new_unit.getBounds().getCenter());
 
-	//Have the agent start its trip.
-	agent.startTrip();
-});
+			//Have the agent start its trip.
+			agent.startTrip();
+		});
+	}
+};
 
 //Run the Agentmap simulation.
 amap.run();
