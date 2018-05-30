@@ -363,7 +363,10 @@
 		else if (point.geometry && point.geometry.coordinates && A.isPointCoordinates(point.geometry.coordinates)) {
 			coordinate_array = point.geometry.coordinates;
 		}
-		else if (!isPointCoordinates(point)) {
+		else if (isPointCoordinates(point)) {
+			coordinate_array = point;
+		}
+		else {
 			throw new Error("Invalid point: point must either be array of 2 coordinates, or an L.latLng.");
 		}
 

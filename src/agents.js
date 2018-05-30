@@ -259,27 +259,28 @@
 	 *
 	 * @param {number} goal_street_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
 	 * @param {number} distance - The distance into the street that the agent should travel in meters.
-	 * @param {LatLng} street_point - The coordinates of a point on a street to which the agent should travel; null by default, otherwise "distance" will be ignored; if point is provided, street_id is optional; if not provided, it will search through all streets for the point; if provided, it will search that particular street.
+	 * @param {LatLng} street_lat_lng - The coordinates of a point on a street to which the agent should travel; null by default, otherwise "distance" will be ignored; if point is provided, street_id is optional; if not provided, it will search through all streets for the point; if provided, it will search that particular street.
 	 */
-	Agent.setTravelAlongStreet = function(goal_street_id, distance, street_point = null) {
+	Agent.setTravelAlongStreet = function(goal_street_id = null, distance = null, street_lat_lng = null) {
 		distance *= .001; //Convert to kilometers.
-		
+
 		let start_place = this.newTripStartPlace(),
+		street_point = A.pointToCoordinateArray(street_lat_lng),
 		street_id,
 		next_starting_point;
 
 		if (typeof(start_place.unit) === "number") {
-			street_id = this.agentmap.units.getLayer(this.place.unit).street_id;
+			street_id = this.agentmap.units.getLayer(start_place.unit).street_id;
 			
-			unit_door = this.agentmap.getUnitDoor(this.place.unit), 
+			unit_door = this.agentmap.getUnitDoor(start_place.unit), 
 			this.travel_state.path.push(unit_door);	
 			
-			unit_street_door = this.agentmap.getStreetNearDoor(this.place.unit),
+			unit_street_door = this.agentmap.getStreetNearDoor(start_place.unit),
 			street_starting_point = A.pointToCoordinateArray(unit_street_door);
 		}
 		else if (typeof(start_place.street) === "number") {
-			street_id = this.place.street,
-			current_point = this.getLatLng(),
+			street_id = start_place.street,
+			current_point = start_place,
 			street_starting_point = A.pointToCoordinateArray(current_point);
 		}
 		
@@ -289,12 +290,7 @@
 			goal_street_point = turf.along(street_feature, distance).geometry.coordinates;
 		}
 		else {
-			if (A.isPointCoordinates(street_point)) {
-				goal_street_point = turf.nearestPointOnLine(street_feature, street_point);		
-			}
-			else {
-				throw new Error("Invalid feature returned from agentFeatureMaker: geometry.coordinates must be a 2-element array of numbers.");	
-			}
+			goal_street_point = turf.nearestPointOnLine(street_feature, street_point);		
 		}
 		
 		//turf.lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
