@@ -27,14 +27,14 @@ amap.update_func = function() {
 	//Perform the following actions for each agent every 20 ticks.
 	if (amap.state.tick % 20 === 0) {
 		amap.agents.eachLayer(function(agent) {
-			//Get a random unit and its ID.
+			//Get a new unit and its ID randomly.
 			let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
 			new_unit_id = amap.units.getLayerId(new_unit);
 
-			//Schedule the agent move to the spot on the street across of the unit's door.
+			//Schedule the agent to move to the spot on the street next to the new unit's door.
 			agent.setTravelNearUnit(new_unit_id);
 
-			//Then, schedule the agent move to the center of the unit.
+			//Then, schedule the agent to move to the center of the new unit.
 			agent.setTravelToPlace({"unit": new_unit_id}, new_unit.getBounds().getCenter());
 
 			//Have the agent start its trip.
