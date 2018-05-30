@@ -213,7 +213,6 @@
 			
 			if (unit_pair[0] !== null) {
 				unit_features[0].push(unit_pair[0]);
-				console.log(starting_id + increment);
 			}
 
 			if (unit_pair[1] !== null) {

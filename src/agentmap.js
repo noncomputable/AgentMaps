@@ -120,10 +120,8 @@
 		this.state.tick = null,
 		this.state.prev_tick = null,
 		this.state.tick_start_delay = null;
-
-		for (agent of this.agents) {
-			agent.delete();
-		}
+		
+		this.agents.clearLayers();
 	};
 
 	/** 
