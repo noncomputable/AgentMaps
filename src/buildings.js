@@ -175,7 +175,7 @@
 				unit_feature.geometry.coordinates[0][4] = unit_feature.geometry.coordinates[0][0];
 
 				//Exclude the unit if it overlaps with any of the other proposed units.
-				let all_proposed_unit_features = unit_features.concat(proposed_unit_features); 
+				let all_proposed_unit_features = unit_features.concat(...proposed_unit_features); 
 				if (noOverlaps(unit_feature, all_proposed_unit_features)) { 
 					//Recode index so that it's useful here.
 					if (i === 1) {
@@ -222,8 +222,8 @@
 			}
 		}
 	
-		let unit_features_merged = [].concat.apply([], unit_features);
-		
+		let unit_features_merged = [].concat(...unit_features);
+
 		return unit_features_merged;
 	}
 
