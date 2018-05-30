@@ -25,7 +25,7 @@ amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor:
 //Do the following on each new tick.
 amap.update_func = function() {
 	//Perform the following actions for each agent every 20 ticks.
-	if (amap.state.tick % 40 === 0) {
+	if (amap.state.tick % 20 === 0) {
 		amap.agents.eachLayer(function(agent) {
 			//Get a random unit and its ID.
 			let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
