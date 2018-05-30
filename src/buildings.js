@@ -3,7 +3,7 @@
 		throw new Error("L.A is undefined! Make sure Agentmaps was setup properly in first function of AgentMaps.js (agentmap.js in /src).");
 	}
 
-	/* Here we define mapify and all other functions and definitions it relies on. */
+	/* Here we define buildingify and all other functions and definitions it relies on. */
 
 	/**
 	 * @typedef {object} Feature
@@ -99,9 +99,8 @@
 		this.streets.eachLayer(function(layer) {
 			let street_feature = layer.feature,
 			street_id = layer._leaflet_id,
-			proposed_anchors = getUnitAnchors(street_feature, bounding_box);
-
-			new_proposed_unit_features = generateUnitFeatures(proposed_anchors, proposed_unit_features, street_id),
+			proposed_anchors = getUnitAnchors(street_feature, bounding_box),
+			new_proposed_unit_features = generateUnitFeatures(proposed_anchors, proposed_unit_features, street_id);
 			proposed_unit_features.push(...new_proposed_unit_features);
 		});
 
@@ -209,16 +208,16 @@
 
 						unit_pair[1] = unit_feature;
 					}
-
 				}
+			}
+			
+			if (unit_pair[0] !== null) {
+				unit_features[0].push(unit_pair[0]);
+				console.log(starting_id + increment);
+			}
 
-				if (unit_pair[0] !== null) {
-					unit_features[0].push(unit_pair[0]);
-				}
-
-				if (unit_pair[1] !== null) {
-					unit_features[1].push(unit_pair[1]);
-				}
+			if (unit_pair[1] !== null) {
+				unit_features[1].push(unit_pair[1]);
 			}
 		}
 	
