@@ -52,6 +52,11 @@
 	 */
 	Agentmap.prototype.run = function() {
 		if (this.state.running === false) {
+			if (this.state.paused === true) {
+				this.state.paused = false,
+				this.state.tick -= this.state.tick - this.state.prev_tick;
+			}
+
 			this.state.running = true;
 			
 			let animation_update = (function (rAF_time) {
@@ -70,9 +75,7 @@
 	 * @param {number} rAF_time - Time passed by the browser's most recent animation frame.
 	 */
 	Agentmap.prototype.update = function(rAF_time) {
-		let total_ticks = rAF_time * .001,
-		tick_at_pause = 0,
-		ticks_since_paused = 0;
+		let total_ticks = rAF_time * .001;
 		
 		if (this.state.tick === null) {
 			this.state.tick = 0,
@@ -84,16 +87,8 @@
 			this.state.tick_start_delay = total_ticks;
 		}
 		else {
-			if (this.state.paused) {
-				tick_at_pause = this.state.tick;
-				this.state.paused = false;
-			}
-			
 			//See the comment immediately above.
 			this.state.tick = total_ticks - this.state.tick_start_delay;
-			ticks_since_paused = this.state.paused ? this.state.tick - tick_at_pause : 0;
-			this.state.tick -= ticks_since_paused;
-			this.state.tick_start_delay += ticks_since_paused;
 		}
 
 		this.update_func();
