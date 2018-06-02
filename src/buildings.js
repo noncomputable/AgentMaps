@@ -45,6 +45,28 @@
 			street_options
 		).addTo(this.map);
 
+		this.streets.eachLayer(function(street) {
+			let street_id = street._leaflet_id;
+			street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
+
+			this.streets.eachLayer(function(other_street) {
+				let other_street_id = other_street._leaflet_id;
+				if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
+					let street_coords = street.getLatLngs().map(pointToCoordinateArray),
+					other_street_coords = other_street.getLatLngs().map(pointToCoordinateArray),
+					intersection_with_indices = getIntersection(street_coords, other_street_coords, [street_id, other_street_id]).map(
+						intersection_with_index => [A.reversedCoordinates(intersection_with_index[0]), 
+						intersection_with_index[1]]);		
+					intersection = intersection_with_indices.map(int_w_index => int_w_index[0]);
+					if (intersection.length > 0) {
+						street.intersections[other_street_id] = intersection_with_indices,
+						other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
+						other_street.intersections[street_id] = intersection_with_indices;
+					}
+				}
+			}, this);
+		}, this);
+
 		//Bind getUnitFeatures to this so it can access the agentmap via this keyword.
 		let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 	
@@ -66,10 +88,10 @@
 			unit_options
 		).addTo(this.map);
 
-		this.units.eachLayer(function(layer) {
-			layer.street_id = layer.feature.properties.street_id,
-			layer.street_anchors = layer.feature.properties.street_anchors,
-			layer.neighbors = layer.feature.properties.neighbors.map(function(neighbor) {
+		this.units.eachLayer(function(unit) {
+			unit.street_id = unit.feature.properties.street_id,
+			unit.street_anchors = unit.feature.properties.street_anchors,
+			unit.neighbors = unit.feature.properties.neighbors.map(function(neighbor) {
 				if (neighbor !== null) {
 					let neighbor_id;
 					this.units.eachLayer(function(neighbor_layer) {
@@ -114,7 +136,7 @@
 	 *
 	 * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
 	 * @returns {Array<Feature>} - An array of street features.
-	*/
+	 */
 	function getStreetFeatures(OSM_data) {
 		let street_features = [];
 
@@ -123,6 +145,7 @@
 			
 			if (feature.geometry.type === "LineString" && feature.properties.highway) {
 				let street_feature = feature;
+
 				street_features.push(street_feature);
 			}
 		}
@@ -371,6 +394,61 @@
 		return coordinate_array;
 	}
 
+	/**
+	  * Given an array of coordinate arrays, get their intersection.
+	  */
+	function getIntersections(array_array) {
+		let reference = array_array[0];
+
+		for (let array of array_array.slice(1)) {
+			if (A.isCoordinateArray(array)) {
+				throw new Error("All elements of the array must be coordinate arrays.");
+			}
+			reference = getIntersection(reference, array);
+		}
+
+		return reference;
+	}
+	
+	/**
+	 * Given two coordinate arrays, get their intersection.
+	 */
+	function getIntersection(arr_a, arr_b, with_indices = []) {
+		let intersection = [];
+
+		for (let i = 0; i < arr_a.length; i++) {
+			let el_a = arr_a[i];
+
+			for (let j = 0; j < arr_b.length; j++) {
+				let el_b = arr_b[j];
+				
+				if (A.isPointCoordinates(el_a) && A.isPointCoordinates(el_b)) {
+					if (el_a[0] === el_b[0] && el_a[1] === el_b[1]) {
+						let new_intersection;
+						if (with_indices.length === 2) {
+							let indices = {};
+							indices[with_indices[0]] = i,
+							indices[with_indices[1]] = j,
+							new_intersection = [el_a, indices];
+						}
+						else {
+							new_intersection = el_a;
+						}
+					
+						intersection.push(new_intersection);
+					}
+				}
+				else {
+					throw new Error("Every element of each array must be a coordinate pair array.");
+				}
+			}
+		}
+
+		return intersection;
+	}
+
+	A.getIntersection = getIntersection;
+	A.getIntersections = getIntersections;
 	A.reversedCoordinates = reversedCoordinates;
 	A.isPointCoordinates = isPointCoordinates;
 	A.pointToCoordinateArray = pointToCoordinateArray;
