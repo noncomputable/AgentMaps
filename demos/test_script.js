@@ -17,13 +17,14 @@ L.tileLayer(
 let amap = L.A.agentmap(map);
 
 //Generate and display streets and buildings on the map.
-amap.buildingify(bounding_box, sample_data);
+function build() { amap.buildingify(bounding_box, sample_data); }
 
 //Generate 100 agents according to the rules of seqUnitAgentMaker, displaying them as red, .5 meter radius circles.
-amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
+function agentify() { amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"}); }
 
 //Do the following on each new tick.
 //amap.update_func = function() {
+function simulate() {
 		amap.agents.eachLayer(function(agent) {
 			//Get a new unit and its ID randomly.
 			let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
@@ -38,7 +39,8 @@ amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor:
 			//Have the agent start its trip.
 			agent.startTrip();
 		});
+}
 //};
 
 //Run the Agentmap simulation.
-amap.run();
+//amap.run();
