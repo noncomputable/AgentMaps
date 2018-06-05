@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "bundle": "npx webpack",
-    "prepublish": "npm run bundle",
+    "prepublish": "npm run bundle"
   },
   "main": "index.js",
   "repository": {
