@@ -6,6 +6,4 @@ if (typeof(L) === "undefined") {
 	throw "L is undefined! Make sure that Leaflet.js is loaded.";
 }
 
-console.log("boop");
-
 L.A = Object.assign({}, agentmap, agents, buildings);
