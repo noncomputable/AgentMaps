@@ -23,7 +23,7 @@ amap.buildingify(bounding_box, sample_data);
 amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
 
 //Do the following on each new tick.
-amap.update_func = function() {
+//amap.update_func = function() {
 		amap.agents.eachLayer(function(agent) {
 			//Get a new unit and its ID randomly.
 			let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
@@ -38,7 +38,7 @@ amap.update_func = function() {
 			//Have the agent start its trip.
 			agent.startTrip();
 		});
-};
+//};
 
 //Run the Agentmap simulation.
 amap.run();

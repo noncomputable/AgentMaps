@@ -1,0 +1,44 @@
+{
+  "name": "agentmaps",
+  "version": "1.0.0",
+  "description": "Geospatial agent-based modeling extension for Leaflet.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noncomputable/AgentMaps.git"
+  },
+  "keywords": [
+    "agent-based",
+    "modeling",
+    "simulation",
+    "GIS",
+    "geographic",
+    "spatial"
+  ],
+  "author": "Andrew Tsesis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/noncomputable/AgentMaps/issues"
+  },
+  "homepage": "https://github.com/noncomputable/AgentMaps#readme",
+  "dependencies": {
+    "@turf/along": "^6.0.1",
+    "@turf/bearing": "^6.0.1",
+    "@turf/boolean-point-in-polygon": "^6.0.1",
+    "@turf/buffer": "^5.1.5",
+    "@turf/centroid": "^6.0.2",
+    "@turf/destination": "^6.0.1",
+    "@turf/intersect": "^6.1.2",
+    "@turf/line-intersect": "^6.0.2",
+    "@turf/line-slice": "^5.1.5",
+    "@turf/nearest-point-on-line": "^6.0.2",
+    "ngraph.path": "^1.0.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.10.2",
+    "webpack-cli": "^3.0.1"
+  }
+}
