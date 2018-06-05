@@ -1,6 +1,8 @@
 var agentmap = require('./agentmap');
 var agents = require('./agents');
 var buildings = require('./buildings');
+window.path = require("ngraph.path");
+window.createGraph = require("ngraph.graph");
 
 if (typeof(L) === "undefined") {
 	throw "L is undefined! Make sure that Leaflet.js is loaded.";
