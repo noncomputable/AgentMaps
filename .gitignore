@@ -32,7 +32,7 @@ package-lock.json
 .Python
 build/
 develop-eggs/
-dist/
+#dist/ # not for gh-pages branch
 downloads/
 eggs/
 .eggs/
