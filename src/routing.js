@@ -108,4 +108,3 @@ function decodeCoordString(coord_string) {
 exports.streetsToGraph = streetsToGraph;
 exports.getPath = getPath;
 exports.getPathFinder = getPathFinder;
-exports.decodeCoordString = decodeCoordString;
