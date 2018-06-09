@@ -35,6 +35,7 @@
     "@turf/centroid": "^6.0.2",
     "@turf/destination": "^6.0.1",
     "@turf/intersect": "^6.1.2",
+    "@turf/line-distance": "^4.7.3",
     "@turf/line-intersect": "^6.0.2",
     "@turf/line-slice": "^5.1.5",
     "@turf/nearest-point-on-line": "^6.0.2",

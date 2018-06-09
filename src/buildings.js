@@ -415,13 +415,14 @@ function getIntersections(array_array) {
 /**
  * Given two coordinate arrays, get their intersection.
  * 
- * @param {ray<ray<number>>} arr_a -  array of coordinate pairs.
- * @param {ray<ray<number>>} arr_b -  array of coordinate pairs.
- * @param {ray<number>} with_indices -  array whose elements are IDs for arr_a and arr_b respectively.
+ * @param {array<array<number>>} arr_a -  array of coordinate pairs.
+ * @param {array<array<number>>} arr_b -  array of coordinate pairs.
+ * @param {array<number>} with_indices -  array whose elements are IDs for arr_a and arr_b respectively.
  *
- * @returns {ray<ray<number, object>>} -  array whose elements are the coordinates in the intersection if
+ * @returns {array<array<number, object>>} -  array whose elements are the coordinates in the intersection if
  * with_indices is empty, or whose elements are arrays whose first element is an intersecting coordinate pair
- * and whose second element is an object mapping the each array ID to the index of the intersecting coordinate pair in it.
+ * and whose second element is an object mapping the each array's ID (supplied in with_indices, a and b respectively) 
+ * to the index of the intersecting coordinate pair in it.
  */
 function getIntersection(arr_a, arr_b, with_indices = []) {
 	let intersection = [];
