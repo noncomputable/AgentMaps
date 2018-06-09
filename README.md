@@ -4,4 +4,4 @@ Make agent-based simulations on maps! Give it some neighborhood's OpenStreetMap 
 
 After including and loading Leaflet, include this script to use Agentmaps: https://unpkg.com/agentmaps@1/dist/agentmaps.js.
 
-Demos and dist are in the gh-pages branch.
+Demos and code dist are in the gh-pages branch.
