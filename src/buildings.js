@@ -380,6 +380,7 @@ function isPointCoordinates(array) {
  * @returns {ray<number>} -  array of the point's coordinates. I.e.: [lng, lat].
  */
 function pointToCoordinateArray(point) {
+	let coordinate_array;
 	if (typeof(point.lat) === "number" && typeof(point.lng) === "number") {
 		coordinate_array = [point.lng, point.lat];
 	}

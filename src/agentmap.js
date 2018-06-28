@@ -1,3 +1,6 @@
+var lineSlice = require('@turf/line-slice').default;
+var lineDistance = require('@turf/line-distance');
+
 /**
  * The main class for building, storing, simulating, and manipulating agent-based models on Leaflet maps.
  *
@@ -157,6 +160,50 @@ Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 	
 	return street_point;
 };
+
+Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
+	let coordinates,
+	street_id,
+	street_feature;
+
+	if (place.unit) {
+		coordinates = this.getStreetNearDoor(place.unit),
+		unit = this.units.getLayer(place.unit),
+		street_id = unit.street_id;
+	}
+	else if (place.street) {
+		coordinates = lat_lng,
+		street_id = place.street;
+	}
+	else {
+		throw new Error("place must be a unit or a street!");
+	}
+
+	street_feature = this.streets.getLayer(street_id).toGeoJSON();
+		
+	let intersections = this.streets.getLayer(street_id).intersections,
+	intersection_points = [],
+	intersection_distances = [];
+
+	for (let intersection in intersections) { 
+		for (let cross_point of intersection) {
+			let intersection_point = cross_point[0],
+			start_coords = L.A.pointToCoordinateArray(coordinates),
+			end_coords = L.A.pointToCoordinateArray(intersection_point),
+			segment = lineSlice(start_coords, end_coords, street.toGeoJSON()),
+			distance = lineDistance(segment);
+			
+			intersection_points.push(intersection_point);
+			intersection_distances.push(distance);
+		}
+	}
+
+	let smallest_distance = Math.min(...intersection_distances),
+	smallest_distance_index = intersection_distances.indexOf(smallest_distance),
+	closest_intersection_point = intersection_points[smallest_distance_index];
+
+	return closest_intersection_point;
+}
 
 /**
  * Generates an agentmap for the given map.

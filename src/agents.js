@@ -197,17 +197,17 @@ Agent.startTrip = function() {
  *
  * @param {number} unit_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
  */
-Agent.setTravelNearUnit = function(unit_id) {
+Agent.setTravelToUnit = function(lat_lng, place) {
 	let start_place = this.newTripStartPlace();
 	
-	if (start_place.unit === unit_id) {
-		return;			
+	if (start_place.unit === place.unit) {
+		return;
 	}
 
-	let street_lat_lng = this.agentmap.getStreetNearDoor(unit_id),
-	street_point = L.A.pointToCoordinateArray(street_lat_lng);
+	let street_lat_lng = this.agentmap.getStreetNearDoor(place.unit);
+	street_lat_lng.new_place = place;
 
-	this.setTravelAlongStreet(null, null, street_point);
+	this.setTravelAlongStreet(street_lat_lng);
 };
 
 /**
@@ -219,11 +219,11 @@ Agent.setTravelInUnit = function(goal_lat_lng) {
 	let goal_point = L.A.pointToCoordinateArray(goal_lat_lng),
 	//Buffering so that points on the perimeter, like the door, are captured. Might be more
 	//efficient to generate the door so that it's slightly inside the area.
-	goal_polygon = buffer(this.agentmap.units.getLayer(this.place.unit).toGeoJSON(), .001);
+	goal_polygon = buffer(this.agentmap.units.getLayer(goal_lat_lng.new_place.unit).toGeoJSON(), .001);
 
 	if (booleanPointInPolygon(goal_point, goal_polygon)) {
-		point_latLng.new_place = this.place;
-		this.travel_state.path.push(point_latLng);
+		goal_lat_lng.new_place = this.place;
+		this.travel_state.path.push(goal_lat_lng);
 	}
 	else {
 		throw new Error("The goal_lat_lng is not inside of the polygon of the goal_place!");
@@ -245,8 +245,23 @@ Agent.setTravelToPlace = function(goal_place, goal_lat_lng) {
 		//efficient to generate the door so that it's slightly inside the area.
 		goal_polygon = buffer(goal_layer.toGeoJSON(), .001);
 		if (booleanPointInPolygon(goal_point, goal_polygon)) {
+			let start_place = this.newTripStartPlace();
 			goal_lat_lng.new_place = goal_place;
-			this.travel_state.path.push(goal_lat_lng);
+			if (goal_place.unit) {
+				if (start_place.unit === goal_place.unit) {
+					this.setTravelInUnit(goal_lat_lng);
+				}
+				else {
+					this.setTravelToUnit(goal_lat_lng, goal_place);
+					let goal_door = this.agentmap.getUnitDoor(goal_place.unit);
+					goal_door.new_place = goal_place;
+					this.travel_state.path.push(goal_door)
+					this.setTravelInUnit(goal_lat_lng);
+				}
+			}
+			else if (goal_place.street) {
+				this.setTravelAlongStreet(goal_lat_lng);
+			}
 		}
 		else {
 			throw new Error("The goal_lat_lng is not inside of the polygon of the goal_place!");
@@ -264,8 +279,8 @@ Agent.setTravelToPlace = function(goal_place, goal_lat_lng) {
  * @param {number} distance - The distance into the street that the agent should travel in meters.
  * @param {LatLng} street_lat_lng - The coordinates of a point on a street to which the agent should travel; null by default, otherwise "distance" will be ignored; if point is provided, street_id is optional; if not provided, it will search through all streets for the point; if provided, it will search that particular street.
  */
-Agent.setTravelAlongStreet = function(goal_street_id = null, distance = null, street_lat_lng = null) {
-	distance *= .001; //Convert to kilometers.
+Agent.setTravelAlongStreet = function(street_lat_lng) {
+	//distance *= .001; //Convert to kilometers.
 
 	let start_place = this.newTripStartPlace(),
 	street_point = L.A.pointToCoordinateArray(street_lat_lng),
@@ -284,7 +299,7 @@ Agent.setTravelAlongStreet = function(goal_street_id = null, distance = null, st
 	else if (typeof(start_place.street) === "number") {
 		street_id = start_place.street,
 		current_point = start_place,
-		street_starting_point = L.A.pointToCoordinateArray(current_point);
+		street_starting_point = L.A.pointToCoordinateArray(this.travel_state.path[this.travel_state.path.length - 1]);
 	}
 	
 	let street_feature = this.agentmap.streets.getLayer(street_id).feature;
