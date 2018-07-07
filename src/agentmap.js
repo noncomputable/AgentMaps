@@ -142,9 +142,9 @@ Agentmap.prototype.getUnitDoor = function(unit_id) {
 	}
 	
 	let unit_spec = unit.getLatLngs()[0],
-	side_a = unit_spec[0],
-	side_b = unit_spec[1],
-	door = 	L.latLngBounds(side_a, side_b).getCenter();
+	corner_a = unit_spec[0],
+	corner_b = unit_spec[1],
+	door = 	L.latLngBounds(corner_a, corner_b).getCenter();
 	
 	return door;
 };
@@ -168,22 +168,22 @@ Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 	return street_point;
 };
 
+/**
+ * Given a point on a street, find the nearest intersection on that street (with any other street).
+ * 
+ * @param {LatLng} lat_lng - The coordinates of the point on the street to search from.
+ * @param {Place} place - A place object corresponding to the street.
+ * @returns {LatLng} - The coordinates of the nearest intersection.
+ */
 Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
-	let coordinates,
-	street_id,
+	let street_id,
 	street_feature;
 
-	if (place.unit) {
-		coordinates = this.getStreetNearDoor(place.unit),
-		unit = this.units.getLayer(place.unit),
-		street_id = unit.street_id;
-	}
-	else if (place.street) {
-		coordinates = lat_lng,
+	if (place.street) {
 		street_id = place.street;
 	}
 	else {
-		throw new Error("place must be a unit or a street!");
+		throw new Error("place must be a street!");
 	}
 
 	street_feature = this.streets.getLayer(street_id).toGeoJSON();

@@ -13,14 +13,14 @@ var Agentmap = require('./agentmap').Agentmap;
  * @property {object} properties - Non-geometric properties describing the map feature.
  * @property {object} geometry - Specification of the feature's geometry.
  * @property {string} geometry.type - The feature's GeoJSON geometry type
- * @property {ray} geometry.coordinates - The coordinates specifying the feature's geometry.
+ * @property {Array} geometry.coordinates - The coordinates specifying the feature's geometry.
  * @see {@link http://geojson.org/}
  */
 
 /**
  * Generate and setup the desired map features (e.g. streets, houses).
  *
- * @param {ray.<ray.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
+ * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
  * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
  */
@@ -115,7 +115,7 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
  * Get all appropriate units within the desired bounding box.
  *
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @returns {ray<Feature>} -  array of features representing real estate units.
+ * @returns {Array<Feature>} -  array of features representing real estate units.
  */
 function getUnitFeatures(OSM_data, bounding_box) {
 	let proposed_unit_features = [];
@@ -137,7 +137,7 @@ function getUnitFeatures(OSM_data, bounding_box) {
  * Get all streets from the GeoJSON data.
  *
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
- * @returns {ray<Feature>} -  array of street features.
+ * @returns {Array<Feature>} -  array of street features.
  */
 function getStreetFeatures(OSM_data) {
 	let street_features = [];
@@ -159,10 +159,10 @@ function getStreetFeatures(OSM_data) {
  * Given two anchors, find four nearby points on either side
  * of the street appropriate to build a unit(s) on.
  *
- * @param {ray<ray<Feature>>} unit_anchors -  array of pairs of points around which to anchor units along a street.
- * @param {ray<Feature>} proposed_unit_features -  array of features representing real estate units already proposed for construction.
+ * @param {Array<Array<Feature>>} unit_anchors -  array of pairs of points around which to anchor units along a street.
+ * @param {Array<Feature>} proposed_unit_features -  array of features representing real estate units already proposed for construction.
  * @param {string} street_feature_id - The Leaflet layer ID of the street feature along which the unit is being constructed..
- * @returns {ray<Feature>} unit_features -  array of features representing real estate units.
+ * @returns {Array<Feature>} unit_features -  array of features representing real estate units.
  */
 function generateUnitFeatures(unit_anchors, proposed_unit_features, street_feature_id) {
 	//One sub-array of unit features for each side of the road.
@@ -255,7 +255,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
  * and end points along the street from which units may be constructed.
  * 
  * @param {Feature} street_feature - A GeoJSON feature object representing a street.
- * @returns {ray<ray<Feature>>} -  array of pairs of points around which to anchor units along a street.  
+ * @returns {Array<Array<Feature>>} -  array of pairs of points around which to anchor units along a street.  
  */
 function getUnitAnchors(street_feature, bounding_box) {
 	let unit_anchors = [],
@@ -288,9 +288,9 @@ function getUnitAnchors(street_feature, bounding_box) {
 /**
  * Get an array of units excluding units that overlap with streets.
  *
- * @param {ray<Feature>} unit_features - ray of features representing units.
- * @param {ray<Layer>} street_layers - ray of Leaflet layers representing streets.
- * @returns {ray<Feature>} - unit_features, but with all units that intersect any streets removed.
+ * @param {Array<Feature>} unit_features - ray of features representing units.
+ * @param {Array<Layer>} street_layers - ray of Leaflet layers representing streets.
+ * @returns {Array<Feature>} - unit_features, but with all units that intersect any streets removed.
  */
 function unitsOutOfStreets(unit_features, street_layers) {
 	let processed_unit_features = unit_features.slice();
@@ -315,7 +315,7 @@ function unitsOutOfStreets(unit_features, street_layers) {
  * Check whether a polygon overlaps with any member of an array of polygons.
  *
  * @param {Feature} polygon_feature - A geoJSON polygon feature.
- * @param {ray<Feature>} polygon_feature_array -  array of geoJSON polygon features.
+ * @param {Array<Feature>} polygon_feature_array -  array of geoJSON polygon features.
  * @returns {boolean} - Whether the polygon_feature overlaps with any one in the array.
  */	
 function noOverlaps(reference_polygon_feature, polygon_feature_array) {
@@ -339,8 +339,8 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
  * methods expect Leaflet's latLng pairs and won't auto-reverse, so we have to do that
  * manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
  * 
- * @param {ray<number|ray<number|ray<number>>>} coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
- * @returns {ray<number|ray<number|ray<number>>>} - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ * @param {Array<number|Array<number|Array<number>>>} coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ * @returns {Array<number|Array<number|Array<number>>>} - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
  */
 function reversedCoordinates(coordinates) {
 	let reversed = coordinates.slice();
@@ -357,9 +357,9 @@ function reversedCoordinates(coordinates) {
 }
 
 /**
- * Given an array, check whether it can be the coordinates of a point.
+ * Given an array, check whether it can represent the coordinates of a point.
  *
- * @param {ray} array -  array to check.
+ * @param {Array} array - Array to check.
  * @returns {boolean} - Whether the array can be the coordinates of a point.
  */
 function isPointCoordinates(array) {
@@ -376,11 +376,12 @@ function isPointCoordinates(array) {
  * Given either a GeoJSON feature, L.latLng, or coordinate array containing the coordinates of a point,
  * return an array of the coordinates.
  *
- * @params {Point|ray<number>|LatLng} point - The data containing the point's coordinates (latitude & longitude).
- * @returns {ray<number>} -  array of the point's coordinates. I.e.: [lng, lat].
+ * @params {Point|Array<number>|LatLng} point - The data containing the point's coordinates (latitude & longitude).
+ * @returns {Array<number>} - Array of the point's coordinates. I.e.: [lng, lat].
  */
 function pointToCoordinateArray(point) {
 	let coordinate_array;
+
 	if (typeof(point.lat) === "number" && typeof(point.lng) === "number") {
 		coordinate_array = [point.lng, point.lat];
 	}
@@ -395,22 +396,6 @@ function pointToCoordinateArray(point) {
 	}
 
 	return coordinate_array;
-}
-
-/**
-  * Given an array of coordinate arrays, get their intersection.
-  */
-function getIntersections(array_array) {
-	let reference = array_array[0];
-
-	for (let array of array_array.slice(1)) {
-		if (isCoordinateray(array)) {
-			throw new Error("l elements of the array must be coordinate arrays.");
-		}
-		reference = getIntersection(reference, array);
-	}
-
-	return reference;
 }
 
 /**
@@ -462,7 +447,6 @@ function getIntersection(arr_a, arr_b, with_indices = []) {
 Agentmap.prototype.buildingify = buildingify;
 
 exports.getIntersection = getIntersection;
-exports.getIntersections = getIntersections;
 exports.reversedCoordinates = reversedCoordinates;
 exports.isPointCoordinates = isPointCoordinates;
 exports.pointToCoordinateArray = pointToCoordinateArray;
