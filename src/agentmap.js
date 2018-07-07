@@ -18,7 +18,7 @@ var lineDistance = require('@turf/line-distance');
  * @property {?number} state.prev_tick - The tick (time in seconds) when the last update was started.
  * @property {?number} state.tick_start_delay - Ticks corresponding to the time of the last animation frame before the trip started. Subtracted from all subsequent tick measurements so that the clock starts at 0, instead of whatever the actual time of that initial animation frame was.
  * @property {object} settings - Settings for the agentmap, filled with defaults.
- * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max).
+ * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
  * @property {?function} update_func - Function to be called on each update.
  */
 Agentmap = function (map) {
@@ -45,20 +45,26 @@ Agentmap = function (map) {
  */
 Agentmap.prototype.run = function() {
 	if (this.state.running === false) {
-		if (this.state.paused === true) {
-			this.state.paused = false,
-			this.state.tick -= this.state.tick - this.state.prev_tick;
-		}
-
 		this.state.running = true;
 		
 		let animation_update = (function (rAF_time) {
+			let total_ticks = rAF_time * .001;
+			
+			if (this.state.paused === true) {
+				this.state.paused = false,
+				//The delay specifically due to the pause isn't the interval from the time at pause to the time at unpause,
+				//but the interval from the time at pause (state.tick, which already accounts for previous delays) to 
+				//the time at unpause the already accumulated delays; the unpause time alone is much higher without accounting
+				//for previous delays and so the pause delay will look much bigger than it actually is if you subtracted previous delays.
+				this.state.tick_start_delay += (total_ticks - this.state.tick_start_delay) - this.state.tick;
+			}
+			
 			this.update(rAF_time);
 			
 			this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
 		}).bind(this);
 
-		this.animation_frame_id = L.Util.requestAnimFrame(animation_update);
+		this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
 	}
 }
 
@@ -75,8 +81,8 @@ Agentmap.prototype.update = function(rAF_time) {
 		this.state.prev_tick = 0,
 
 		//requestAnimationFrame doesn't start with timestamp 0; the first timestamp will typically be pretty large; 
-		//we want to store it and subtract it from each newly recieved tick at which we're animating so that ticks 
-		//are counted from 0, not whatever timestamp the original call to rAF happened to return. 
+		//we want to store this initial timestamp and subtract it from each subsequent timestamp so that ticks 
+		//are counted from 0, not whatever timestamp the initial call to rAF happened to return. 
 		this.state.tick_start_delay = total_ticks;
 	}
 	else {
@@ -84,6 +90,7 @@ Agentmap.prototype.update = function(rAF_time) {
 		this.state.tick = total_ticks - this.state.tick_start_delay;
 	}
 
+	//Execute user-provided per-tick instructions.
 	this.update_func();
 
 	let movement_precision = this.settings.movement_precision,
