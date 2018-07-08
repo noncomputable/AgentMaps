@@ -47,29 +47,41 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 		street_options
 	).addTo(this.map);
 
+	//Having added the streets as layers to the map, do any processing that requires access to those layers.
 	this.streets.eachLayer(function(street) {
 		let street_id = street._leaflet_id;
+
+		addStreetLayerIntersections.call(this, street, street_id);
+	}, this);
+	
+	/**
+	 * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
+	 */
+	function addStreetLayerIntersections(street, street_id) {
 		street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
 
 		this.streets.eachLayer(function(other_street) {
 			let other_street_id = other_street._leaflet_id;
+
+			//Skip if both streets are the same, or if the street already has its intersections with the other street.
 			if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
 				let street_coords = street.getLatLngs().map(pointToCoordinateArray),
 				other_street_coords = other_street.getLatLngs().map(pointToCoordinateArray),
-				intersection_with_indices = getIntersection(street_coords, other_street_coords, [street_id, other_street_id]).map(
-					intersection_with_index => [reversedCoordinates(intersection_with_index[0]), 
-					intersection_with_index[1]]);		
-				intersection = intersection_with_indices.map(int_w_index => int_w_index[0]);
-				if (intersection.length > 0) {
-					street.intersections[other_street_id] = intersection_with_indices,
+				identified_intersections = getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
+					identified_intersection => 
+					[reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
+				);
+
+				if (identified_intersections.length > 0) {
+					street.intersections[other_street_id] = identified_intersections,
 					other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
-					other_street.intersections[street_id] = intersection_with_indices;
+					other_street.intersections[street_id] = identified_intersections;
 				}
 			}
-		}, this);
-	}, this);
+		});
+	}
 
-	//Bind getUnitFeatures to this so it can access the agentmap via this keyword.
+	//Bind getUnitFeatures to "this" so it can access the agentmap as "this.agentmap".
 	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 
 	let unit_options = {
@@ -90,9 +102,11 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 		unit_options
 	).addTo(this.map);
 
+	//Having added the units as layers to the map, do any processing that requires access to those layers.
 	this.units.eachLayer(function(unit) {
 		unit.street_id = unit.feature.properties.street_id,
 		unit.street_anchors = unit.feature.properties.street_anchors,
+		//Change the ID's in each unit's neighbours array into the appropriate Leaflet ID's.
 		unit.neighbors = unit.feature.properties.neighbors.map(function(neighbor) {
 			if (neighbor !== null) {
 				let neighbor_id;
@@ -181,7 +195,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 			street_buffer = 6 / 1000, //Distance between center of street and start of unit.
 			house_depth = 18 / 1000,
 			angle = bearing(anchor_a, anchor_b),
-			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //gle of line perpendicular to the anchor segment.
+			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //Angle of line perpendicular to the anchor segment.
 			unit_feature = { 
 				type: "Feature",
 				properties: {
@@ -401,17 +415,17 @@ function pointToCoordinateArray(point) {
 /**
  * Given two coordinate arrays, get their intersection.
  * 
- * @param {array<array<number>>} arr_a -  array of coordinate pairs.
- * @param {array<array<number>>} arr_b -  array of coordinate pairs.
- * @param {array<number>} with_indices -  array whose elements are IDs for arr_a and arr_b respectively.
+ * @param {array<array<number>>} arr_a - Array of coordinate pairs.
+ * @param {array<array<number>>} arr_b - Array of coordinate pairs.
+ * @param {array<number>} ids - 2-element array whose elements are IDs for arr_a and arr_b respectively.
  *
- * @returns {array<array<number, object>>} -  array whose elements are the coordinates in the intersection if
- * with_indices is empty, or whose elements are arrays whose first element is an intersecting coordinate pair
- * and whose second element is an object mapping the each array's ID (supplied in with_indices, a and b respectively) 
- * to the index of the intersecting coordinate pair in it.
+ * @returns {Array<Array<number|Object<number, number>>>} - Array whose elements are the intersections' cooridinates if
+ * ids is empty, or otherwise whose elements are arrays each of whose first element is an
+ * intersection's coordinates and whose second element is an object mapping each array's ID (supplied by ids) 
+ * to the index of the intersecting coordinate-pair in that array.
  */
-function getIntersection(arr_a, arr_b, with_indices = []) {
-	let intersection = [];
+function getIntersections(arr_a, arr_b, ids = []) {
+	let intersections = [];
 
 	for (let i = 0; i < arr_a.length; i++) {
 		let el_a = arr_a[i];
@@ -422,17 +436,18 @@ function getIntersection(arr_a, arr_b, with_indices = []) {
 			if (isPointCoordinates(el_a) && isPointCoordinates(el_b)) {
 				if (el_a[0] === el_b[0] && el_a[1] === el_b[1]) {
 					let new_intersection;
-					if (with_indices.length === 2) {
-						let indices = {};
-						indices[with_indices[0]] = i,
-						indices[with_indices[1]] = j,
-						new_intersection = [el_a, indices];
+
+					if (ids.length === 2) {
+						let identified_intersections = {};
+						identified_intersections[ids[0]] = i,
+						identified_intersections[ids[1]] = j,
+						new_intersection = [el_a, identified_intersections];
 					}
 					else {
 						new_intersection = el_a;
 					}
 				
-					intersection.push(new_intersection);
+					intersections.push(new_intersection);
 				}
 			}
 			else {
@@ -441,12 +456,12 @@ function getIntersection(arr_a, arr_b, with_indices = []) {
 		}
 	}
 
-	return intersection;
+	return intersections;
 }
 
 Agentmap.prototype.buildingify = buildingify;
 
-exports.getIntersection = getIntersection;
+exports.getIntersections = getIntersections;
 exports.reversedCoordinates = reversedCoordinates;
 exports.isPointCoordinates = isPointCoordinates;
 exports.pointToCoordinateArray = pointToCoordinateArray;
