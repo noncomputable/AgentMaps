@@ -1,9 +1,10 @@
 //** Convert OSM geojson data into a distance-weighted graph and find the shortest path between two points. **//
 
-var path = require("ngraph.path");
-var createGraph = require("ngraph.graph");
-var lineSlice = require('@turf/line-slice').default;
-var lineDistance = require('@turf/line-distance');
+let path = require("ngraph.path"),
+createGraph = require("ngraph.graph"),
+lineSlice = require('@turf/line-slice').default,
+lineDistance = require('@turf/line-distance'),
+Agentmap = require('./agentmap').Agentmap;
 
 /**
  * Convert a layerGroup of streets into a graph.
@@ -36,12 +37,13 @@ function streetsToGraph(streets) {
 			}
 		}
 
-		//Sort the cross_indices so that they are in order from the start of the street's coordinate array to the end.
+		//Sort the intersection_indices so that they are in order from the start of the street's coordinate array to the end;
+		//this is why we're not getting the raw coordinates, but their indices first, so they can be sorted.
 		intersection_indices = intersection_indices.sort(function(a, b) {
 			return a - b;
 		});
 
-		//Check if beginning and end of street are in the cross_incides; if not, add them.
+		//Check if beginning and end points of the street are in the intersection_incides; if not, add them.
 		if (!intersection_indices.some(intersection_index => intersection_index === 0)) {
 			intersection_indices.unshift(0);
 		}
@@ -61,7 +63,10 @@ function streetsToGraph(streets) {
 			end_coords = L.A.pointToCoordinateArray(node_b),
 			segment = lineSlice(start_coords, end_coords, street.toGeoJSON()),
 			distance = lineDistance(segment);
-			graph.addLink(a_string, b_string, distance);
+			graph.addLink(a_string, b_string, {
+				distance: distance,
+				place: { street: street_id } 
+			});
 		}
 	});
 
@@ -69,33 +74,79 @@ function streetsToGraph(streets) {
 }
 
 /**
- * Given an OSM street network (graph), return a greedy A* pathfinder that can operate on it.
+ * Given an OSM street network (graph), return an A* pathfinder that can operate on it.
  * 
  * @param {object} graph - An ngraph graph representing an OSM street network.
- * @returns {object} - A greedy A* pathfinder for the graph.
+ * @returns {object} - An A* pathfinder for the graph.
  */
 function getPathFinder(graph) {
-	return path.aGreedy(graph, {
+	return path.aStar(graph, {
 		distance(fromNode, toNode, link) {
-			return link.data;
+			return link.data.distance;
 		}
 	});
 }
 
 /**
- * Get an approximately shortest path between two points on a graph.
+ * Get a path between two points on a graph.
  *
  * @param {LatLng} start
  * @param {LatLng} end
- * @param {Object} pathFinder - The pathfinder associated with a graph which contains the start and end points.
+ * @param {Boolean} [sparse=false] - Whether to exclude intersections between the first and last along a street-specific path (which are superfluous for extracting the necessary sub-street).
  * @return {Array<Array<number>>} - An array of points along the graph, leading from the start to the end.
  */
-function getPath(start, end, pathFinder) {
+function getPath(start, end, start_lat_lng, goal_lat_lng, sparse = false) {
 	let start_coord = encodeLatLng(start),
 	end_coord = encodeLatLng(end),
-	encoded_path = pathFinder.find(start_coord, end_coord),
-	path = encoded_path.map(point => decodeCoordString(point.id));
+	encoded_path = this.pathfinder.find(start_coord, end_coord),
+	path = [];
+	
+	if (encoded_path.length > 0 && decodeCoordString(encoded_path[0].id).distanceTo(start) > 
+					decodeCoordString(encoded_path[0].id).distanceTo(end)) {
+		encoded_path = encoded_path.reverse();
+	}
 
+	
+	if (sparse === true && encoded_path.length >= 2) {
+		let sparse_path = [], 
+		recent_street = null,
+		current_street = null;
+		
+		for (let i = 0; i <= encoded_path.length - 2; i++) {
+			current_street = this.streets.graph.getLink(encoded_path[i].id, encoded_path[i + 1].id) ||
+				this.streets.graph.getLink(encoded_path[i + 1].id, encoded_path[i].id);
+			
+			if (recent_street === null || current_street.data.place.street !== recent_street.data.place.street) {
+				let decoded_coords = decodeCoordString(encoded_path[i].id, current_street.data.place);
+				sparse_path.push(decoded_coords);
+			}
+			
+			//If the last place on the path to the goal is labeled with a different street id than the goal,
+			//add it to the sparse path.
+			if (i === encoded_path.length - 2 && goal_lat_lng.new_place.unit !== encoded_path[i + 1]) {
+				let decoded_coords = decodeCoordString(encoded_path[i + 1].id, current_street.data.place);
+				sparse_path.push(decoded_coords);
+			}
+				
+			recent_street = current_street;
+		}
+			
+		path = sparse_path;
+	}
+	else {
+		path = encoded_path.map(point => decodeCoordString(point.id, 0));
+	}
+	
+	path.unshift(start_lat_lng);
+	path.push(goal_lat_lng);
+	
+	//If the goal point lies before the first intersection of the goal street, then the 2nd to last point in the
+	//path will have the previous street's id attached to it. If the goal lies on a different street, make
+	//sure the 2nd to last point (thei street path intersection point before the goal) has the same street id as the goal.
+	if (path[path.length - 2].new_place.street !== goal_lat_lng.new_place.street) {
+		path[path.length - 2].new_place = goal_lat_lng.new_place;
+	}
+	
 	return path;
 }
 
@@ -113,14 +164,19 @@ function encodeLatLng(lat_lng) {
  * Turn a string containing coordinates (a graph node's ID) into a LatLng object.
  *
  * @param {string} coord_string - A string containing coordinates in the format of "Latitude,Longitude".
+ * @param {object} place - An object specifying the place of the coordinate string.
  * @returns {LatLng} - The coordinates encoded by the coord_string.
  */
-function decodeCoordString(coord_string) {
-	let coord_strings = coord_string.split(",");
+function decodeCoordString(coord_string, place) {
+	let coord_strings = coord_string.split(","),
+	lat_lng = L.latLng(coord_strings);
+	lat_lng.new_place = place;
 
-	return L.latLng(coord_strings);
+	return lat_lng;
 }
 
+Agentmap.prototype.getPath = getPath;
+
 exports.streetsToGraph = streetsToGraph;
-exports.getPath = getPath;
 exports.getPathFinder = getPathFinder;
+exports.encodeLatLng = encodeLatLng;

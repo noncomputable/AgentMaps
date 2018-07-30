@@ -1,10 +1,11 @@
-var centroid = require('@turf/centroid').default;
-var buffer = require('@turf/buffer').default;
-var booleanPointInPolygon = require('@turf/boolean-point-in-polygon').default;
-var along = require('@turf/along').default;
-var nearestPointOnLine = require('@turf/nearest-point-on-line').default;
-var lineSlice = require('@turf/line-slice').default;
-var Agentmap = require('./agentmap').Agentmap;
+let centroid = require('@turf/centroid').default,
+buffer = require('@turf/buffer').default,
+booleanPointInPolygon = require('@turf/boolean-point-in-polygon').default,
+along = require('@turf/along').default,
+nearestPointOnLine = require('@turf/nearest-point-on-line').default,
+lineSlice = require('@turf/line-slice').default,
+Agentmap = require('./agentmap').Agentmap,
+encodeLatLng = require('./routing').encodeLatLng;
 
 /* Here we define agentify, the agent base class, and all other functions and definitions they rely on. */
 
@@ -193,33 +194,15 @@ Agent.startTrip = function() {
 }
 
 /**
- * Set the agent up to travel to a unit, via streets.
- *
- * @param {number} unit_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
- */
-Agent.setTravelToUnit = function(lat_lng, place) {
-	let start_place = this.newTripStartPlace();
-	
-	if (start_place.unit === place.unit) {
-		return;
-	}
-
-	let street_lat_lng = this.agentmap.getStreetNearDoor(place.unit);
-	street_lat_lng.new_place = place;
-
-	this.setTravelAlongStreet(street_lat_lng);
-};
-
-/**
  * Set the agent up to travel to a point within the unit he is in.
  *
  * @param {LatLng} goal_lat_lng - LatLng coordinate object for a point in the same unit the agent is in.
  */
-Agent.setTravelInUnit = function(goal_lat_lng) {
+Agent.setTravelInUnit = function(goal_lat_lng, goal_place) {
 	let goal_point = L.A.pointToCoordinateArray(goal_lat_lng),
 	//Buffering so that points on the perimeter, like the door, are captured. Might be more
 	//efficient to generate the door so that it's slightly inside the area.
-	goal_polygon = buffer(this.agentmap.units.getLayer(goal_lat_lng.new_place.unit).toGeoJSON(), .001);
+	goal_polygon = buffer(this.agentmap.units.getLayer(goal_place.unit).toGeoJSON(), .001);
 
 	if (booleanPointInPolygon(goal_point, goal_polygon)) {
 		goal_lat_lng.new_place = this.place;
@@ -233,34 +216,62 @@ Agent.setTravelInUnit = function(goal_lat_lng) {
 /**
  * Set the agent up to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
  *
- * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
+ * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
+ * @param {Boolean} replace_trip - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
+ * simply appended to the current scheduled path).
  */
-Agent.setTravelToPlace = function(goal_place, goal_lat_lng) {
+Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false) {
 	let goal_layer = this.agentmap.units.getLayer(goal_place.unit) || this.agentmap.streets.getLayer(goal_place.street);
 
 	if (goal_layer) {
-		let goal_point = L.A.pointToCoordinateArray(goal_lat_lng),
+		let goal_coords = L.A.pointToCoordinateArray(goal_lat_lng);
+		
 		//Buffering so that points on the perimeter, like the door, are captured. Might be more
 		//efficient to generate the door so that it's slightly inside the area.
-		goal_polygon = buffer(goal_layer.toGeoJSON(), .001);
-		if (booleanPointInPolygon(goal_point, goal_polygon)) {
-			let start_place = this.newTripStartPlace();
-			goal_lat_lng.new_place = goal_place;
-			if (goal_place.unit) {
-				if (start_place.unit === goal_place.unit) {
-					this.setTravelInUnit(goal_lat_lng);
-				}
-				else {
-					this.setTravelToUnit(goal_lat_lng, goal_place);
-					let goal_door = this.agentmap.getUnitDoor(goal_place.unit);
-					goal_door.new_place = goal_place;
-					this.travel_state.path.push(goal_door)
-					this.setTravelInUnit(goal_lat_lng);
-				}
+		let goal_polygon = buffer(goal_layer.toGeoJSON(), .001);
+		
+		if (booleanPointInPolygon(goal_coords, goal_polygon)) {
+			if (replace_trip === true) {
+				this.travel_state.path.length = 0;
 			}
-			else if (goal_place.street) {
-				this.setTravelAlongStreet(goal_lat_lng);
+			
+			let start_place = this.newTripStartPlace();
+			
+			if (start_place.unit === goal_place.unit) {
+				this.setTravelInUnit(goal_lat_lng, goal_place);
+				return;
+			}
+			//Move to the street if it's starting at a unit and its goal is elsewhere.
+			else if (typeof(start_place.unit) === "number") {
+				let start_unit_door = this.agentmap.getUnitDoor(start_place.unit);
+				start_unit_door.new_place = start_place;
+				this.travel_state.path.push(start_unit_door);	
+				
+				let start_unit_street_id = this.agentmap.units.getLayer(start_place.unit).street_id,
+				start_unit_street_point = this.agentmap.getStreetNearDoor(start_place.unit);
+				start_unit_street_point.new_place = { street: start_unit_street_id };
+				this.travel_state.path.push(start_unit_street_point);
+				
+				L.circleMarker(start_unit_door, {radius: 5, color: "blue"}).addTo(map); 
+				L.circleMarker(goal_lat_lng, {radius: 5, color: "red"}).addTo(map); 
+			}
+			
+			if (typeof(goal_place.unit) === "number") {
+				let goal_street_point = this.agentmap.getStreetNearDoor(goal_place.unit),
+				goal_street_point_place = { street: this.agentmap.units.getLayer(goal_place.unit).street_id };
+				
+				//Move to the point on the street closest to the goal unit...
+				this.setTravelAlongStreet(goal_street_point, goal_street_point_place);
+
+				//Move from that point into the unit.
+				let goal_door = this.agentmap.getUnitDoor(goal_place.unit);
+				goal_door.new_place = goal_place;
+				this.travel_state.path.push(goal_door)
+				this.setTravelInUnit(goal_lat_lng, goal_place);
+			}
+			else if (typeof(goal_place.street) === "number") {
+				this.setTravelAlongStreet(goal_lat_lng, goal_place);
 			}
 		}
 		else {
@@ -273,60 +284,98 @@ Agent.setTravelToPlace = function(goal_place, goal_lat_lng) {
 };
 
 /**
- * Set the agent up to travel to a point along a street, via streets.
+ * Set the agent up to travel to a point along the streets, via streets.
  *
- * @param {number} goal_street_id - The id of the unit to which the agent should travel; unit_id must not be the id of the agent's current place.
- * @param {number} distance - The distance into the street that the agent should travel in meters.
- * @param {LatLng} street_lat_lng - The coordinates of a point on a street to which the agent should travel; null by default, otherwise "distance" will be ignored; if point is provided, street_id is optional; if not provided, it will search through all streets for the point; if provided, it will search that particular street.
+ * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
+ * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"street": street_id}.
  */
-Agent.setTravelAlongStreet = function(street_lat_lng) {
-	//distance *= .001; //Convert to kilometers.
-
-	let start_place = this.newTripStartPlace(),
-	street_point = L.A.pointToCoordinateArray(street_lat_lng),
-	street_id,
-	next_starting_point;
-
-	if (typeof(start_place.unit) === "number") {
-		street_id = this.agentmap.units.getLayer(start_place.unit).street_id;
-		
-		unit_door = this.agentmap.getUnitDoor(start_place.unit), 
-		this.travel_state.path.push(unit_door);	
-		
-		unit_street_door = this.agentmap.getStreetNearDoor(start_place.unit),
-		street_starting_point = L.A.pointToCoordinateArray(unit_street_door);
-	}
-	else if (typeof(start_place.street) === "number") {
-		street_id = start_place.street,
-		current_point = start_place,
-		street_starting_point = L.A.pointToCoordinateArray(this.travel_state.path[this.travel_state.path.length - 1]);
-	}
+Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
+	let goal_coords,
+	goal_street_id,
+	goal_street_point, 
+	goal_street_feature,
+	start_place = this.newTripStartPlace(),
+	start_street_id,
+	start_street_point,
+	start_street_feature;
 	
-	let street_feature = this.agentmap.streets.getLayer(street_id).feature;
+	if (typeof(start_place.street) === "number" && typeof(goal_place.street) === "number") {
+		start_street_id = start_place.street,
+		start_street_point = this.travel_state.path[this.travel_state.path.length - 1];
+		start_street_point.new_place = {street: start_street_id};
 
-	if (street_point === null) {
-		goal_street_point = along(street_feature, distance).geometry.coordinates;
+		goal_street_id = goal_place.street,
+		goal_street_feature = this.agentmap.streets.getLayer(goal_street_id).feature,
+		goal_coords = L.A.pointToCoordinateArray(goal_lat_lng),
+		goal_street_point = L.latLng(nearestPointOnLine(goal_street_feature, goal_coords).geometry.coordinates.reverse());
+		goal_street_point.new_place = goal_place;
 	}
 	else {
-		goal_street_point = nearestPointOnLine(street_feature, street_point);		
+		throw new Error("Both the start and end places must be streets!");
 	}
 	
+	if (start_street_id === goal_street_id) {
+		this.setTravelOnSameStreet(start_street_point, goal_street_point, goal_street_feature, goal_street_id);
+	}
+	//If the start and end points are on different streets, move from the start to its nearest intersection, then from there
+	//to the intersection nearest to the end, and finally to the end.
+	else {
+		let start_nearest_intersection = this.agentmap.getNearestIntersection(start_street_point, start_place),
+		goal_nearest_intersection = this.agentmap.getNearestIntersection(goal_street_point, goal_place);
+		
+		start_street_feature = this.agentmap.streets.getLayer(start_street_id).feature;
+	
+		this.setTravelOnStreetNetwork(start_street_point, goal_street_point, start_nearest_intersection, goal_nearest_intersection);
+	}
+};
+
+/**
+ * Set the agent up to travel between two points on the same street.
+ *
+ * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
+ * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
+ * @param street_feature {Feature} - A GeoJSON object representing an OpenStreetMap street.
+ * @param street_id {number} - The ID of the street in the streets layerGroup.
+ */
+Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_feature, street_id) {
 	//lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
 	//as the original lineString array. So, if the goal point comes earlier in the array (e.g. it's on the far left),
 	//it'll end up being the first point in the path, instead of the last, and the agent will move to it directly,
 	//ignoring the street, and then travel along the street from the goal point to its original point (backwards).
 	//To fix this, I'm reversing the order of the coordinates in the segment if the last point in the line is closer
 	//to the agent's starting point than the first point on the line (implying it's a situation of the kind described above). 
-	let goal_street_line_unordered = lineSlice(street_starting_point, goal_street_point, street_feature).geometry.coordinates,
-	goal_street_line = L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[0])) <
-		L.latLng(street_starting_point).distanceTo(L.latLng(goal_street_line_unordered[goal_street_line_unordered.length - 1])) ?
-		goal_street_line_unordered :
-		goal_street_line_unordered.reverse(),
-	goal_street_path = goal_street_line.map(point => L.latLng(L.A.reversedCoordinates(point)));
-	goal_street_path[0].new_place = {street: street_id},
-	goal_street_path[goal_street_path.length - 1].new_place = {street: street_id};
-	this.travel_state.path.push(...goal_street_path);
-};
+	
+	let start_coords = L.A.pointToCoordinateArray(start_lat_lng),
+	goal_coords = L.A.pointToCoordinateArray(goal_lat_lng),
+	street_path_unordered = L.A.reversedCoordinates(lineSlice(start_coords, goal_coords, street_feature).geometry.coordinates);
+	let start_to_path_beginning = start_lat_lng.distanceTo(L.latLng(street_path_unordered[0])),
+	start_to_path_end = start_lat_lng.distanceTo(L.latLng(street_path_unordered[street_path_unordered.length - 1]));
+	let street_path = start_to_path_beginning < start_to_path_end ?	street_path_unordered :	street_path_unordered.reverse();
+	let street_path_lat_lngs = street_path.map(coords => L.latLng(coords));
+	street_path_lat_lngs[0].new_place = { street: street_id },
+	street_path_lat_lngs.forEach(function(ln) { L.circleMarker(ln, {radius: 5, color: "green"}).addTo(map); });
+	this.travel_state.path.push(...street_path_lat_lngs);
+}
+
+/**
+ * Set the agent up to travel between two points on a street network.
+ *
+ * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
+ * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
+ * @param start_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street at the start_lat_lng.
+ * @param goal_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street as the goal_lat_lng.
+ */
+Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int_lat_lng, goal_int_lat_lng) {
+	let path = this.agentmap.getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_lng, true);
+
+	
+	for (let i = 0; i <= path.length - 2; i++) {
+		let current_street_id = path[i].new_place.street,
+		current_street_feature = this.agentmap.streets.getLayer(current_street_id).feature;
+		
+		this.setTravelOnSameStreet(path[i], path[i + 1], current_street_feature, current_street_id);			
+	}
+}
 
 /**
  * Continue to move the agent directly from one point to another, without regard for streets, 
