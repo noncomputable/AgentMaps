@@ -132,6 +132,7 @@ Agent.initialize = function(latLng, options, agentmap) {
 
 /**
  * Stop the agent from traveling, reset all the properties of its travel state.
+ * @private
  */
 Agent.resetTravelState = function() {
 	for (let key in this.travel_state) {
@@ -144,6 +145,7 @@ Agent.resetTravelState = function() {
 
 /**
  * Set the agent up to travel to some point on the map.
+ * @private
  *
  * @param {latLng} goal_point - The point to which the agent should travel.
  */
@@ -162,6 +164,7 @@ Agent.travelTo = function(goal_point) {
 
 /**
  * Start a trip along the path specified in the agent's travel_state.
+ * @private
  */
 Agent.startTrip = function() {
 	if (this.travel_state.path.length > 0) {
@@ -173,14 +176,9 @@ Agent.startTrip = function() {
 };
 
 /**
- * Specific methods for traveling between units, within units, and along streets, so as to keep track of where the agent is. Should be used
- * to move the agent around, not travelTo. If the agent should move in some other way, a wrapper for setTravelTo should be created that
- * keeps track of the agent's place at any given time accordingly.
- */
-
-/**
  * Given the agent's currently scheduled trips (its path), get the place from which a new trip should start (namely, the end of the current path).
  * That is: If there's already a path in queue, start the new path from the end of the existing one.
+ * @private
  */
  Agent.newTripStartPlace = function() {
 	if (this.travel_state.path.length === 0) { 
@@ -195,6 +193,7 @@ Agent.startTrip = function() {
 
 /**
  * Set the agent up to travel to a point within the unit he is in.
+ * @private
  *
  * @param {LatLng} goal_lat_lng - LatLng coordinate object for a point in the same unit the agent is in.
  */
@@ -282,6 +281,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
 
 /**
  * Set the agent up to travel to a point along the streets, via streets.
+ * @private
  *
  * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
  * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"street": street_id}.
@@ -328,6 +328,7 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
 
 /**
  * Set the agent up to travel between two points on the same street.
+ * @private
  *
  * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
  * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
@@ -355,6 +356,7 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 
 /**
  * Set the agent up to travel between two points on a street network.
+ * @private
  *
  * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
  * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
@@ -364,7 +366,6 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int_lat_lng, goal_int_lat_lng) {
 	let path = this.agentmap.getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_lng, true);
 
-	
 	for (let i = 0; i <= path.length - 2; i++) {
 		let current_street_id = path[i].new_place.street,
 		current_street_feature = this.agentmap.streets.getLayer(current_street_id).feature;
@@ -383,6 +384,7 @@ Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int
  * each requestAnimationFrame call was causing each agent to skip too far ahead at each call, causing moveDirectly
  * to not be able to catch when the agent is within 1 meter of the goal_point... splitting the interval since the last
  * call up and making intermediary calls fixes that.
+ * @private
  *
  * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
  */
@@ -439,6 +441,7 @@ Agent.moveDirectly = function(animation_interval, intermediary_interval, steps_i
 
 /**
  * Make the agent proceed with whatever it's doing and update its properties before the browser draws the next frame.
+ * @private
  *
  * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
  */
@@ -450,6 +453,9 @@ Agent.update = function(animation_interval, intermediary_interval, steps_inbetwe
 	}
 }
 
+/**
+ * Returns an agent object.
+ */
 function agent(feature, options, agentmap) {
 	return new L.A.Agent(feature, options, agentmap);
 }

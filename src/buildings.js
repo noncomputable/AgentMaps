@@ -70,11 +70,11 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 
 			//Skip if both streets are the same, or if the street already has its intersections with the other street.
 			if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
-				let street_coords = street.getLatLngs().map(pointToCoordinateArray),
-				other_street_coords = other_street.getLatLngs().map(pointToCoordinateArray),
-				identified_intersections = getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
+				let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
+				other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
+				identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
 					identified_intersection => 
-					[reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
+					[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
 				);
 
 				if (identified_intersections.length > 0) {
@@ -132,6 +132,7 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 
 /**
  * Get all appropriate units within the desired bounding box.
+ * @private
  *
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
  * @returns {Array<Feature>} -  array of features representing real estate units.
@@ -154,6 +155,7 @@ function getUnitFeatures(OSM_data, bounding_box) {
 
 /**
  * Get all streets from the GeoJSON data.
+ * @private
  *
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
  * @returns {Array<Feature>} -  array of street features.
@@ -177,6 +179,7 @@ function getStreetFeatures(OSM_data) {
 /**
  * Given two anchors, find four nearby points on either side
  * of the street appropriate to build a unit(s) on.
+ * @private
  *
  * @param {Array<Array<Feature>>} unit_anchors -  array of pairs of points around which to anchor units along a street.
  * @param {Array<Feature>} proposed_unit_features -  array of features representing real estate units already proposed for construction.
@@ -272,6 +275,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 /**
  * Find anchors for potential units. chors are the pairs of start 
  * and end points along the street from which units may be constructed.
+ * @private
  * 
  * @param {Feature} street_feature - A GeoJSON feature object representing a street.
  * @returns {Array<Array<Feature>>} -  array of pairs of points around which to anchor units along a street.  
@@ -287,8 +291,8 @@ function getUnitAnchors(street_feature, bounding_box) {
 	
 	while (end_anchor.geometry.coordinates != endpoint) {
 		//Exclude proposed anchors if they're outside of the bounding box.
-		start_coord = reversedCoordinates(start_anchor.geometry.coordinates), 
-		end_coord = reversedCoordinates(end_anchor.geometry.coordinates);
+		start_coord = L.A.reversedCoordinates(start_anchor.geometry.coordinates), 
+		end_coord = L.A.reversedCoordinates(end_anchor.geometry.coordinates);
 		if (L.latLngBounds(bounding_box).contains(start_coord) &&
 			L.latLngBounds(bounding_box).contains(end_coord)) {
 				unit_anchors.push([start_anchor, end_anchor]);
@@ -306,6 +310,7 @@ function getUnitAnchors(street_feature, bounding_box) {
 
 /**
  * Get an array of units excluding units that overlap with streets.
+ * @private
  *
  * @param {Array<Feature>} unit_features - ray of features representing units.
  * @param {Array<Layer>} street_layers - ray of Leaflet layers representing streets.
@@ -332,6 +337,7 @@ function unitsOutOfStreets(unit_features, street_layers) {
 
 /**
  * Check whether a polygon overlaps with any member of an array of polygons.
+ * @private
  *
  * @param {Feature} polygon_feature - A geoJSON polygon feature.
  * @param {Array<Feature>} polygon_feature_array -  array of geoJSON polygon features.
@@ -348,125 +354,6 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 	return true;
 }
 
-/**
- * Given a geoJSON geometry object's coordinates, return the object, but with
- * all the coordinates reversed. <br /point.geometry && point.geometry.coordinates && >
- * 
- * Why? GeoJSON coordinates are in lngLat format by default, while Leaflet uses latLng.
- * L.geoJSON will auto-reverse the order of a GeoJSON object's coordinates, as it
- * expects geoJSON coordinates to be lngLat. However, normal, non-GeoJSON-specific Leaflet
- * methods expect Leaflet's latLng pairs and won't auto-reverse, so we have to do that
- * manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
- * 
- * @param {Array<number|Array<number|Array<number>>>} coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
- * @returns {Array<number|Array<number|Array<number>>>} - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
- */
-function reversedCoordinates(coordinates) {
-	let reversed = coordinates.slice();
-	if (typeof coordinates[0] != "number") {
-		for (let inner_coordinates of coordinates) {
-			reversed.splice(reversed.indexOf(inner_coordinates), 1, reversedCoordinates(inner_coordinates));
-		}
-	}
-	else {
-		reversed = [coordinates[1], coordinates[0]];
-	}
-
-	return reversed;
-}
-
-/**
- * Given an array, check whether it can represent the coordinates of a point.
- *
- * @param {Array} array - Array to check.
- * @returns {boolean} - Whether the array can be the coordinates of a point.
- */
-function isPointCoordinates(array) {
-	if (array.length !== 2 || 
-		typeof(array[0]) !== "number" ||
-		typeof(array[1]) !== "number") {
-		return false;
-	}
-
-	return true;
-}
-
-/**
- * Given either a GeoJSON feature, L.latLng, or coordinate array containing the coordinates of a point,
- * return an array of the coordinates.
- *
- * @params {Point|Array<number>|LatLng} point - The data containing the point's coordinates (latitude & longitude).
- * @returns {Array<number>} - Array of the point's coordinates. I.e.: [lng, lat].
- */
-function pointToCoordinateArray(point) {
-	let coordinate_array;
-
-	if (typeof(point.lat) === "number" && typeof(point.lng) === "number") {
-		coordinate_array = [point.lng, point.lat];
-	}
-	else if (point.geometry && point.geometry.coordinates && isPointCoordinates(point.geometry.coordinates)) {
-		coordinate_array = point.geometry.coordinates;
-	}
-	else if (isPointCoordinates(point)) {
-		coordinate_array = point;
-	}
-	else {
-		throw new Error("Invalid point: point must either be array of 2 coordinates, or an L.latLng.");
-	}
-
-	return coordinate_array;
-}
-
-/**
- * Given two coordinate arrays, get their intersection.
- * 
- * @param {array<array<number>>} arr_a - Array of coordinate pairs.
- * @param {array<array<number>>} arr_b - Array of coordinate pairs.
- * @param {array<number>} ids - 2-element array whose elements are IDs for arr_a and arr_b respectively.
- *
- * @returns {Array<Array<number|Object<number, number>>>} - Array whose elements are the intersections' cooridinates if
- * ids is empty, or otherwise whose elements are arrays each of whose first element is an
- * intersection's coordinates and whose second element is an object mapping each array's ID (supplied by ids) 
- * to the index of the intersecting coordinate-pair in that array.
- */
-function getIntersections(arr_a, arr_b, ids = []) {
-	let intersections = [];
-
-	for (let i = 0; i < arr_a.length; i++) {
-		let el_a = arr_a[i];
-
-		for (let j = 0; j < arr_b.length; j++) {
-			let el_b = arr_b[j];
-			
-			if (isPointCoordinates(el_a) && isPointCoordinates(el_b)) {
-				if (el_a[0] === el_b[0] && el_a[1] === el_b[1]) {
-					let new_intersection;
-
-					if (ids.length === 2) {
-						let identified_intersections = {};
-						identified_intersections[ids[0]] = i,
-						identified_intersections[ids[1]] = j,
-						new_intersection = [el_a, identified_intersections];
-					}
-					else {
-						new_intersection = el_a;
-					}
-				
-					intersections.push(new_intersection);
-				}
-			}
-			else {
-				throw new Error("Every element of each array must be a coordinate pair array.");
-			}
-		}
-	}
-
-	return intersections;
-}
 
 Agentmap.prototype.buildingify = buildingify;
 
-exports.getIntersections = getIntersections;
-exports.reversedCoordinates = reversedCoordinates;
-exports.isPointCoordinates = isPointCoordinates;
-exports.pointToCoordinateArray = pointToCoordinateArray;

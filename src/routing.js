@@ -8,6 +8,7 @@ Agentmap = require('./agentmap').Agentmap;
 
 /**
  * Convert a layerGroup of streets into a graph.
+ * @private
  *
  * @param {LayerGroup} streets - A Leaflet layerGroup of streets, forming a street network.
  * @returns {Object} - A graph representing the street network, operable by the ngraph pathfinder. 
@@ -75,6 +76,7 @@ function streetsToGraph(streets) {
 
 /**
  * Given an OSM street network (graph), return an A* pathfinder that can operate on it.
+ * @private
  * 
  * @param {object} graph - An ngraph graph representing an OSM street network.
  * @returns {object} - An A* pathfinder for the graph.
@@ -89,6 +91,7 @@ function getPathFinder(graph) {
 
 /**
  * Get a path between two points on a graph.
+ * @private
  *
  * @param start_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street at the start_lat_lng.
  * @param goal_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street as the goal_lat_lng.
@@ -153,6 +156,7 @@ function getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_ln
 
 /**
  * Turn a LatLng object into a string representing its coordinates (to act as a graph node's ID).
+ * @private
  *
  * @param {LatLng} lat_lng - The coordinates to encode into a string.
  * @returns {string} - A string containing coordinates in the format of "Latitude,Longitude".
@@ -163,6 +167,7 @@ function encodeLatLng(lat_lng) {
 
 /**
  * Turn a string containing coordinates (a graph node's ID) into a LatLng object.
+ * @private
  *
  * @param {string} coord_string - A string containing coordinates in the format of "Latitude,Longitude".
  * @param {object} place - An object specifying the place of the coordinate string.

@@ -39,12 +39,12 @@
     "@turf/line-intersect": "^6.0.2",
     "@turf/line-slice": "^5.1.5",
     "@turf/nearest-point-on-line": "^6.0.2",
-    "gh-pages": "^1.2.0",
     "ngraph.graph": "0.0.14",
     "ngraph.path": "^1.0.2"
   },
   "devDependencies": {
     "webpack": "^4.10.2",
-    "webpack-cli": "^3.0.1"
+    "webpack-cli": "^3.0.1",
+    "gh-pages": "^1.2.0"
   }
 }

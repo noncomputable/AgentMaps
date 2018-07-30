@@ -1,5 +1,5 @@
-var lineSlice = require('@turf/line-slice').default;
-var lineDistance = require('@turf/line-distance');
+let lineSlice = require('@turf/line-slice').default,
+lineDistance = require('@turf/line-distance');
 
 /**
  * The main class for building, storing, simulating, and manipulating agent-based models on Leaflet maps.
@@ -73,6 +73,7 @@ Agentmap.prototype.run = function() {
 
 /**
  * Update the simulation at the given time.
+ * @private
  *
  * @param {number} rAF_time - Time passed by the browser's most recent animation frame.
  */
@@ -118,6 +119,7 @@ Agentmap.prototype.reset = function() {
 	this.state.paused = false,
 	this.state.animation_frame_id = null,
 	this.state.time = null,
+	this.state.ticks = null,
 	this.state.prev_time = null,
 	this.state.time_start_delay = null;
 	
