@@ -252,9 +252,6 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
 				start_unit_street_point = this.agentmap.getStreetNearDoor(start_place.unit);
 				start_unit_street_point.new_place = { street: start_unit_street_id };
 				this.travel_state.path.push(start_unit_street_point);
-				
-				L.circleMarker(start_unit_door, {radius: 5, color: "blue"}).addTo(map); 
-				L.circleMarker(goal_lat_lng, {radius: 5, color: "red"}).addTo(map); 
 			}
 			
 			if (typeof(goal_place.unit) === "number") {
@@ -353,7 +350,6 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	let street_path = start_to_path_beginning < start_to_path_end ?	street_path_unordered :	street_path_unordered.reverse();
 	let street_path_lat_lngs = street_path.map(coords => L.latLng(coords));
 	street_path_lat_lngs[0].new_place = { street: street_id },
-	street_path_lat_lngs.forEach(function(ln) { L.circleMarker(ln, {radius: 5, color: "green"}).addTo(map); });
 	this.travel_state.path.push(...street_path_lat_lngs);
 }
 
