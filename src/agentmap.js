@@ -26,6 +26,7 @@ Agentmap = function (map) {
 	this.units = null,
 	this.streets = null,
 	this.agents = null, 
+	this.pathfinder = null,
 	this.state = {
 		running: false,
 		paused: false,
@@ -178,6 +179,7 @@ Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	let street_id,
 	street_feature;
+	start_coords = L.A.pointToCoordinateArray(lat_lng);
 
 	if (place.street) {
 		street_id = place.street;
@@ -193,11 +195,10 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	intersection_distances = [];
 
 	for (let intersection in intersections) { 
-		for (let cross_point of intersection) {
+		for (let cross_point of intersections[intersection]) {
 			let intersection_point = cross_point[0],
-			start_coords = L.A.pointToCoordinateArray(coordinates),
-			end_coords = L.A.pointToCoordinateArray(intersection_point),
-			segment = lineSlice(start_coords, end_coords, street.toGeoJSON()),
+			intersection_coords = L.A.pointToCoordinateArray(intersection_point),
+			segment = lineSlice(start_coords, intersection_coords, street_feature),
 			distance = lineDistance(segment);
 			
 			intersection_points.push(intersection_point);
@@ -207,8 +208,8 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 
 	let smallest_distance = Math.min(...intersection_distances),
 	smallest_distance_index = intersection_distances.indexOf(smallest_distance),
-	closest_intersection_point = intersection_points[smallest_distance_index];
-
+	closest_intersection_point = L.latLng(intersection_points[smallest_distance_index]);
+	
 	return closest_intersection_point;
 }
 

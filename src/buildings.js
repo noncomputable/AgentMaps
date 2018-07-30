@@ -1,10 +1,11 @@
-var bearing = require('@turf/bearing').default;
-var destination = require('@turf/destination').default;
-var along = require('@turf/along').default;
-var lineIntersect = require('@turf/line-intersect').default;
-var intersect = require('@turf/intersect').default;
-var Agentmap = require('./agentmap').Agentmap;
-var streetsToGraph = require('./routing').streetsToGraph;
+let bearing = require('@turf/bearing').default,
+destination = require('@turf/destination').default,
+along = require('@turf/along').default,
+lineIntersect = require('@turf/line-intersect').default,
+intersect = require('@turf/intersect').default,
+Agentmap = require('./agentmap').Agentmap,
+streetsToGraph = require('./routing').streetsToGraph,
+getPathFinder = require('./routing').getPathFinder;
 
 /* Here we define buildingify and all other functions and definitions it relies on. */
 
@@ -55,7 +56,8 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 		addStreetLayerIntersections.call(this, street, street_id);
 	}, this);
 
-	this.streets.graph = streetsToGraph(this.streets);
+	this.streets.graph = streetsToGraph(this.streets),
+	this.pathfinder = getPathFinder(this.streets.graph);
 	
 	/**
 	 * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
