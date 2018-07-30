@@ -49,11 +49,9 @@ Agentmap = function (map) {
 Agentmap.prototype.run = function() {
 	if (this.state.running === false) {
 		this.state.running = true;
-		this.state.ticks = 0;
 
 		let animation_update = (function (rAF_time) {
 			let total_time = rAF_time * .001;
-			this.state.ticks += 1;
 			
 			if (this.state.paused === true) {
 				this.state.paused = false,
@@ -80,10 +78,12 @@ Agentmap.prototype.run = function() {
  */
 Agentmap.prototype.update = function(rAF_time) {
 	let total_time = rAF_time * .001;
+	this.state.ticks += 1;
 	
 	if (this.state.time === null) {
 		this.state.time = 0,
 		this.state.prev_time = 0,
+		this.state.ticks = 0;
 
 		//requestAnimationFrame doesn't start with timetamp 0; the first timetamp will typically be pretty large; 
 		//we want to store this initial timetamp and subtract it from each subsequent timetamp so that time 
@@ -95,7 +95,7 @@ Agentmap.prototype.update = function(rAF_time) {
 		this.state.time = total_time - this.state.time_start_delay;
 	}
 
-	//Execute user-provided per-time instructions.
+	//Execute user-provided per-tick instructions.
 	this.update_func();
 
 	let movement_precision = this.settings.movement_precision,
