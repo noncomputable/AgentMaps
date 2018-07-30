@@ -90,23 +90,24 @@ function getPathFinder(graph) {
 /**
  * Get a path between two points on a graph.
  *
- * @param {LatLng} start
- * @param {LatLng} end
+ * @param start_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street at the start_lat_lng.
+ * @param goal_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street as the goal_lat_lng.
+ * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
+ * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
  * @param {Boolean} [sparse=false] - Whether to exclude intersections between the first and last along a street-specific path (which are superfluous for extracting the necessary sub-street).
  * @return {Array<Array<number>>} - An array of points along the graph, leading from the start to the end.
  */
-function getPath(start, end, start_lat_lng, goal_lat_lng, sparse = false) {
-	let start_coord = encodeLatLng(start),
-	end_coord = encodeLatLng(end),
+function getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_lng, sparse = false) {
+	let start_coord = encodeLatLng(start_int_lat_lng),
+	end_coord = encodeLatLng(goal_int_lat_lng),
 	encoded_path = this.pathfinder.find(start_coord, end_coord),
 	path = [];
 	
-	if (encoded_path.length > 0 && decodeCoordString(encoded_path[0].id).distanceTo(start) > 
-					decodeCoordString(encoded_path[0].id).distanceTo(end)) {
+	if (encoded_path.length > 0 && decodeCoordString(encoded_path[0].id).distanceTo(start_int_lat_lng) > 
+					decodeCoordString(encoded_path[0].id).distanceTo(goal_int_lat_lng)) {
 		encoded_path = encoded_path.reverse();
 	}
 
-	
 	if (sparse === true && encoded_path.length >= 2) {
 		let sparse_path = [], 
 		recent_street = null,
