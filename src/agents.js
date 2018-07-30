@@ -448,7 +448,7 @@ Agent.moveDirectly = function(animation_interval, intermediary_interval, steps_i
  */
 Agent.update = function(animation_interval, intermediary_interval, steps_inbetween) {
 	this.update_func();
-	//Set all movement controls and everything else in user-provided update_func; e.g. if (agentmap.ticks % 60 == 0 && this.place.unit == 9) { this.setTravelToUnit(); }
+	
 	if (this.travel_state.traveling) {
 		this.moveDirectly(animation_interval, intermediary_interval, steps_inbetween);
 	}
