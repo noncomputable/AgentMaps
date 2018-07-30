@@ -20,7 +20,7 @@ let amap = L.A.agentmap(map);
 amap.buildingify(bounding_box, sample_data);
 
 //Generate 100 agents according to the rules of seqUnitAgentMaker, displaying them as red, .5 meter radius circles.
-amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
+amap.agentify(1, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
 
 //Do the following on each new tick.
 //amap.update_func = function() {
@@ -30,7 +30,7 @@ amap.agentify(100, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor:
 		new_unit_id = amap.units.getLayerId(new_unit);
 
 		//Schedule the agent to move to the center of the new unit.
-		agent.setTravelToPlace({"unit": new_unit_id}, new_unit.getBounds().getCenter());
+		agent.setTravelToPlace(new_unit.getBounds().getCenter(), {"unit": new_unit_id});
 
 		//Have the agent start its trip.
 		agent.startTrip();
