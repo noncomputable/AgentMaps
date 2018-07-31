@@ -10,16 +10,6 @@ getPathFinder = require('./routing').getPathFinder;
 /* Here we define buildingify and all other functions and definitions it relies on. */
 
 /**
- * @typedef {object} Feature
- * @property {string} type - Should be Feature.
- * @property {object} properties - Non-geometric properties describing the map feature.
- * @property {object} geometry - Specification of the feature's geometry.
- * @property {string} geometry.type - The feature's GeoJSON geometry type
- * @property {Array} geometry.coordinates - The coordinates specifying the feature's geometry.
- * @see {@link http://geojson.org/}
- */
-
-/**
  * Generate and setup the desired map features (e.g. streets, houses).
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.

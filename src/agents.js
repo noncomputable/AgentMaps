@@ -10,14 +10,7 @@ encodeLatLng = require('./routing').encodeLatLng;
 /* Here we define agentify, the agent base class, and all other functions and definitions they rely on. */
 
 /**
- * @typedef {Feature} Point
- * @property {Array} geometry.coordinates - This should be a single array with 2 elements: the point's coordinates.
- *
- * An extension of {@link Feature} for points.
- */
-
-/**
- * Callback that gives a feature with appropriate geometry and properties to represent an agent.
+ * User-defined callback that gives a feature with appropriate geometry and properties to represent an agent.
  *
  * @callback agentFeatureMaker
  * @param {number} i - A number used to determine the agent's coordinates and other properties.
@@ -29,6 +22,7 @@ encodeLatLng = require('./routing').encodeLatLng;
 /**
  * A standard featureMaker callback, which sets an agent's location as the center of a unit on the map.
  * 
+ * @memberof Agentmap
  * @type {agentFeatureMaker}
  */
 function seqUnitAgentMaker(i){
@@ -88,6 +82,7 @@ function agentify(count, agentFeatureMaker) {
 
 /**
  * The main class representing individual agents, using Leaflet class system.
+ * @private
  *
  * @class Agent
  */
@@ -95,7 +90,8 @@ let Agent = L.Layer.extend({});
 
 /**
  * Constructor for the Agent class, using Leaflet class system.
- *
+ * 
+ * @name Agent
  * @constructor 
  * @param {Array} latLng - A pair of coordinates to place the agent at.
  * @param {Object} options - An array of options for the agent, namely its layer.
@@ -423,6 +419,7 @@ Agent.moveDirectly = function(animation_interval, intermediary_interval, steps_i
 	//Intermediary movements.
 	for (let i = 0; i < steps_inbetween; ++i) {
 		move(intermediary_interval);
+		
 		if (state.traveling === false) {
 			return;
 		}
@@ -454,6 +451,8 @@ Agent.update = function(animation_interval, intermediary_interval, steps_inbetwe
 
 /**
  * Returns an agent object.
+ * 
+ * @memberof Agentmap
  */
 function agent(feature, options, agentmap) {
 	return new L.A.Agent(feature, options, agentmap);

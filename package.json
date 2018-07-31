@@ -6,6 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "bundle": "npx webpack",
     "prepublish": "npm run bundle",
+    "make-docs": "jsdoc src site/docs/DOCS.md -d site/docs", 
     "publish-pages": "gh-pages -d site"
   },
   "main": "src/index.js",
