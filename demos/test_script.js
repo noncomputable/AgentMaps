@@ -20,7 +20,7 @@ let amap = L.A.agentmap(map);
 amap.buildingify(bounding_box, sample_data);
 
 //Generate 100 agents according to the rules of seqUnitAgentMaker, displaying them as red, .5 meter radius circles.
-amap.agentify(1, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
+amap.agentify(50, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
 
 //Do the following on each new tick.
 //amap.update_func = function() {
