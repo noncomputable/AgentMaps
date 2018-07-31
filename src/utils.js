@@ -1,3 +1,5 @@
+/* A few functions that may be useful in other modules. */
+
 /**
  * Given a geoJSON geometry object's coordinates, return the object, but with
  * all the coordinates reversed. <br /point.geometry && point.geometry.coordinates && >
