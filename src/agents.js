@@ -430,7 +430,6 @@ Agent.moveDirectly = function(animation_interval, intermediary_interval, steps_i
 	
 	//Latest requested movement.
 	if (state.traveling === true) {
-		//why is this lynchpin
 		latest_interval = animation_interval - (this.agentmap.settings.movement_precision * steps_inbetween);
 		move(latest_interval);
 	}
