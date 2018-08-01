@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* A few functions that may be useful in other modules. */
+
+/**
+ * Given a geoJSON geometry object's coordinates, return the object, but with
+ * all the coordinates reversed. &lt;br /point.geometry &amp;&amp; point.geometry.coordinates &amp;&amp; >
+ * 
+ * Why? GeoJSON coordinates are in lngLat format by default, while Leaflet uses latLng.
+ * L.geoJSON will auto-reverse the order of a GeoJSON object's coordinates, as it
+ * expects geoJSON coordinates to be lngLat. However, normal, non-GeoJSON-specific Leaflet
+ * methods expect Leaflet's latLng pairs and won't auto-reverse, so we have to do that
+ * manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
+ * 
+ * @param {Array&lt;number|Array&lt;number|Array&lt;number>>>} coordinates - GeoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ * @returns {Array&lt;number|Array&lt;number|Array&lt;number>>>} - Reversed geoJSON coordinates for a point, (multi-)line, or (multi-)polygon.
+ */
+function reversedCoordinates(coordinates) {
+	let reversed = coordinates.slice();
+	if (typeof coordinates[0] != "number") {
+		for (let inner_coordinates of coordinates) {
+			reversed.splice(reversed.indexOf(inner_coordinates), 1, reversedCoordinates(inner_coordinates));
+		}
+	}
+	else {
+		reversed = [coordinates[1], coordinates[0]];
+	}
+
+	return reversed;
+}
+
+/**
+ * Given an array, check whether it can represent the coordinates of a point.
+ *
+ * @param {Array} array - Array to check.
+ * @returns {boolean} - Whether the array can be the coordinates of a point.
+ */
+function isPointCoordinates(array) {
+	if (array.length !== 2 || 
+		typeof(array[0]) !== "number" ||
+		typeof(array[1]) !== "number") {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Given either a GeoJSON feature, L.latLng, or coordinate array containing the coordinates of a point,
+ * return an array of the coordinates.
+ *
+ * @params {Point|Array&lt;number>|LatLng} point - The data containing the point's coordinates (latitude &amp; longitude).
+ * @returns {Array&lt;number>} - Array of the point's coordinates. I.e.: [lng, lat].
+ */
+function pointToCoordinateArray(point) {
+	let coordinate_array;
+
+	if (typeof(point.lat) === "number" &amp;&amp; typeof(point.lng) === "number") {
+		coordinate_array = [point.lng, point.lat];
+	}
+	else if (point.geometry &amp;&amp; point.geometry.coordinates &amp;&amp; isPointCoordinates(point.geometry.coordinates)) {
+		coordinate_array = point.geometry.coordinates;
+	}
+	else if (isPointCoordinates(point)) {
+		coordinate_array = point;
+	}
+	else {
+		throw new Error("Invalid point: point must either be array of 2 coordinates, or an L.latLng.");
+	}
+
+	return coordinate_array;
+}
+
+/**
+ * Given two coordinate arrays, get their intersection.
+ * 
+ * @param {array&lt;array&lt;number>>} arr_a - Array of coordinate pairs.
+ * @param {array&lt;array&lt;number>>} arr_b - Array of coordinate pairs.
+ * @param {array&lt;number>} ids - 2-element array whose elements are IDs for arr_a and arr_b respectively.
+ *
+ * @returns {Array&lt;Array&lt;number|Object&lt;number, number>>>} - Array whose elements are the intersections' cooridinates if
+ * ids is empty, or otherwise whose elements are arrays each of whose first element is an
+ * intersection's coordinates and whose second element is an object mapping each array's ID (supplied by ids) 
+ * to the index of the intersecting coordinate-pair in that array.
+ */
+function getIntersections(arr_a, arr_b, ids = []) {
+	let intersections = [];
+
+	for (let i = 0; i &lt; arr_a.length; i++) {
+		let el_a = arr_a[i];
+
+		for (let j = 0; j &lt; arr_b.length; j++) {
+			let el_b = arr_b[j];
+			
+			if (isPointCoordinates(el_a) &amp;&amp; isPointCoordinates(el_b)) {
+				if (el_a[0] === el_b[0] &amp;&amp; el_a[1] === el_b[1]) {
+					let new_intersection;
+
+					if (ids.length === 2) {
+						let identified_intersections = {};
+						identified_intersections[ids[0]] = i,
+						identified_intersections[ids[1]] = j,
+						new_intersection = [el_a, identified_intersections];
+					}
+					else {
+						new_intersection = el_a;
+					}
+				
+					intersections.push(new_intersection);
+				}
+			}
+			else {
+				throw new Error("Every element of each array must be a coordinate pair array.");
+			}
+		}
+	}
+
+	return intersections;
+}
+
+exports.getIntersections = getIntersections;
+exports.reversedCoordinates = reversedCoordinates;
+exports.isPointCoordinates = isPointCoordinates;
+exports.pointToCoordinateArray = pointToCoordinateArray;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agentify">agentify</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 01 2018 03:42:31 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
