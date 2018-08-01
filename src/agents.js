@@ -20,7 +20,7 @@ encodeLatLng = require('./routing').encodeLatLng;
  */
 
 /**
- * A standard featureMaker callback, which sets an agent's location as the center of a unit on the map.
+ * A standard {@link agentFeatureMaker} callback, which sets an agent's location as the center of a unit on the map.
  * 
  * @memberof Agentmap
  * @type {agentFeatureMaker}
@@ -93,12 +93,12 @@ let Agent = L.Layer.extend({});
  * 
  * @name Agent
  * @constructor 
- * @param {Array} latLng - A pair of coordinates to place the agent at.
+ * @param {LatLng} lat_lng - A pair of coordinates to place the agent at.
  * @param {Object} options - An array of options for the agent, namely its layer.
  * @param {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {number} feature.AgentMap_id - The agent's instance id, so it can be accessed from inside the Leaflet layer. To avoid putting the actual instance inside the feature object.
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
- * @property {Object.<string, number>} place - The id of the place (unit, street, etc.) where the agent is currently at.
+ * @property {Place} place - A place object containing the id of the place (unit, street, etc.) where the agent is currently at.
  * @property {Object} travel_state - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
  * @property {boolean} travel_state.traveling - Whether the agent is currently on a trip.
  * @property {?Point} travel_state.current_point - The point where the agent is currently located.
@@ -109,7 +109,7 @@ let Agent = L.Layer.extend({});
  * @property {Array} travel_state.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the travel_state is changed/reset.
  * @property {?function} update_func - Function to be called on each update.
  */
-Agent.initialize = function(latLng, options, agentmap) {
+Agent.initialize = function(lat_lng, options, agentmap) {
 	this.agentmap = agentmap,
 	this.place = null,
 	this.travel_state = {
@@ -123,7 +123,7 @@ Agent.initialize = function(latLng, options, agentmap) {
 	};
 	this.update_func = function() {};
 
-	L.CircleMarker.prototype.initialize.call(this, latLng, options);
+	L.CircleMarker.prototype.initialize.call(this, lat_lng, options);
 }
 
 /**
@@ -175,6 +175,8 @@ Agent.travelTo = function(goal_point) {
  * Given the agent's currently scheduled trips (its path), get the place from which a new trip should start (namely, the end of the current path).
  * That is: If there's already a path in queue, start the new path from the end of the existing one.
  * @private
+ *
+ * @returns {Place} - The place where a new trip should start.
  */
  Agent.newTripStartPlace = function() {
 	if (this.travel_state.path.length === 0) { 
@@ -212,7 +214,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place) {
  * Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
- * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
+ * @param {Place} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
  * @param {Boolean} replace_trip - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
  * simply appended to the current scheduled path).
  */
@@ -280,7 +282,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
  * @private
  *
  * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
- * @param {Object<string, number>} goal_place - The place to which the agent will travel. Must be of form {"street": street_id}.
+ * @param {Place} goal_place - The place to which the agent will travel. Must be of form {"street": street_id}.
  */
 Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
 	let goal_coords,

@@ -7,9 +7,9 @@ lineDistance = require('@turf/line-distance');
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
  * @property {object} map - A Leaflet Map instance.
- * @property {featureGroup} agents - A featureGroup containing all agents.
- * @property {featureGroup} units - A featureGroup containing all units.
- * @property {featureGroup} streets - A featureGroup containing all streets.
+ * @property {FeatureGroup} agents - A featureGroup containing all agents.
+ * @property {FeatureGroup} units - A featureGroup containing all units.
+ * @property {FeatureGroup} streets - A featureGroup containing all streets.
  * @property {object} state - Properties detailing the state of the simulation process.
  * @property {boolean} state.running - Whether the simulation is running or not.
  * @property {boolean} state.paused - Whether the simulation is paused.
@@ -222,6 +222,7 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 /**
  * Generates an agentmap for the given map.
  *
+ * @name agentmap
  * @param {object} map - A Leaflet Map instance.
  * @returns {object} - An Agentmap instance.
  */
@@ -231,6 +232,8 @@ function agentmapFactory(map) {
 
 /**
  * Returns the number of layers in a Leaflet layer group.
+ *
+ * @memberof L.LayerGroup
  */
 function layerCount() {
 	return this.getLayers().length;
