@@ -1,4 +1,4 @@
-var sample_data = {
+var map_data = {
 "type": "FeatureCollection",
 "features": [
 {

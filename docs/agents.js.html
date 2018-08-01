@@ -168,10 +168,23 @@ Agent.resetTravelState = function() {
 };
 
 /**
- * Set the agent up to travel to some point on the map.
+ * Start a trip along the path specified in the agent's travel_state.
+ * @private
+ */
+Agent.startTrip = function() {
+	if (this.travel_state.path.length > 0) {
+		this.travelTo(this.travel_state.path[0]);
+	}
+	else {
+		throw new Error("The travel state's path is empty! There's no path to take a trip along!");
+	}
+};
+
+/**
+ * Set the agent to travel to some point on the map.
  * @private
  *
- * @param {latLng} goal_point - The point to which the agent should travel.
+ * @param {LatLng} goal_point - The point to which the agent should travel.
  */
 Agent.travelTo = function(goal_point) {
 	let state = this.travel_state;
@@ -184,19 +197,6 @@ Agent.travelTo = function(goal_point) {
 	state.lng_dir = Math.sign(- (state.current_point.lng - state.goal_point.lng)),
 	
 	state.slope = Math.abs(((state.current_point.lat - state.goal_point.lat) / (state.current_point.lng - state.goal_point.lng)));
-};
-
-/**
- * Start a trip along the path specified in the agent's travel_state.
- * @private
- */
-Agent.startTrip = function() {
-	if (this.travel_state.path.length > 0) {
-		this.travelTo(this.travel_state.path[0]);
-	}
-	else {
-		throw new Error("The travel state's path is empty! There's no path to take a trip along!");
-	}
 };
 
 /**
@@ -216,7 +216,7 @@ Agent.startTrip = function() {
 }
 
 /**
- * Set the agent up to travel to a point within the unit he is in.
+ * Schedule the agent to travel to a point within the unit he is in.
  * @private
  *
  * @param {LatLng} goal_lat_lng - LatLng coordinate object for a point in the same unit the agent is in.
@@ -228,7 +228,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place) {
 	goal_polygon = buffer(this.agentmap.units.getLayer(goal_place.unit).toGeoJSON(), .001);
 
 	if (booleanPointInPolygon(goal_point, goal_polygon)) {
-		goal_lat_lng.new_place = this.place;
+		goal_lat_lng.new_place = goal_place;
 		this.travel_state.path.push(goal_lat_lng);
 	}
 	else {
@@ -237,7 +237,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place) {
 };
 
 /**
- * Set the agent up to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+ * Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
  * @param {Object&lt;string, number>} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
@@ -304,7 +304,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
 };
 
 /**
- * Set the agent up to travel to a point along the streets, via streets.
+ * Schedule the agent to travel to a point along the streets, via streets.
  * @private
  *
  * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
@@ -322,7 +322,9 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
 	
 	if (typeof(start_place.street) === "number" &amp;&amp; typeof(goal_place.street) === "number") {
 		start_street_id = start_place.street,
-		start_street_point = this.travel_state.path[this.travel_state.path.length - 1];
+		start_street_point = this.travel_state.path.length !== 0 ? 
+			this.travel_state.path[this.travel_state.path.length - 1] :
+			this.getLatLng();
 		start_street_point.new_place = {street: start_street_id};
 
 		goal_street_id = goal_place.street,
@@ -351,7 +353,7 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
 };
 
 /**
- * Set the agent up to travel between two points on the same street.
+ * Schedule the agent to travel between two points on the same street.
  * @private
  *
  * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
@@ -373,13 +375,17 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	let start_to_path_beginning = start_lat_lng.distanceTo(L.latLng(street_path_unordered[0])),
 	start_to_path_end = start_lat_lng.distanceTo(L.latLng(street_path_unordered[street_path_unordered.length - 1]));
 	let street_path = start_to_path_beginning &lt; start_to_path_end ?	street_path_unordered :	street_path_unordered.reverse();
-	let street_path_lat_lngs = street_path.map(coords => L.latLng(coords));
-	street_path_lat_lngs[0].new_place = { street: street_id },
+	let street_path_lat_lngs = street_path.map(coords => { 
+		let lat_lng = L.latLng(coords);
+		lat_lng.new_place = { street: street_id };
+
+		return lat_lng;
+	});
 	this.travel_state.path.push(...street_path_lat_lngs);
 }
 
 /**
- * Set the agent up to travel between two points on a street network.
+ * Schedule the agent up to travel between two points on a street network.
  * @private
  *
  * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
@@ -507,7 +513,7 @@ exports.agent = agent;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jul 31 2018 17:04:58 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 01 2018 02:59:04 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
