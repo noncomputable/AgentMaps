@@ -15,10 +15,10 @@ In short, it's something like a bare-bones SimCity generator.
 
 ##### Table of Contents
 [Prerequisites](#prerequisites)
-[Basic Walkthrough](#basic walkthrough)
+[Basic Walkthrough](#basic\ walkthrough)
 [Documentation](#documentation)
 [Demos](#demos)
-[Feature Wishlist](#feature wishlist)
+[Feature Wishlist](#feature\ wishlist)
 [Authors](#authors)
 [Acknowledgements](#acknowledgements)
 
@@ -50,8 +50,8 @@ All of the above is pretty important to be able to contribute to AgentMaps or un
 
 ## Basic Walkthrough
 
-Here, we'll walk through building a simple Agentmaps simulation. I suggest looking at the detailed [documentation](#documentations) for
-all of the Agentmaps functions and classes used here to get a better understanding of how they work, what kinds of input they expect, and
+Here, we'll walk through building a simple AgentMaps simulation. I suggest looking at the detailed [documentation](#documentations) for
+all of the AgentMaps functions and classes used here to get a better understanding of how they work, what kinds of input they expect, and
 what you can expect them to do in response. If you're not so familiar with Leaflet, I suggest doing the same with the [Leaflet docs](https://leafletjs.com/reference-1.3.2.html).
 
 Create an HTML document that loads the Leaflet stylesheet and script, contains a \<div\> in which to insert the Leaflet map, and
@@ -61,7 +61,7 @@ loads AgentMaps at the end:
 <!DOCTYPE HTML>
 <html>
 <head>
-<link rel="stylesheet" href="leaflet_style.css"></link>
+<link rel="stylesheet" href="leaflet_style.css">
 <script src="leaflet_script.js"></script>
 </head>
 <body>
@@ -214,8 +214,8 @@ Documentation for people who want to contribute to AgentMaps or understand its i
 
 ## Demos
 
-You can find a slightly more substantial demonstration of AgentMaps live [here](https://noncomputable.github.io/AgentMaps/demos/epidemic.html>).
-You can find the corresponding code under /demos/epidemic/ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos/epidemic>).
+You can find a slightly more substantial demonstration of AgentMaps live [here](https://noncomputable.github.io/AgentMaps/demos/epidemic.html).
+You can find the corresponding code under /demos/epidemic/ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos/epidemic).
 
 # Feature Wishlist
 
@@ -225,11 +225,11 @@ Here are some things I think would be great for AgentMaps to have. If you add th
 * Sidewalks: streets and sidewalks should be divided and made into distinct places that agents can distinguish and navigate between.
 * Architectural Variety: buildings vary in size, dimension, and shape a lot--they're not all identical rectangles. Users should be able
 to specify these customizations and AgentMaps should be able to generate and embed them appropriately.
- * For example, what if the GeoJSON the user provides contains a big park? The street parallel to it probably shouldn't be dotted with normal sized units--it should probably be one big unit itself!
+..* For example, what if the GeoJSON the user provides contains a big park? The street parallel to it probably shouldn't be dotted with normal sized units--it should probably be one big unit itself!
 * Urban Development: buildings, streets, and sidewalks change! Users should be able to easily specify these changes and AgentMaps should be able to
 incorporate them coherently.
 * Optimization: 
- * Make utilities for running spatial computations on agents and buildings faster. Otherwise users may tend to default to naive implementations that hinder them from be able to do what they want to do. 
+..* Make utilities for running spatial computations on agents and buildings faster. Otherwise users may tend to default to naive implementations that hinder them from be able to do what they want to do. 
 
 # Authors
 
