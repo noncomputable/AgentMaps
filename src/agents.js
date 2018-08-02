@@ -14,9 +14,10 @@ encodeLatLng = require('./routing').encodeLatLng;
  *
  * @callback agentFeatureMaker
  * @param {number} i - A number used to determine the agent's coordinates and other properties.
- * @returns {?Point} - Either a GeoJSON Point feature with properties and coordinates for agent i, including
- * a "place" property that will define the agent's initial agent.place; or null, which will cause agentify
- * to immediately stop its work & terminate.
+ * @returns {?Point} - A GeoJSON Point feature with properties and coordinates for agent i, including
+ * a "place" property that will define the agent's initial agent.place and a layer_options property that
+ * can be used primarily to specify the style (color, size, etc.) of the agent feature on the map.
+ * For a list of valid items for the layer_options object, see {@link https://leafletjs.com/reference-1.3.2.html#circlemarker}.
  */
 
 /**
@@ -24,10 +25,12 @@ encodeLatLng = require('./routing').encodeLatLng;
  * 
  * @memberof Agentmap
  * @type {agentFeatureMaker}
+ * @param {number} i - The index of the agent to be generated.
+ * @returns {Feature} - A Feature object with a valid Place in its .properties.place and a valid options object in its .properties.layer_options.
  */
 function seqUnitAgentMaker(i){
 	if (i > this.units.getLayers().length - 1) {
-		return null;
+		throw new Error("seqUnitAgentMaker cannot accommodate more users than there are units.");
 	}
 	
 	let unit = this.units.getLayers()[i],
@@ -57,14 +60,11 @@ function agentify(count, agentFeatureMaker) {
 	for (let i = agents_existing; i < agents_existing + count; i++) {
 		//Callback function aren't automatically bound to the agentmap.
 		let boundFeatureMaker = agentFeatureMaker.bind(agentmap),
-		feature = boundFeatureMaker(i);
-		if (feature === null) {
-			return;
-		}
+		agent_feature = boundFeatureMaker(i);
 		
-		let coordinates = L.A.reversedCoordinates(feature.geometry.coordinates),
-		place = feature.properties.place,
-		layer_options = feature.properties.layer_options;
+		let coordinates = L.A.reversedCoordinates(agent_feature.geometry.coordinates),
+		place = agent_feature.properties.place,
+		layer_options = agent_feature.properties.layer_options;
 		
 		//Make sure the agent feature is valid and has everything we need.
 		if (!L.A.isPointCoordinates(coordinates)) {
@@ -460,11 +460,13 @@ Agent.update = function(animation_interval, intermediary_interval, steps_inbetwe
 
 /**
  * Returns an agent object.
- * 
- * @memberof Agentmap
+ *
+ * @param {LatLng} lat_lng - A pair of coordinates to place the agent at.
+ * @param {Object} options - An array of options for the agent, namely its layer.
+ * @param {Agentmap} agentmap - The agentmap instance in which the agent exists.
  */
-function agent(feature, options, agentmap) {
-	return new L.A.Agent(feature, options, agentmap);
+function agent(lat_lng, options, agentmap) {
+	return new L.A.Agent(lat_lng, options, agentmap);
 }
 
 Agentmap.prototype.agentify = agentify,
