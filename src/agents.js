@@ -42,6 +42,7 @@ function seqUnitAgentMaker(i){
 /**
  * Generate some number of agents and place them on the map.
  *
+ * @memberof Agentmap
  * @param {number} count - The desired number of agents.
  * @param {agentFeatureMaker} agentFeatureMaker - A callback that determines an agent i's feature properties and geometry (always a Point).
  */
