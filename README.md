@@ -220,7 +220,7 @@ Documentation for people who want to contribute to AgentMaps or understand its i
 
 ## Demos
 
-You can find a slightly more substantial demonstration of AgentMaps live [here](https://noncomputable.github.io/AgentMaps/demos/epidemic.html).
+You can find a slightly more substantial demonstration of AgentMaps live [here](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html).
 You can find the corresponding code under /demos/epidemic/ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos/epidemic).
 
 # Feature Wishlist
