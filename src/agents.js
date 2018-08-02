@@ -9,83 +9,6 @@ lineSlice = require('@turf/line-slice').default,
 Agentmap = require('./agentmap').Agentmap,
 encodeLatLng = require('./routing').encodeLatLng;
 
-<<<<<<< HEAD
-/* Here we define agentify, the agent base class, and all other functions and definitions they rely on. */
-
-/**
- * User-defined callback that gives a feature with appropriate geometry and properties to represent an agent.
- *
- * @callback agentFeatureMaker
- * @param {number} i - A number used to determine the agent's coordinates and other properties.
- * @returns {?Point} - A GeoJSON Point feature with properties and coordinates for agent i, including
- * a "place" property that will define the agent's initial agent.place and a layer_options property that
- * can be used primarily to specify the style (color, size, etc.) of the agent feature on the map.
- * For a list of valid items for the layer_options object, see {@link https://leafletjs.com/reference-1.3.2.html#circlemarker}.
- */
-
-/**
- * A standard {@link agentFeatureMaker} callback, which sets an agent's location as the center of a unit on the map.
- * 
- * @memberof Agentmap
- * @type {agentFeatureMaker}
- * @param {number} i - The index of the agent to be generated.
- * @returns {Feature} - A Feature object with a valid Place in its .properties.place and a valid options object in its .properties.layer_options.
- */
-function seqUnitAgentMaker(i){
-	if (i > this.units.getLayers().length - 1) {
-		throw new Error("seqUnitAgentMaker cannot accommodate more users than there are units.");
-	}
-	
-	let unit = this.units.getLayers()[i],
-	unit_id = this.units.getLayerId(unit),
-	center_point = centroid(unit.feature);
-	center_point.properties.place = {"unit": unit_id},
-	center_point.properties.layer_options = {radius: .5, color: "red", fillColor: "red"}; 
-	
-	return center_point;
-}
-
-/**
- * Generate some number of agents and place them on the map.
- *
- * @memberof Agentmap
- * @param {number} count - The desired number of agents.
- * @param {agentFeatureMaker} agentFeatureMaker - A callback that determines an agent i's feature properties and geometry (always a Point).
- */
-function agentify(count, agentFeatureMaker) {
-	let agentmap = this;
-
-	if (!(this.agents instanceof L.LayerGroup)) {
-		this.agents = L.layerGroup().addTo(this.map);
-	}
-
-	let agents_existing = agentmap.agents.getLayers().length;
-	for (let i = agents_existing; i < agents_existing + count; i++) {
-		//Callback function aren't automatically bound to the agentmap.
-		let boundFeatureMaker = agentFeatureMaker.bind(agentmap),
-		agent_feature = boundFeatureMaker(i);
-		
-		let coordinates = L.A.reversedCoordinates(agent_feature.geometry.coordinates),
-		place = agent_feature.properties.place,
-		layer_options = agent_feature.properties.layer_options;
-		
-		//Make sure the agent feature is valid and has everything we need.
-		if (!L.A.isPointCoordinates(coordinates)) {
-			throw new Error("Invalid feature returned from agentFeatureMaker: geometry.coordinates must be a 2-element array of numbers.");	
-		}
-		else if (typeof(place.unit) !== "number" &&
-			typeof(place.street) !== "number") {
-			throw new Error("Invalid feature returned from agentFeatureMaker: properties.place must be a {unit: unit_id} or {street: street_id} with an existing layer's ID.");	
-		}
-		
-		new_agent = agent(coordinates, layer_options, agentmap);
-		new_agent.place = place;
-		this.agents.addLayer(new_agent);
-	}
-}
-=======
->>>>>>> 9de98a75046eb9b201335e8dc158d92caf619ef5
-
 /**
  * The main class representing individual agents, using Leaflet class system.
  * @private
@@ -487,14 +410,14 @@ function agent(lat_lng, options, agentmap) {
 
 /**
  * A standard {@link agentFeatureMaker}, which sets an agent's location to be the point at the center of the iᵗʰ unit of the map,
- * its place to be that unit, and its layer options to be red and of radius .5 meters.
+ * its place property to be that unit's, and its layer_options to be red and of radius .5 meters.
  * 
  * @memberof Agentmap
  * @type {agentFeatureMaker}
  */
 function seqUnitAgentMaker(i){
 	if (i > this.units.getLayers().length - 1) {
-		return null;
+		throw new Error("seqUnitAgentMaker cannot accommodate more users than there are units.");
 	}
 	
 	let unit = this.units.getLayers()[i],
