@@ -30,7 +30,7 @@ In short, it's something like a bare-bones SimCity generator.
 
 # Getting Started
 
-## Prerequisites<a name="prerequisites">
+## Prerequisites
 
 First of all, you can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@1/dist/agentmaps.js>.
 
@@ -54,7 +54,7 @@ you can also use it to get the coordinates of the two points bounding your neigh
 
 All of the above is pretty important to be able to contribute to AgentMaps or understand its internal implementation as well.
 
-## Basic Walkthrough<a name="basic-walkthrough">
+## Basic Walkthrough
 
 Here, we'll walk through building a simple AgentMaps simulation. I suggest looking at the detailed [documentation](#documentations) for
 all of the AgentMaps functions and classes used here to get a better understanding of how they work, what kinds of input they expect, and
@@ -212,36 +212,36 @@ agentmap.run();
 
 Once we load our HTML document, the simulation should begin and we can watch our agents moving about the neighborhood.
 
-## Documentation<a name="documentation">
+## Documentation
 
 Documentation for all the necessary features for people who want to use AgentMaps is available at <https://noncomputable.github.io/AgentMaps/docs/index.html>.
 
 Documentation for people who want to contribute to AgentMaps or understand its internals is available here <https://noncomputable.github.io/AgentMaps/devdocs/index.html>.
 
-## Demos<a name="demos">
+## Demos
 
 You can find a slightly more substantial demonstration of AgentMaps live [here](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html).
 You can find the corresponding code under /demos/epidemic/ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos/epidemic).
 
-# Feature Wishlist<a name="feature-wishlist">
+# Feature Wishlist
 
 I've been stuffed with other work, so it'd be really cool if anyone wants to come along and help make AgentMaps better and more useful.
 Here are some things I think would be great for AgentMaps to have. If you add them before I do, I'll credit your name next to them.
 
 * Sidewalks: streets and sidewalks should be divided and made into distinct places that agents can distinguish and navigate between.
-* Architectural Variety: buildings vary in size, dimension, and shape a lot--they're not all identical rectangles. Users should be able
+* Architectural Variety: buildings vary in size, dimension, and shape a lot——they're not all identical rectangles. Users should be able
 to specify these customizations and AgentMaps should be able to generate and embed them appropriately.
-  * For example, what if the GeoJSON the user provides contains a big park? The street parallel to it probably shouldn't be dotted with normal sized units--it should probably be one big unit itself!
-* Urban Development: buildings, streets, and sidewalks change! Users should be able to easily specify these changes and AgentMaps should be able to
+  * For example, what if the GeoJSON the user provides contains a big park? The street parallel to it probably shouldn't be dotted with normal sized units——it should probably be one big unit itself!
+* Urban Development: buildings, streets, and sidewalks change over time! Users should be able to easily specify these changes and AgentMaps should be able to
 incorporate them coherently.
 * Optimization: 
   * Make utilities for running spatial computations on agents and buildings faster. Otherwise users may tend to default to naive implementations that hinder them from be able to do what they want to do. 
 
-# Authors<a name="authors">
+# Authors
 
 * Andrew - Came up with AgentMaps.
 
-# Acknowledgements<a name="acknowledgements">
+# Acknowledgements
 
 I've only had a few extended conversations which involved me talking and thinking about this project outloud over the last few months, and those probably influenced how I went forward with it. The people I've had those discussions with are:
 
