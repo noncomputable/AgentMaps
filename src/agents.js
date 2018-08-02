@@ -1,3 +1,5 @@
+/* Here we define agentify, the agent base class, and everything they uniquely rely on. */
+
 let centroid = require('@turf/centroid').default,
 buffer = require('@turf/buffer').default,
 booleanPointInPolygon = require('@turf/boolean-point-in-polygon').default,
@@ -7,78 +9,6 @@ lineSlice = require('@turf/line-slice').default,
 Agentmap = require('./agentmap').Agentmap,
 encodeLatLng = require('./routing').encodeLatLng;
 
-/* Here we define agentify, the agent base class, and all other functions and definitions they rely on. */
-
-/**
- * User-defined callback that gives a feature with appropriate geometry and properties to represent an agent.
- *
- * @callback agentFeatureMaker
- * @param {number} i - A number used to determine the agent's coordinates and other properties.
- * @returns {?Point} - Either a GeoJSON Point feature with properties and coordinates for agent i, including
- * a "place" property that will define the agent's initial agent.place; or null, which will cause agentify
- * to immediately stop its work & terminate.
- */
-
-/**
- * A standard {@link agentFeatureMaker} callback, which sets an agent's location as the center of a unit on the map.
- * 
- * @memberof Agentmap
- * @type {agentFeatureMaker}
- */
-function seqUnitAgentMaker(i){
-	if (i > this.units.getLayers().length - 1) {
-		return null;
-	}
-	
-	let unit = this.units.getLayers()[i],
-	unit_id = this.units.getLayerId(unit),
-	center_point = centroid(unit.feature);
-	center_point.properties.place = {"unit": unit_id},
-	center_point.properties.layer_options = {radius: .5, color: "red", fillColor: "red"}; 
-	
-	return center_point;
-}
-
-/**
- * Generate some number of agents and place them on the map.
- *
- * @param {number} count - The desired number of agents.
- * @param {agentFeatureMaker} agentFeatureMaker - A callback that determines an agent i's feature properties and geometry (always a Point).
- */
-function agentify(count, agentFeatureMaker) {
-	let agentmap = this;
-
-	if (!(this.agents instanceof L.LayerGroup)) {
-		this.agents = L.layerGroup().addTo(this.map);
-	}
-
-	let agents_existing = agentmap.agents.getLayers().length;
-	for (let i = agents_existing; i < agents_existing + count; i++) {
-		//Callback function aren't automatically bound to the agentmap.
-		let boundFeatureMaker = agentFeatureMaker.bind(agentmap),
-		feature = boundFeatureMaker(i);
-		if (feature === null) {
-			return;
-		}
-		
-		let coordinates = L.A.reversedCoordinates(feature.geometry.coordinates),
-		place = feature.properties.place,
-		layer_options = feature.properties.layer_options;
-		
-		//Make sure the agent feature is valid and has everything we need.
-		if (!L.A.isPointCoordinates(coordinates)) {
-			throw new Error("Invalid feature returned from agentFeatureMaker: geometry.coordinates must be a 2-element array of numbers.");	
-		}
-		else if (typeof(place.unit) !== "number" &&
-			typeof(place.street) !== "number") {
-			throw new Error("Invalid feature returned from agentFeatureMaker: properties.place must be a {unit: unit_id} or {street: street_id} with an existing layer's ID.");	
-		}
-		
-		new_agent = agent(coordinates, layer_options, agentmap);
-		new_agent.place = place;
-		this.agents.addLayer(new_agent);
-	}
-}
 
 /**
  * The main class representing individual agents, using Leaflet class system.
@@ -466,6 +396,79 @@ function agent(feature, options, agentmap) {
 	return new L.A.Agent(feature, options, agentmap);
 }
 
+/**
+ * A user-defined callback function that returns a feature with appropriate geometry and properties to represent an agent.
+ *
+ * @callback agentFeatureMaker
+ * @param {number} i - A number used to determine the agent's coordinates and other properties.
+ * @returns {?Point} - Either a GeoJSON Point feature with properties and coordinates for agent i, including
+ * a "place" property that will define the agent's initial agent.place; or null, which will cause agentify
+ * to immediately stop its work & terminate.
+ */
+
+/**
+ * A standard {@link agentFeatureMaker}, which sets an agent's location to be the point at the center of the iᵗʰ unit of the map,
+ * its place to be that unit, and its layer options to be red and of radius .5 meters.
+ * 
+ * @memberof Agentmap
+ * @type {agentFeatureMaker}
+ */
+function seqUnitAgentMaker(i){
+	if (i > this.units.getLayers().length - 1) {
+		return null;
+	}
+	
+	let unit = this.units.getLayers()[i],
+	unit_id = this.units.getLayerId(unit),
+	center_point = centroid(unit.feature);
+	center_point.properties.place = {"unit": unit_id},
+	center_point.properties.layer_options = {radius: .5, color: "red", fillColor: "red"}; 
+	
+	return center_point;
+}
+
+/**
+ * Generate some number of agents and place them on the map.
+ *
+ * @param {number} count - The desired number of agents.
+ * @param {agentFeatureMaker} agentFeatureMaker - A callback that determines an agent i's feature properties and geometry (always a Point).
+ */
+function agentify(count, agentFeatureMaker) {
+	let agentmap = this;
+
+	if (!(this.agents instanceof L.LayerGroup)) {
+		this.agents = L.layerGroup().addTo(this.map);
+	}
+
+	let agents_existing = agentmap.agents.getLayers().length;
+	for (let i = agents_existing; i < agents_existing + count; i++) {
+		//Callback function aren't automatically bound to the agentmap.
+		let boundFeatureMaker = agentFeatureMaker.bind(agentmap),
+		feature = boundFeatureMaker(i);
+		if (feature === null) {
+			return;
+		}
+		
+		let coordinates = L.A.reversedCoordinates(feature.geometry.coordinates),
+		place = feature.properties.place,
+		layer_options = feature.properties.layer_options;
+		
+		//Make sure the agent feature is valid and has everything we need.
+		if (!L.A.isPointCoordinates(coordinates)) {
+			throw new Error("Invalid feature returned from agentFeatureMaker: geometry.coordinates must be a 2-element array of numbers.");	
+		}
+		else if (typeof(place.unit) !== "number" &&
+			typeof(place.street) !== "number") {
+			throw new Error("Invalid feature returned from agentFeatureMaker: properties.place must be a {unit: unit_id} or {street: street_id} with an existing layer's ID.");	
+		}
+		
+		new_agent = agent(coordinates, layer_options, agentmap);
+		new_agent.place = place;
+		this.agents.addLayer(new_agent);
+	}
+}
+
+Agentmap.prototype.agent = agent,
 Agentmap.prototype.agentify = agentify,
 Agentmap.prototype.seqUnitAgentMaker = seqUnitAgentMaker;
 
