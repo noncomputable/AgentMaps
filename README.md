@@ -212,13 +212,18 @@ agentmap.run();
 
 Once we load our HTML document, the simulation should begin and we can watch our agents moving about the neighborhood.
 
-## Documentation
+## Tips
+
+how agentmakers work
+accessing neighbors and intersections
+
+# Documentation
 
 Documentation for all the necessary features for people who want to use AgentMaps is available at <https://noncomputable.github.io/AgentMaps/docs/index.html>.
 
 Documentation for people who want to contribute to AgentMaps or understand its internals is available here <https://noncomputable.github.io/AgentMaps/devdocs/index.html>.
 
-## Demos
+# Demos
 
 You can find a slightly more substantial demonstration of AgentMaps live [here](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html).
 You can find the corresponding code under /demos/epidemic/ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos/epidemic).
