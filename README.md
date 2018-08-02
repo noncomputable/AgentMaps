@@ -229,10 +229,10 @@ I've been stuffed with other work, so it'd be really cool if anyone wants to com
 Here are some things I think would be great for AgentMaps to have. If you add them before I do, I'll credit your name next to them.
 
 * Sidewalks: streets and sidewalks should be divided and made into distinct places that agents can distinguish and navigate between.
-* Architectural Variety: buildings vary in size, dimension, and shape a lot--they're not all identical rectangles. Users should be able
+* Architectural Variety: buildings vary in size, dimension, and shape a lot——they're not all identical rectangles. Users should be able
 to specify these customizations and AgentMaps should be able to generate and embed them appropriately.
-  * For example, what if the GeoJSON the user provides contains a big park? The street parallel to it probably shouldn't be dotted with normal sized units--it should probably be one big unit itself!
-* Urban Development: buildings, streets, and sidewalks change! Users should be able to easily specify these changes and AgentMaps should be able to
+  * For example, what if the GeoJSON the user provides contains a big park? The street parallel to it probably shouldn't be dotted with normal sized units——it should probably be one big unit itself!
+* Urban Development: buildings, streets, and sidewalks change over time! Users should be able to easily specify these changes and AgentMaps should be able to
 incorporate them coherently.
 * Optimization: 
   * Make utilities for running spatial computations on agents and buildings faster. Otherwise users may tend to default to naive implementations that hinder them from be able to do what they want to do. 
