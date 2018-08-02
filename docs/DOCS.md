@@ -130,7 +130,7 @@ which just assigns a number to each agent it generates in sequence, counting up 
 in the center of the unit whose ID is the corresponding number. We'll make 50:
 
 ```javascript
-agentmap.agentify(50, agentmap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
+agentmap.agentify(50, agentmap.seqUnitAgentMaker);
 ```
 
 The Agentmap simulation will start once we call `agentmap.run()`. From then on, its operation is divided up into consecutive "ticks".

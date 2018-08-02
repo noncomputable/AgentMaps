@@ -21,7 +21,7 @@ amap.buildingify(bounding_box, map_data);
 
 //Start some number of agents off sick, and make a custom seqUnitAgentMaker to make agents the perimeter streets.
 //Generate 50 agents according to the rules of seqUnitAgentMaker, displaying them as red, .5 meter radius circles.
-amap.agentify(50, amap.seqUnitAgentMaker, {radius: .5, color: "red", fillColor: "red"});
+amap.agentify(50, amap.seqUnitAgentMaker);
 
 //Do the following on each tick of the simulation.
 amap.update_func = function() {
