@@ -15,11 +15,17 @@ In short, it's something like a bare-bones SimCity generator.
 
 ##### Table of Contents
 [Prerequisites](#prerequisites)
+
 [Basic Walkthrough](#basic-walkthrough)
+
 [Documentation](#documentation)
+
 [Demos](#demos)
+
 [Feature Wishlist](#feature-wishlist)
+
 [Authors](#authors)
+
 [Acknowledgements](#acknowledgements)
 
 # Getting Started
