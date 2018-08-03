@@ -34,6 +34,7 @@ let Agent = L.Layer.extend({});
  * @property {?Point} travel_state.goal_point - The point where the agent is traveling to.
  * @property {?number} travel_state.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
  * @property {?number} travel_state.lng_dir - The longitudinal direction. -1 if traveling to lesser longitude (left), 1 if traveling to greater longitude (right).
+ * @property {?number} travel_state.speed - The speed that the agent should travel, in meters per tick.
  * @property {?number} travel_state.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
  * @property {Array} travel_state.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the travel_state is changed/reset.
  * @property {?function} update_func - Function to be called on each update.
@@ -48,6 +49,7 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 		lat_dir: null,
 		lng_dir: null,
 		slope: null,
+		speed: null,
 		path: [],
 	};
 	this.update_func = function() {};
@@ -123,15 +125,17 @@ Agent.travelTo = function(goal_point) {
  * @private
  *
  * @param {LatLng} goal_lat_lng - LatLng coordinate object for a point in the same unit the agent is in.
+ * @param {number} speed - The speed that the agent should travel, in meters per tick.
  */
-Agent.setTravelInUnit = function(goal_lat_lng, goal_place) {
+Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
 	let goal_point = L.A.pointToCoordinateArray(goal_lat_lng),
 	//Buffering so that points on the perimeter, like the door, are captured. Might be more
 	//efficient to generate the door so that it's slightly inside the area.
 	goal_polygon = buffer(this.agentmap.units.getLayer(goal_place.unit).toGeoJSON(), .001);
 
 	if (booleanPointInPolygon(goal_point, goal_polygon)) {
-		goal_lat_lng.new_place = goal_place;
+		goal_lat_lng.new_place = goal_place,
+		goal_lat_lng.speed = speed;
 		this.travel_state.path.push(goal_lat_lng);
 	}
 	else {
@@ -144,10 +148,11 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place) {
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
  * @param {Place} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
+ * @param {number} speed - The speed that the agent should travel, in meters per tick.
  * @param {Boolean} replace_trip - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
  * simply appended to the current scheduled path).
  */
-Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false) {
+Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed, replace_trip = false) {
 	let goal_layer = this.agentmap.units.getLayer(goal_place.unit) || this.agentmap.streets.getLayer(goal_place.street);
 
 	if (goal_layer) {
@@ -165,18 +170,20 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
 			let start_place = this.newTripStartPlace();
 			
 			if (start_place.unit === goal_place.unit) {
-				this.setTravelInUnit(goal_lat_lng, goal_place);
+				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 				return;
 			}
 			//Move to the street if it's starting at a unit and its goal is elsewhere.
 			else if (typeof(start_place.unit) === "number") {
 				let start_unit_door = this.agentmap.getUnitDoor(start_place.unit);
-				start_unit_door.new_place = start_place;
+				start_unit_door.new_place = start_place,
+				start_unit_door.speed = speed;
 				this.travel_state.path.push(start_unit_door);	
 				
 				let start_unit_street_id = this.agentmap.units.getLayer(start_place.unit).street_id,
 				start_unit_street_point = this.agentmap.getStreetNearDoor(start_place.unit);
-				start_unit_street_point.new_place = { street: start_unit_street_id };
+				start_unit_street_point.new_place = { street: start_unit_street_id },
+				start_unit_street_point.speed = speed;
 				this.travel_state.path.push(start_unit_street_point);
 			}
 			
@@ -185,16 +192,17 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
 				goal_street_point_place = { street: this.agentmap.units.getLayer(goal_place.unit).street_id };
 				
 				//Move to the point on the street closest to the goal unit...
-				this.setTravelAlongStreet(goal_street_point, goal_street_point_place);
+				this.setTravelAlongStreet(goal_street_point, goal_street_point_place, speed);
 
 				//Move from that point into the unit.
 				let goal_door = this.agentmap.getUnitDoor(goal_place.unit);
-				goal_door.new_place = goal_place;
+				goal_door.new_place = goal_place,
+				goal_door.speed = speed;
 				this.travel_state.path.push(goal_door)
-				this.setTravelInUnit(goal_lat_lng, goal_place);
+				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 			}
 			else if (typeof(goal_place.street) === "number") {
-				this.setTravelAlongStreet(goal_lat_lng, goal_place);
+				this.setTravelAlongStreet(goal_lat_lng, goal_place, speed);
 			}
 		}
 		else {
@@ -212,8 +220,9 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, replace_trip = false
  *
  * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
  * @param {Place} goal_place - The place to which the agent will travel. Must be of form {"street": street_id}.
+ * @param {number} speed - The speed that the agent should travel, in meters per tick.
  */
-Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
+Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place, speed) {
 	let goal_coords,
 	goal_street_id,
 	goal_street_point, 
@@ -241,7 +250,7 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
 	}
 	
 	if (start_street_id === goal_street_id) {
-		this.setTravelOnSameStreet(start_street_point, goal_street_point, goal_street_feature, goal_street_id);
+		this.setTravelOnSameStreet(start_street_point, goal_street_point, goal_street_feature, goal_street_id, speed);
 	}
 	//If the start and end points are on different streets, move from the start to its nearest intersection, then from there
 	//to the intersection nearest to the end, and finally to the end.
@@ -251,7 +260,7 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
 		
 		start_street_feature = this.agentmap.streets.getLayer(start_street_id).feature;
 	
-		this.setTravelOnStreetNetwork(start_street_point, goal_street_point, start_nearest_intersection, goal_nearest_intersection);
+		this.setTravelOnStreetNetwork(start_street_point, goal_street_point, start_nearest_intersection, goal_nearest_intersection, speed);
 	}
 };
 
@@ -263,8 +272,9 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place) {
  * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
  * @param street_feature {Feature} - A GeoJSON object representing an OpenStreetMap street.
  * @param street_id {number} - The ID of the street in the streets layerGroup.
+ * @param {number} speed - The speed that the agent should travel, in meters per tick.
  */
-Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_feature, street_id) {
+Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_feature, street_id, speed) {
 	//lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
 	//as the original lineString array. So, if the goal point comes earlier in the array (e.g. it's on the far left),
 	//it'll end up being the first point in the path, instead of the last, and the agent will move to it directly,
@@ -280,7 +290,8 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	let street_path = start_to_path_beginning < start_to_path_end ?	street_path_unordered :	street_path_unordered.reverse();
 	let street_path_lat_lngs = street_path.map(coords => { 
 		let lat_lng = L.latLng(coords);
-		lat_lng.new_place = { street: street_id };
+		lat_lng.new_place = { street: street_id },
+		lat_lng.speed = speed;
 
 		return lat_lng;
 	});
@@ -295,15 +306,16 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
  * @param goal_lat_lng {LatLng} - The coordinates of the point on the street to which the agent should travel.
  * @param start_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street at the start_lat_lng.
  * @param goal_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street as the goal_lat_lng.
+ * @param {number} speed - The speed that the agent should travel, in meters per tick.
  */
-Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int_lat_lng, goal_int_lat_lng) {
+Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int_lat_lng, goal_int_lat_lng, speed) {
 	let path = this.agentmap.getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_lng, true);
 
 	for (let i = 0; i <= path.length - 2; i++) {
 		let current_street_id = path[i].new_place.street,
 		current_street_feature = this.agentmap.streets.getLayer(current_street_id).feature;
 		
-		this.setTravelOnSameStreet(path[i], path[i + 1], current_street_feature, current_street_id);			
+		this.setTravelOnSameStreet(path[i], path[i + 1], current_street_feature, current_street_id, speed);			
 	}
 }
 
@@ -362,7 +374,7 @@ Agent.moveDirectly = function(animation_interval, intermediary_interval, steps_i
 		}
 	}
 	
-	//Latest requested movement.
+	//Last movement after intermediary movements, based on the time remaining after all the intermediary steps are discounted.
 	if (state.traveling === true) {
 		latest_interval = animation_interval - (this.agentmap.settings.movement_precision * steps_inbetween);
 		move(latest_interval);
