@@ -416,8 +416,32 @@ function agent(lat_lng, options, agentmap) {
  * @param {number} i - A number used to determine the agent's coordinates and other properties.
  * @returns {Point} - a GeoJSON Point feature with properties and coordinates for agent i, including
  * a "place" property that will set the agent's initial {@link Place} and an object "layer_options" property
- * that will specify the feature's Leaflet options (like its color, size, etc.). 
- * See {@link https://leafletjs.com/reference-1.3.2.html#circlemarker} for all possible options.
+ * that will specify the feature's Leaflet options (like its color, size, etc.). All other provided properties 
+ * will be transferred to the Agent object once it is created.
+ * See {@link https://leafletjs.com/reference-1.3.2.html#circlemarker} for all possible layer options.
+ *
+ * Ex:
+ * let point = {
+ * 	"type": "Feature", 
+ * 	"properties": {
+ * 		"layer_options": {
+ * 			"color": "red",
+ * 			"radius": .5,
+ * 		},
+ * 		"place": {
+ * 			"unit": 89
+ * 		},
+ * 		age: 72,
+ * 		home_city: "LA"
+ * 	},
+ * 	"geometry" {
+ * 		"type": "Point",
+ * 		"coordinates": [
+ * 			14.54589,
+ * 			57.136239
+ * 		]
+ * 	}
+ * }
  */
 
 /**
@@ -474,7 +498,7 @@ function agentify(count, agentFeatureMaker) {
 		}
 		
 		new_agent = agent(coordinates, layer_options, agentmap);
-		new_agent.place = place;
+		Object.assign(new_agent, agent_feature.properties);
 		this.agents.addLayer(new_agent);
 	}
 }
