@@ -357,7 +357,6 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
  * @returns {Array<?number>} - An array of Leaflet layer IDs corresponding to the unit's neighbors.
  */
 function getUnitNeighborLayerIDs(neighbors) {
-	console.log("n", neighbors);
 	let neighbor_layer_ids = neighbors.map(function(neighbor) {
 		if (neighbor !== null) {
 			let neighbor_layer_id = null;
@@ -373,7 +372,7 @@ function getUnitNeighborLayerIDs(neighbors) {
 			return null;
 		}
 	}, this);
-	console.log("nl", neighbor_layer_ids);
+	
 	return neighbor_layer_ids;
 }
 
