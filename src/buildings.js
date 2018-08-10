@@ -14,11 +14,18 @@ getPathFinder = require('./routing').getPathFinder;
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
  */
-function buildingify(bounding_box, OSM_data, OSM_data_URL) {
-	//if (!GeoJSON_data && GeoJSON_data_URL) {}
-	
+function buildingify(bounding_box, OSM_data) {
+	setupStreetFeatures.call(this, OSM_data);
+	setupUnitFeatures.call(this, bounding_box, OSM_data);
+}
+
+/**
+ * Generate and setup streets based on the provided GeoJSON data.
+ *
+ * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ */
+function setupStreetFeatures(OSM_data) {
 	let street_features = getStreetFeatures(OSM_data);
 	
 	let street_options = {
@@ -33,7 +40,7 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 		type: "FeatureCollection",
 		features: street_features
 	};
-	
+console.log(street_feature_collection, street_options);	
 	this.streets = L.geoJSON(
 		street_feature_collection,
 		street_options
@@ -75,7 +82,15 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 			}
 		});
 	}
+}
 
+/**
+ * Generate and setup building units based on the provided GeoJSON data.
+ *
+ * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
+ * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ */
+function setupUnitFeatures(OSM_data) {
 	//Bind getUnitFeatures to "this" so it can access the agentmap as "this.agentmap".
 	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 
@@ -344,6 +359,4 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 	return true;
 }
 
-
 Agentmap.prototype.buildingify = buildingify;
-
