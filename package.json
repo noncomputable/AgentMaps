@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "bundle": "npx webpack",
     "prepublish": "npm run bundle",
-    "make-docs": "cp README.md site\\docs\\DOCS.md & cp README.md site\\devdocs\\DEVDOCS.md & npm run make-usr-docs & npm run make-dev-docs",
+    "make-docs": "cp site\\docs\\DOCS.md site\\devdocs\\DEVDOCS.md & npm run make-usr-docs & npm run make-dev-docs",
     "make-usr-docs": "jsdoc src site\\docs\\DOCS.md -d site\\docs",
     "make-dev-docs": "jsdoc src site\\devdocs\\DEVDOCS.md -d site\\devdocs -p",
     "publish-pages": "cp README.md site\\index.md & gh-pages -d site"
