@@ -55,33 +55,6 @@ console.log(street_feature_collection, street_options);
 
 	this.streets.graph = streetsToGraph(this.streets),
 	this.pathfinder = getPathFinder(this.streets.graph);
-	
-	/**
-	 * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
-	 */
-	function addStreetLayerIntersections(street, street_id) {
-		street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
-
-		this.streets.eachLayer(function(other_street) {
-			let other_street_id = other_street._leaflet_id;
-
-			//Skip if both streets are the same, or if the street already has its intersections with the other street.
-			if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
-				let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
-				other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
-				identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
-					identified_intersection => 
-					[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
-				);
-
-				if (identified_intersections.length > 0) {
-					street.intersections[other_street_id] = identified_intersections,
-					other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
-					other_street.intersections[street_id] = identified_intersections;
-				}
-			}
-		});
-	}
 }
 
 /**
@@ -116,7 +89,7 @@ function setupUnitFeatures(OSM_data) {
 	this.units.eachLayer(function(unit) {
 		unit.street_id = unit.feature.properties.street_id,
 		unit.street_anchors = unit.feature.properties.street_anchors,
-		//Change the ID's in each unit's neighbours array into the appropriate Leaflet ID's.
+		//Change the IDs of each unit in this unit's neighbours array into the appropriate Leaflet IDs.
 		unit.neighbors = unit.feature.properties.neighbors.map(function(neighbor) {
 			if (neighbor !== null) {
 				let neighbor_id;
@@ -179,6 +152,37 @@ function getStreetFeatures(OSM_data) {
 	}
 
 	return street_features;
+}
+
+/**
+ * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
+ *
+ * @param {object} street - A Leaflet polyline representing a street.
+ */
+function addStreetLayerIntersections(street) {
+	let street_id = street._leaflet_id;
+
+	street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
+
+	this.streets.eachLayer(function(other_street) {
+		let other_street_id = other_street._leaflet_id;
+
+		//Skip if both streets are the same, or if the street already has its intersections with the other street.
+		if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
+			let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
+			other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
+			identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
+				identified_intersection => 
+				[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
+			);
+
+			if (identified_intersections.length > 0) {
+				street.intersections[other_street_id] = identified_intersections,
+				other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
+				other_street.intersections[street_id] = identified_intersections;
+			}
+		}
+	});
 }
 
 /**
@@ -283,7 +287,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
  * @private
  * 
  * @param {Feature} street_feature - A GeoJSON feature object representing a street.
- * @returns {Array<Array<Feature>>} -  array of pairs of points around which to anchor units along a street.  
+ * @returns {Array<Array<Feature>>} - Array of pairs of points around which to anchor units along a street.  
  */
 function getUnitAnchors(street_feature, bounding_box) {
 	let unit_anchors = [],
