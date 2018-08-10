@@ -1,3 +1,5 @@
+/* Here we define buildingify and all other functions and definitions it relies on. */
+
 let bearing = require('@turf/bearing').default,
 destination = require('@turf/destination').default,
 along = require('@turf/along').default,
@@ -6,8 +8,6 @@ intersect = require('@turf/intersect').default,
 Agentmap = require('./agentmap').Agentmap,
 streetsToGraph = require('./routing').streetsToGraph,
 getPathFinder = require('./routing').getPathFinder;
-
-/* Here we define buildingify and all other functions and definitions it relies on. */
 
 /**
  * Generate and setup the desired map features (e.g. streets, houses).
@@ -40,7 +40,7 @@ function setupStreetFeatures(OSM_data) {
 		type: "FeatureCollection",
 		features: street_features
 	};
-console.log(street_feature_collection, street_options);	
+
 	this.streets = L.geoJSON(
 		street_feature_collection,
 		street_options
@@ -48,13 +48,66 @@ console.log(street_feature_collection, street_options);
 
 	//Having added the streets as layers to the map, do any processing that requires access to those layers.
 	this.streets.eachLayer(function(street) {
-		let street_id = street._leaflet_id;
-
-		addStreetLayerIntersections.call(this, street, street_id);
+		addStreetLayerIntersections.call(this, street);
 	}, this);
 
 	this.streets.graph = streetsToGraph(this.streets),
 	this.pathfinder = getPathFinder(this.streets.graph);
+}
+
+/**
+ * Get all streets from the GeoJSON data.
+ * @private
+ *
+ * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
+ * @returns {Array<Feature>} -  array of street features.
+ */
+function getStreetFeatures(OSM_data) {
+	let street_features = [];
+
+	for (let i =  0; i < OSM_data.features.length; ++i) {
+		let feature = OSM_data.features[i];
+		
+		if (feature.geometry.type === "LineString" && feature.properties.highway) {
+			let street_feature = feature;
+
+			street_features.push(street_feature);
+		}
+	}
+
+	return street_features;
+}
+
+/**
+ * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
+ * @private
+ * 
+ * @param {object} street - A Leaflet polyline representing a street.
+ */
+function addStreetLayerIntersections(street) {
+	let street_id = street._leaflet_id;
+
+	street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
+
+	this.streets.eachLayer(function(other_street) {
+		let other_street_id = other_street._leaflet_id;
+
+		//Skip if both streets are the same, or if the street already has its intersections with the other street.
+		if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
+			let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
+			other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
+			identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
+				identified_intersection => 
+				[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
+			);
+
+			if (identified_intersections.length > 0) {
+				street.intersections[other_street_id] = identified_intersections,
+				other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
+				other_street.intersections[street_id] = identified_intersections;
+			}
+		}
+	});
 }
 
 /**
@@ -90,21 +143,7 @@ function setupUnitFeatures(OSM_data) {
 		unit.street_id = unit.feature.properties.street_id,
 		unit.street_anchors = unit.feature.properties.street_anchors,
 		//Change the IDs of each unit in this unit's neighbours array into the appropriate Leaflet IDs.
-		unit.neighbors = unit.feature.properties.neighbors.map(function(neighbor) {
-			if (neighbor !== null) {
-				let neighbor_id;
-				this.units.eachLayer(function(neighbor_layer) {
-					if (neighbor_layer.feature.properties.id === neighbor.properties.id) {
-						neighbor_id = this.units.getLayerId(neighbor_layer);
-					}
-				}, this);
-
-				return neighbor_id;
-			}
-			else {
-				return null;
-			}
-		}, this);
+		unit.neighbors = getUnitNeighborLayerIDs.call(this, unit.feature.properties.neighbors);
 	}, this);
 }
 
@@ -129,60 +168,6 @@ function getUnitFeatures(OSM_data, bounding_box) {
 	unit_features = unitsOutOfStreets(proposed_unit_features, this.streets);
 
 	return unit_features;
-}
-
-/**
- * Get all streets from the GeoJSON data.
- * @private
- *
- * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
- * @returns {Array<Feature>} -  array of street features.
- */
-function getStreetFeatures(OSM_data) {
-	let street_features = [];
-
-	for (let i =  0; i < OSM_data.features.length; ++i) {
-		let feature = OSM_data.features[i];
-		
-		if (feature.geometry.type === "LineString" && feature.properties.highway) {
-			let street_feature = feature;
-
-			street_features.push(street_feature);
-		}
-	}
-
-	return street_features;
-}
-
-/**
- * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
- *
- * @param {object} street - A Leaflet polyline representing a street.
- */
-function addStreetLayerIntersections(street) {
-	let street_id = street._leaflet_id;
-
-	street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
-
-	this.streets.eachLayer(function(other_street) {
-		let other_street_id = other_street._leaflet_id;
-
-		//Skip if both streets are the same, or if the street already has its intersections with the other street.
-		if (typeof(street.intersections[other_street_id]) === "undefined" && street_id !== other_street_id) {
-			let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
-			other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
-			identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
-				identified_intersection => 
-				[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
-			);
-
-			if (identified_intersections.length > 0) {
-				street.intersections[other_street_id] = identified_intersections,
-				other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
-				other_street.intersections[street_id] = identified_intersections;
-			}
-		}
-	});
 }
 
 /**
@@ -361,6 +346,35 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 		}
 	}
 	return true;
+}
+
+/**
+ * Given an array of pre-layer IDs, check if any of them correspond to the pre-layer IDs of unit layers, and if so
+ * return an array of the corresponding layer IDs.
+ * @private
+ *
+ * @param {Array<?number>} - An array of pre-layer feature IDs for a unit's neighbors.
+ * @returns {Array<?number>} - An array of Leaflet layer IDs corresponding to the unit's neighbors.
+ */
+function getUnitNeighborLayerIDs(neighbors) {
+	console.log("n", neighbors);
+	let neighbor_layer_ids = neighbors.map(function(neighbor) {
+		if (neighbor !== null) {
+			let neighbor_layer_id = null;
+			this.units.eachLayer(function(possible_neighbor_layer) {
+				if (possible_neighbor_layer.feature.properties.id === neighbor.properties.id) {
+					neighbor_layer_id = this.units.getLayerId(possible_neighbor_layer);
+				}
+			}, this);
+
+			return neighbor_layer_id;
+		}
+		else {
+			return null;
+		}
+	}, this);
+	console.log("nl", neighbor_layer_ids);
+	return neighbor_layer_ids;
 }
 
 Agentmap.prototype.buildingify = buildingify;
