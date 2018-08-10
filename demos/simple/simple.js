@@ -21,47 +21,30 @@ amap.buildingify(bounding_box, map_data);
 
 //Start some number of agents off sick, and make a custom seqUnitAgentMaker to make agents the perimeter streets.
 //Generate 50 agents according to the rules of seqUnitAgentMaker, displaying them as red, .5 meter radius circles.
-amap.agentify(50, amap.seqUnitAgentMaker);
+amap.agentify(1, amap.seqUnitAgentMaker);
 
 //Do the following on each tick of the simulation.
 amap.update_func = function() {
-	//Have the agent leave and come home from work some random moment within one minute of 6000 ticks. Give them a workplace in an interior street.
-	//Do this at the start of the simulation and then every 600 ticks.
-	if (amap.state.ticks % 6000 === 0) {
+	if (amap.state.ticks === 0) {
 		amap.agents.eachLayer(function(agent) {
-			//Only do this if it's the start of the simulation.
-			if (amap.state.ticks === 0) {
-				//Store the agent's starting coordinates and unit ID as its "home".
-				agent.home = { 
-					lat_lng: agent.getLatLng(),
-					unit: agent.place.unit
-				};
-			}
-
 			//Get a new unit and its ID randomly.
 			let new_unit = amap.units.getLayers()[Math.floor(amap.units.count()*Math.random())],
 			new_unit_id = amap.units.getLayerId(new_unit);
 
 			//Schedule the agent to move to the center of the new unit.
-			agent.setTravelToPlace(new_unit.getBounds().getCenter(), {"unit": new_unit_id}, 3, true);
+			agent.setTravelToPlace(new_unit.getBounds().getCenter(), {"unit": new_unit_id}, 2, true);
 
 			//Have the agent start its trip.
 			agent.startTrip();
 		});
+	let a = amap.agents.getLayers()[0];
+	a.travel_state.path.forEach(p => L.circleMarker(p, {"radius": .5, "color": "blue"}).addTo(map));
+	let path = [];
+	for (let point of a.travel_state.path) {
+	if (!path.some(el => el.lat === point.lat && el.lng === point.lng)) {
+	path.push(point);
+	a.travel_state.path = path;
+}
+}
 	}
-
-	//Do this every other 300 ticks.
-	if (amap.state.ticks % 3000 === 0 && amap.state.ticks % 6000 !== 0) {
-		amap.agents.eachLayer(function(agent) {
-			//Schedule the agent to move to the center of its home unit and replace the currently schedule trip.
-			agent.setTravelToPlace(agent.home.lat_lng, {"unit": agent.home.unit}, 3, true);
-
-			//Have the agent start its trip.
-			agent.startTrip();
-		});
-	}
-
-	//Do this every tick.
-	//Check if each other agent is in the same unit as the agent, and then with some probability set its property to sick and change its color if
-	//a sick agent is there. Also occassionally visit a neighbors house.
 };

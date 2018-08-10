@@ -26,7 +26,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>let bearing = require('@turf/bearing').default,
+            <pre class="prettyprint source linenums"><code>/* Here we define buildingify and all other functions and definitions it relies on. */
+
+let bearing = require('@turf/bearing').default,
 destination = require('@turf/destination').default,
 along = require('@turf/along').default,
 lineIntersect = require('@turf/line-intersect').default,
@@ -35,18 +37,23 @@ Agentmap = require('./agentmap').Agentmap,
 streetsToGraph = require('./routing').streetsToGraph,
 getPathFinder = require('./routing').getPathFinder;
 
-/* Here we define buildingify and all other functions and definitions it relies on. */
-
 /**
  * Generate and setup the desired map features (e.g. streets, houses).
  *
  * @param {Array.&lt;Array.&lt;number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @param {string} OSM_data_URL - URL from which to download equivalent OSM_data.
  */
-function buildingify(bounding_box, OSM_data, OSM_data_URL) {
-	//if (!GeoJSON_data &amp;&amp; GeoJSON_data_URL) {}
-	
+function buildingify(bounding_box, OSM_data) {
+	setupStreetFeatures.call(this, OSM_data);
+	setupUnitFeatures.call(this, bounding_box, OSM_data);
+}
+
+/**
+ * Generate and setup streets based on the provided GeoJSON data.
+ *
+ * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ */
+function setupStreetFeatures(OSM_data) {
 	let street_features = getStreetFeatures(OSM_data);
 	
 	let street_options = {
@@ -61,7 +68,7 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 		type: "FeatureCollection",
 		features: street_features
 	};
-	
+
 	this.streets = L.geoJSON(
 		street_feature_collection,
 		street_options
@@ -69,41 +76,75 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 
 	//Having added the streets as layers to the map, do any processing that requires access to those layers.
 	this.streets.eachLayer(function(street) {
-		let street_id = street._leaflet_id;
-
-		addStreetLayerIntersections.call(this, street, street_id);
+		addStreetLayerIntersections.call(this, street);
 	}, this);
 
 	this.streets.graph = streetsToGraph(this.streets),
 	this.pathfinder = getPathFinder(this.streets.graph);
-	
-	/**
-	 * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
-	 */
-	function addStreetLayerIntersections(street, street_id) {
-		street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
+}
 
-		this.streets.eachLayer(function(other_street) {
-			let other_street_id = other_street._leaflet_id;
+/**
+ * Get all streets from the GeoJSON data.
+ * @private
+ *
+ * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
+ * @returns {Array&lt;Feature>} -  array of street features.
+ */
+function getStreetFeatures(OSM_data) {
+	let street_features = [];
 
-			//Skip if both streets are the same, or if the street already has its intersections with the other street.
-			if (typeof(street.intersections[other_street_id]) === "undefined" &amp;&amp; street_id !== other_street_id) {
-				let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
-				other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
-				identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
-					identified_intersection => 
-					[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
-				);
+	for (let i =  0; i &lt; OSM_data.features.length; ++i) {
+		let feature = OSM_data.features[i];
+		
+		if (feature.geometry.type === "LineString" &amp;&amp; feature.properties.highway) {
+			let street_feature = feature;
 
-				if (identified_intersections.length > 0) {
-					street.intersections[other_street_id] = identified_intersections,
-					other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
-					other_street.intersections[street_id] = identified_intersections;
-				}
-			}
-		});
+			street_features.push(street_feature);
+		}
 	}
 
+	return street_features;
+}
+
+/**
+ * Gets the intersections of all the streets on the map and adds them as properties to the street layers.
+ * @private
+ * 
+ * @param {object} street - A Leaflet polyline representing a street.
+ */
+function addStreetLayerIntersections(street) {
+	let street_id = street._leaflet_id;
+
+	street.intersections = typeof(street.intersections) === "undefined" ? {} : street.intersections;
+
+	this.streets.eachLayer(function(other_street) {
+		let other_street_id = other_street._leaflet_id;
+
+		//Skip if both streets are the same, or if the street already has its intersections with the other street.
+		if (typeof(street.intersections[other_street_id]) === "undefined" &amp;&amp; street_id !== other_street_id) {
+			let street_coords = street.getLatLngs().map(L.A.pointToCoordinateArray),
+			other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
+			identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
+				identified_intersection => 
+				[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
+			);
+
+			if (identified_intersections.length > 0) {
+				street.intersections[other_street_id] = identified_intersections,
+				other_street.intersections = typeof(other_street.intersections) === "undefined" ? {} : other_street.intersections,
+				other_street.intersections[street_id] = identified_intersections;
+			}
+		}
+	});
+}
+
+/**
+ * Generate and setup building units based on the provided GeoJSON data.
+ *
+ * @param {Array.&lt;Array.&lt;number>>} bounding_box - The map's top-left and bottom-right coordinates.
+ * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ */
+function setupUnitFeatures(OSM_data) {
 	//Bind getUnitFeatures to "this" so it can access the agentmap as "this.agentmap".
 	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 
@@ -129,22 +170,8 @@ function buildingify(bounding_box, OSM_data, OSM_data_URL) {
 	this.units.eachLayer(function(unit) {
 		unit.street_id = unit.feature.properties.street_id,
 		unit.street_anchors = unit.feature.properties.street_anchors,
-		//Change the ID's in each unit's neighbours array into the appropriate Leaflet ID's.
-		unit.neighbors = unit.feature.properties.neighbors.map(function(neighbor) {
-			if (neighbor !== null) {
-				let neighbor_id;
-				this.units.eachLayer(function(neighbor_layer) {
-					if (neighbor_layer.feature.properties.id === neighbor.properties.id) {
-						neighbor_id = this.units.getLayerId(neighbor_layer);
-					}
-				}, this);
-
-				return neighbor_id;
-			}
-			else {
-				return null;
-			}
-		}, this);
+		//Change the IDs of each unit in this unit's neighbours array into the appropriate Leaflet IDs.
+		unit.neighbors = getUnitNeighborLayerIDs.call(this, unit.feature.properties.neighbors);
 	}, this);
 }
 
@@ -169,29 +196,6 @@ function getUnitFeatures(OSM_data, bounding_box) {
 	unit_features = unitsOutOfStreets(proposed_unit_features, this.streets);
 
 	return unit_features;
-}
-
-/**
- * Get all streets from the GeoJSON data.
- * @private
- *
- * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM streets inside the bounding box.
- * @returns {Array&lt;Feature>} -  array of street features.
- */
-function getStreetFeatures(OSM_data) {
-	let street_features = [];
-
-	for (let i =  0; i &lt; OSM_data.features.length; ++i) {
-		let feature = OSM_data.features[i];
-		
-		if (feature.geometry.type === "LineString" &amp;&amp; feature.properties.highway) {
-			let street_feature = feature;
-
-			street_features.push(street_feature);
-		}
-	}
-
-	return street_features;
 }
 
 /**
@@ -296,7 +300,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
  * @private
  * 
  * @param {Feature} street_feature - A GeoJSON feature object representing a street.
- * @returns {Array&lt;Array&lt;Feature>>} -  array of pairs of points around which to anchor units along a street.  
+ * @returns {Array&lt;Array&lt;Feature>>} - Array of pairs of points around which to anchor units along a street.  
  */
 function getUnitAnchors(street_feature, bounding_box) {
 	let unit_anchors = [],
@@ -372,9 +376,35 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 	return true;
 }
 
+/**
+ * Given an array of pre-layer IDs, check if any of them correspond to the pre-layer IDs of unit layers, and if so
+ * return an array of the corresponding layer IDs.
+ * @private
+ *
+ * @param {Array&lt;?number>} - An array of pre-layer feature IDs for a unit's neighbors.
+ * @returns {Array&lt;?number>} - An array of Leaflet layer IDs corresponding to the unit's neighbors.
+ */
+function getUnitNeighborLayerIDs(neighbors) {
+	let neighbor_layer_ids = neighbors.map(function(neighbor) {
+		if (neighbor !== null) {
+			let neighbor_layer_id = null;
+			this.units.eachLayer(function(possible_neighbor_layer) {
+				if (possible_neighbor_layer.feature.properties.id === neighbor.properties.id) {
+					neighbor_layer_id = this.units.getLayerId(possible_neighbor_layer);
+				}
+			}, this);
+
+			return neighbor_layer_id;
+		}
+		else {
+			return null;
+		}
+	}, this);
+	
+	return neighbor_layer_ids;
+}
 
 Agentmap.prototype.buildingify = buildingify;
-
 </code></pre>
         </article>
     </section>
@@ -385,13 +415,13 @@ Agentmap.prototype.buildingify = buildingify;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentify">agentify</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 02 2018 00:48:39 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 10 2018 01:13:41 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

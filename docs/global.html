@@ -170,7 +170,346 @@
     
 
     
-    <h4 class="name" id="buildingify"><span class="type-signature"></span>buildingify<span class="signature">(bounding_box, OSM_data, OSM_data_URL)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="agent"><span class="type-signature"></span>agent<span class="signature">(lat_lng, options, agentmap)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns an agent object.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>lat_lng</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#LatLng">LatLng</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A pair of coordinates to place the agent at.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An array of options for the agent, namely its layer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>agentmap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Agentmap.html">Agentmap</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The agentmap instance in which the agent exists.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line408">line 408</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="agentify"><span class="type-signature"></span>agentify<span class="signature">(count, agentFeatureMaker)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Generate some number of agents and place them on the map.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The desired number of agents.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>agentFeatureMaker</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#agentFeatureMaker">agentFeatureMaker</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A callback that determines an agent i's feature properties and geometry (always a Point).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line450">line 450</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="buildingify"><span class="type-signature"></span>buildingify<span class="signature">(bounding_box, OSM_data)</span><span class="type-signature"></span></h4>
     
 
     
@@ -257,29 +596,6 @@
         </tr>
 
     
-
-        <tr>
-            
-                <td class="name"><code>OSM_data_URL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">URL from which to download equivalent OSM_data.</td>
-        </tr>
-
-    
     </tbody>
 </table>
 
@@ -317,7 +633,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line19">line 19</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -982,6 +1298,299 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 
 
         
+            
+
+    
+
+    
+    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(OSM_data)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Generate and setup streets based on the provided GeoJSON data.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>OSM_data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A GeoJSON Feature Collection object containing the OSM features inside the bounding box.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line28">line 28</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, OSM_data)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Generate and setup building units based on the provided GeoJSON data.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>bounding_box</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Array.&lt;number>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The map's top-left and bottom-right coordinates.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>OSM_data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A GeoJSON Feature Collection object containing the OSM features inside the bounding box.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 
     
@@ -993,7 +1602,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
 
     
-    <h4 class="name" id="agentFeatureMaker"><span class="type-signature"></span>agentFeatureMaker<span class="signature">(i)</span><span class="type-signature"> &rarr; (nullable) {<a href="global.html#Point">Point</a>}</span></h4>
+    <h4 class="name" id="agentFeatureMaker"><span class="type-signature"></span>agentFeatureMaker<span class="signature">(i)</span><span class="type-signature"> &rarr; {<a href="global.html#Point">Point</a>}</span></h4>
     
 
     
@@ -1001,7 +1610,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 
 
 <div class="description">
-    User-defined callback that gives a feature with appropriate geometry and properties to represent an agent.
+    A user-defined callback function that returns a feature with appropriate geometry and properties to represent an agent.
 </div>
 
 
@@ -1094,7 +1703,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line12">line 12</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line412">line 412</a>
     </li></ul></dd>
     
 
@@ -1121,9 +1730,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 
         
 <div class="param-desc">
-    - Either a GeoJSON Point feature with properties and coordinates for agent i, including
-a "place" property that will define the agent's initial agent.place; or null, which will cause agentify
-to immediately stop its work & terminate.
+    - a GeoJSON Point feature with properties and coordinates for agent i, includinga "place" property that will set the agent's initial <a href="global.html#Place">Place</a> and an object "layer_options" propertythat will specify the feature's Leaflet options (like its color, size, etc.). See <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker">https://leafletjs.com/reference-1.3.2.html#circlemarker</a> for all possible options.
 </div>
 
 
@@ -1890,13 +2497,13 @@ to immediately stop its work & terminate.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentify">agentify</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 02 2018 00:48:37 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 10 2018 01:13:39 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
