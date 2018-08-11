@@ -37,7 +37,7 @@ let Agent = L.Layer.extend({});
  * @property {?number} travel_state.speed - The speed that the agent should travel, in meters per tick.
  * @property {?number} travel_state.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
  * @property {Array} travel_state.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the travel_state is changed/reset.
- * @property {?function} update_func - Function to be called on each update.
+ * @property {?function} update_func - User-defined function to be called on each update.
  */
 Agent.initialize = function(lat_lng, options, agentmap) {
 	this.agentmap = agentmap,

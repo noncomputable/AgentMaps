@@ -20,7 +20,7 @@ lineDistance = require('@turf/line-distance');
  * @property {?number} state.time_start_delay - Ticks corresponding to the time of the last animation frame before the trip started. Subtracted from all subsequent time measurements so that the clock starts at 0, instead of whatever the actual time of that initial animation frame was.
  * @property {object} settings - Settings for the agentmap, filled with defaults.
  * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
- * @property {?function} update_func - Function to be called on each update.
+ * @property {?function} update_func - User-defined function to be called on each update.
  */
 Agentmap = function (map) {
 	this.map = map,
