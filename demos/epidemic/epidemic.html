@@ -17,8 +17,15 @@
 <div style="text-align: center;">
 <div id="sample_map" style="border: 1px solid white; height: 400px; width: 500px; display: inline-block; vertical-align: top; border-radius: 5px;"></div>
 <div id="commander" style="margin-top: 5px">
-<button type="Button" id="reset" onclick="if (this.textContent == 'Start') { this.textContent = 'Reset'; amap.run() } else { amap.reset(); }">Start</button>
-<button type="Button" id="run" onclick="if (this.textContent == 'Run') { this.textContent = 'Pause'; amap.run() } else { this.textContent = 'Run'; amap.pause(); }">Run</button>
+<button type="Button" id="reset" onclick="if (this.textContent == 'Start') { this.textContent = 'Reset'; document.getElementById('run').textContent = 'Pause'; amap.run() } else { amap.reset(); }">Start</button>
+<button type="Button" id="run" onclick="if (this.textContent == 'Run') { this.textContent = 'Pause'; amap.run(); } else { this.textContent = 'Run'; amap.pause(); }">
+Run
+</button>
+<div id="data" style="margin-top:10px">
+<div style="background: rgba(34, 153, 84, .5); border: 1px solid #7dcea0; border-radius: 2.5px; width: 20%; height: 25px; margin: auto; padding-top: 1%;">Ticks: <div id="tick_value" style="display:inline">0</div></div>
+<div style="background: rgba(34, 153, 84, .5); border: 1px solid #7dcea0; border-radius: 2.5px; width: 20%; height: 25px; margin: auto; padding-top: 1%;">Healthy Residents: <div id="healthy_value" style="display:inline">0</div></div>
+<div style="background: rgba(34, 153, 84, .5); border: 1px solid #7dcea0; border-radius: 2.5px; width: 20%; height: 25px; margin: auto; padding-top: 1%;">Infected Residents: <div id="infected_value" style="display:inline">0</div></div>
+</div>
 </div>
 </div>
 <script type="text/javascript" src="../../dist/agentmaps.js"></script>
