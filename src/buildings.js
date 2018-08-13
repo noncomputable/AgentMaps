@@ -120,17 +120,17 @@ function setupUnitFeatures(OSM_data) {
 	//Bind getUnitFeatures to "this" so it can access the agentmap as "this.agentmap".
 	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 
+	let unit_feature_collection = { 
+		type: "FeatureCollection", 
+		features: unit_features
+	};
+	
 	let unit_options = {
 		style: {
 			"color": "green",
 			"weight": 1,
 			"opacity": .87
 		},
-	};
-
-	let unit_feature_collection = { 
-		type: "FeatureCollection", 
-		features: unit_features
 	};
 	
 	this.units = L.geoJSON(
@@ -171,14 +171,14 @@ function getUnitFeatures(OSM_data, bounding_box) {
 }
 
 /**
- * Given two anchors, find four nearby points on either side
- * of the street appropriate to build a unit(s) on.
+ * Given an array of anchor pairs, for each anchor pair find four 
+ * nearby points on either side of the street appropriate to build a unit(s) on.
  * @private
  *
- * @param {Array<Array<Feature>>} unit_anchors -  array of pairs of points around which to anchor units along a street.
- * @param {Array<Feature>} proposed_unit_features -  array of features representing real estate units already proposed for construction.
+ * @param {Array<Array<Feature>>} unit_anchors - Array of pairs of points around which to anchor units along a street.
+ * @param {Array<Feature>} proposed_unit_features - Array of features representing building units already proposed for construction.
  * @param {string} street_feature_id - The Leaflet layer ID of the street feature along which the unit is being constructed..
- * @returns {Array<Feature>} unit_features -  array of features representing real estate units.
+ * @returns {Array<Feature>} unit_features - Array of features representing units.
  */
 function generateUnitFeatures(unit_anchors, proposed_unit_features, street_feature_id) {
 	//One sub-array of unit features for each side of the road.
@@ -215,8 +215,10 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 			unit_feature.geometry.coordinates[0][4] = unit_feature.geometry.coordinates[0][0];
 
 			//Exclude the unit if it overlaps with any of the other proposed units.
-			let all_proposed_unit_features = unit_features.concat(...proposed_unit_features); 
+			let all_proposed_unit_features = unit_features[0].concat(unit_features[1]).concat(proposed_unit_features);
+			console.log("coming");
 			if (noOverlaps(unit_feature, all_proposed_unit_features)) { 
+				console.log("in");
 				//Recode index so that it's useful here.
 				if (i === 1) {
 					i = 0;
@@ -242,11 +244,13 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 					unit_pair[0] = unit_feature;
 				}
 				else {
-					//Make unit_feature opposite to this unit_feature on the street its third neighbor.
-					unit_feature.properties.neighbors[2] = unit_pair[0],
-					//Make unit_feature opposite to this unit_feature on the street's third neighbor this unit_feature.
-					unit_pair[0].properties.neighbors[2] = unit_feature,
-
+					if (unit_pair[0] !== null) {
+						//Make unit_feature opposite to this unit_feature on the street its third neighbor.
+						unit_feature.properties.neighbors[2] = unit_pair[0],
+						//Make unit_feature opposite to this unit_feature on the street's third neighbor this unit_feature.
+						unit_pair[0].properties.neighbors[2] = unit_feature;
+					}
+					
 					unit_pair[1] = unit_feature;
 				}
 			}
@@ -306,8 +310,8 @@ function getUnitAnchors(street_feature, bounding_box) {
  * Get an array of units excluding units that overlap with streets.
  * @private
  *
- * @param {Array<Feature>} unit_features - ray of features representing units.
- * @param {Array<Layer>} street_layers - ray of Leaflet layers representing streets.
+ * @param {Array<Feature>} unit_features - Array of features representing units.
+ * @param {Array<Layer>} street_layers - Array of Leaflet layers representing streets.
  * @returns {Array<Feature>} - unit_features, but with all units that intersect any streets removed.
  */
 function unitsOutOfStreets(unit_features, street_layers) {
@@ -333,18 +337,19 @@ function unitsOutOfStreets(unit_features, street_layers) {
  * Check whether a polygon overlaps with any member of an array of polygons.
  * @private
  *
- * @param {Feature} polygon_feature - A geoJSON polygon feature.
- * @param {Array<Feature>} polygon_feature_array -  array of geoJSON polygon features.
+ * @param {Feature} reference_polygon_feature - A geoJSON polygon feature.
+ * @param {Array<Feature>} polygon_feature_array - Array of geoJSON polygon features.
  * @returns {boolean} - Whether the polygon_feature overlaps with any one in the array.
  */	
 function noOverlaps(reference_polygon_feature, polygon_feature_array) {
-	return true;
+	//return true;
 	for (feature_array_element of polygon_feature_array) {
 		let overlap_exists = intersect(reference_polygon_feature, feature_array_element);
 		if (overlap_exists) {
 			return false;
 		}
 	}
+
 	return true;
 }
 
