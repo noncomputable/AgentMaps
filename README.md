@@ -238,9 +238,9 @@ I've been stuffed with other work, so it'd be really cool if anyone wants to com
 Here are some things I think would be great for AgentMaps to have. If you add them before I do, I'll credit your name appropriately.
 
 * Sidewalks: streets and sidewalks should be divided and made into distinct places that agents can distinguish and navigate between.
-* Architectural Variety: buildings vary in size, dimension, and shape a lotMthey're not all identical rectangles. Users should be able
+* Architectural Variety: buildings vary in size, dimension, and shape a lot¿they're not all identical rectangles. Users should be able
 to provide custom building specifications and AgentMaps should materialize them.
-  * For example, what if the GeoJSON the user provides contains a big park? The streets along it probably shouldn't be dotted with normal sized units€”it should probably be one big unit itself!
+  * For example, what if the GeoJSON the user provides contains a big park? The streets along it probably shouldn't be dotted with normal sized units¿it should probably be one big unit itself!
 * Urban Development: buildings change over time. Users should be able to specify these changes over time and AgentMaps should incorporate them coherently.
 * Agent Diversity: agents are conveniently visualized with leaflet CircleMarkers and you can customize them a lot. But what if someone wants little human-shaped
 sprites instead? Users should be able to specify Markers with custom images for the agents too.
