@@ -216,9 +216,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 
 			//Exclude the unit if it overlaps with any of the other proposed units.
 			let all_proposed_unit_features = unit_features[0].concat(unit_features[1]).concat(proposed_unit_features);
-			console.log("coming");
 			if (noOverlaps(unit_feature, all_proposed_unit_features)) { 
-				console.log("in");
 				//Recode index so that it's useful here.
 				if (i === 1) {
 					i = 0;
