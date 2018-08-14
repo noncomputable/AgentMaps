@@ -14,27 +14,32 @@ getPathFinder = require('./routing').getPathFinder;
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @param {object} street_options - An object containing the Leaflet styling options for streets.
+ * @param {object} unit_options - An object containing the Leaflet styling options for units.
  */
-function buildingify(bounding_box, OSM_data) {
-	setupStreetFeatures.call(this, OSM_data);
-	setupUnitFeatures.call(this, bounding_box, OSM_data);
+function buildingify(bounding_box, OSM_data, street_options, unit_options) {
+	setupStreetFeatures.call(this, OSM_data, street_options);
+	setupUnitFeatures.call(this, OSM_data, bounding_box, unit_options);
 }
 
 /**
  * Generate and setup streets based on the provided GeoJSON data.
  *
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @param {object} street_options - An object containing the Leaflet styling options for streets.
  */
-function setupStreetFeatures(OSM_data) {
+function setupStreetFeatures(OSM_data, street_options) {
 	let street_features = getStreetFeatures(OSM_data);
 	
-	let street_options = {
-		style: {
-			"color": "yellow",
-			"weight": 4,
-			"opacity": .5
-		},
-	};
+	if (typeof street_options === "undefined") {
+		street_options = {
+			style: {
+				"color": "yellow",
+				"weight": 4,
+				"opacity": .5
+			},
+		};
+	}
 
 	let street_feature_collection = {
 		type: "FeatureCollection",
@@ -115,8 +120,9 @@ function addStreetLayerIntersections(street) {
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @param {object} unit_options - An object containing the Leaflet styling options for units.
  */
-function setupUnitFeatures(OSM_data) {
+function setupUnitFeatures(OSM_data, bounding_box, unit_options) {
 	//Bind getUnitFeatures to "this" so it can access the agentmap as "this.agentmap".
 	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
 
@@ -125,13 +131,15 @@ function setupUnitFeatures(OSM_data) {
 		features: unit_features
 	};
 	
-	let unit_options = {
-		style: {
-			"color": "green",
-			"weight": 1,
-			"opacity": .87
-		},
-	};
+	if (typeof unit_options === "undefined") {
+		unit_options = {
+			style: {
+				"color": "green",
+				"weight": 1,
+				"opacity": .87
+			},
+		};
+	}
 	
 	this.units = L.geoJSON(
 		unit_feature_collection,
