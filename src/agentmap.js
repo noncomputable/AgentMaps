@@ -111,9 +111,9 @@ Agentmap.prototype.update = function(rAF_time) {
 };
 
 /**
-* Stop the animation, reset the animation state properties, and delete the agents.
+* Stop the animation, reset the animation state properties, and delete the features.
 */
-Agentmap.prototype.reset = function() {
+Agentmap.prototype.clear = function() {
 	L.Util.cancelAnimFrame(this.state.animation_frame_id);
 	this.state.running = false,
 	this.state.paused = false,
@@ -124,6 +124,8 @@ Agentmap.prototype.reset = function() {
 	this.state.time_start_delay = null;
 	
 	this.agents.clearLayers();
+	this.streets.clearLayers();
+	this.units.clearLayers();
 };
 
 /** 
