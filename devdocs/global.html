@@ -142,7 +142,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agentmap.js.html">agentmap.js</a>, <a href="agentmap.js.html#line222">line 222</a>
+        <a href="agentmap.js.html">agentmap.js</a>, <a href="agentmap.js.html#line224">line 224</a>
     </li></ul></dd>
     
 
@@ -271,7 +271,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line87">line 87</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line98">line 98</a>
     </li></ul></dd>
     
 
@@ -610,7 +610,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line450">line 450</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line474">line 474</a>
     </li></ul></dd>
     
 
@@ -644,7 +644,7 @@
     
 
     
-    <h4 class="name" id="buildingify"><span class="type-signature"></span>buildingify<span class="signature">(bounding_box, OSM_data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="buildingify"><span class="type-signature"></span>buildingify<span class="signature">(bounding_box, OSM_data, street_options<span class="signature-attributes">opt</span>, unit_options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -676,6 +676,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -701,6 +703,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -724,10 +734,368 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">A GeoJSON Feature Collection object containing the OSM features inside the bounding box.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>street_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">An object containing the Leaflet styling options for streets.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Leaflet polyline styling options. See available options here: <a href="https://leafletjs.com/reference-1.3.2.html#polyline-l-polyline">https://leafletjs.com/reference-1.3.2.html#polyline-l-polyline</a>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>unit_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">An object containing the Leaflet & AgentMaps styling options for units.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The Leaflet polygon styling options. See available options here: <a href="https://leafletjs.com/reference-1.3.2.html#polygon-l-polygon">https://leafletjs.com/reference-1.3.2.html#polygon-l-polygon</a>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>front_buffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    6
+                
+                </td>
+            
+
+            <td class="description last">The number of meters beetween the front of unit and its street.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>side_buffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3
+                
+                </td>
+            
+
+            <td class="description last">The number of meters between two units on the same street.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    14
+                
+                </td>
+            
+
+            <td class="description last">The length of the unit in meters along the street.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>depth</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    18
+                
+                </td>
+            
+
+            <td class="description last">The depth of the unit in meters out from its front.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -768,7 +1136,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line18">line 18</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line26">line 26</a>
     </li></ul></dd>
     
 
@@ -1139,7 +1507,7 @@
     
 
     
-    <h4 class="name" id="generateUnitFeatures"><span class="type-signature">(private) </span>generateUnitFeatures<span class="signature">(unit_anchors, proposed_unit_features, street_feature_id)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
+    <h4 class="name" id="generateUnitFeatures"><span class="type-signature">(private) </span>generateUnitFeatures<span class="signature">(unit_anchors, proposed_unit_features, street_feature_id, unit_options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
     
 
     
@@ -1147,7 +1515,7 @@
 
 
 <div class="description">
-    Given two anchors, find four nearby points on either sideof the street appropriate to build a unit(s) on.
+    Given an array of anchor pairs, for each anchor pair find four nearby points on either side of the street appropriate to build a unit(s) on.
 </div>
 
 
@@ -1199,7 +1567,7 @@
 
             
 
-            <td class="description last">array of pairs of points around which to anchor units along a street.</td>
+            <td class="description last">Array of pairs of points around which to anchor units along a street.</td>
         </tr>
 
     
@@ -1222,7 +1590,7 @@
 
             
 
-            <td class="description last">array of features representing real estate units already proposed for construction.</td>
+            <td class="description last">Array of features representing building units already proposed for construction.</td>
         </tr>
 
     
@@ -1246,6 +1614,29 @@
             
 
             <td class="description last">The Leaflet layer ID of the street feature along which the unit is being constructed..</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>unit_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object containing the AgentMaps styling options for units.</td>
         </tr>
 
     
@@ -1286,7 +1677,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line183">line 183</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line203">line 203</a>
     </li></ul></dd>
     
 
@@ -1313,7 +1704,7 @@
 
         
 <div class="param-desc">
-    unit_features -  array of features representing real estate units.
+    unit_features - Array of features representing units.
 </div>
 
 
@@ -2123,7 +2514,7 @@ to the index of the intersecting coordinate-pair in that array.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line65">line 65</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line76">line 76</a>
     </li></ul></dd>
     
 
@@ -2179,7 +2570,7 @@ to the index of the intersecting coordinate-pair in that array.
     
 
     
-    <h4 class="name" id="getUnitAnchors"><span class="type-signature">(private) </span>getUnitAnchors<span class="signature">(street_feature)</span><span class="type-signature"> &rarr; {Array.&lt;Array.&lt;<a href="global.html#Feature">Feature</a>>>}</span></h4>
+    <h4 class="name" id="getUnitAnchors"><span class="type-signature">(private) </span>getUnitAnchors<span class="signature">(street_feature, unit_options)</span><span class="type-signature"> &rarr; {Array.&lt;Array.&lt;<a href="global.html#Feature">Feature</a>>>}</span></h4>
     
 
     
@@ -2243,6 +2634,29 @@ to the index of the intersecting coordinate-pair in that array.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>unit_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object containing the AgentMaps styling options for units.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2280,7 +2694,7 @@ to the index of the intersecting coordinate-pair in that array.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line277">line 277</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line300">line 300</a>
     </li></ul></dd>
     
 
@@ -2336,7 +2750,7 @@ to the index of the intersecting coordinate-pair in that array.
     
 
     
-    <h4 class="name" id="getUnitFeatures"><span class="type-signature">(private) </span>getUnitFeatures<span class="signature">(OSM_data)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
+    <h4 class="name" id="getUnitFeatures"><span class="type-signature">(private) </span>getUnitFeatures<span class="signature">(OSM_data, unit_options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
     
 
     
@@ -2400,6 +2814,29 @@ to the index of the intersecting coordinate-pair in that array.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>unit_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object containing the AgentMaps styling options for units.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2437,7 +2874,7 @@ to the index of the intersecting coordinate-pair in that array.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line157">line 157</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line176">line 176</a>
     </li></ul></dd>
     
 
@@ -2594,7 +3031,7 @@ to the index of the intersecting coordinate-pair in that array.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line359">line 359</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line383">line 383</a>
     </li></ul></dd>
     
 
@@ -2807,7 +3244,7 @@ to the index of the intersecting coordinate-pair in that array.
     
 
     
-    <h4 class="name" id="noOverlaps"><span class="type-signature">(private) </span>noOverlaps<span class="signature">(polygon_feature, polygon_feature_array)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    <h4 class="name" id="noOverlaps"><span class="type-signature">(private) </span>noOverlaps<span class="signature">(reference_polygon_feature, polygon_feature_array)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -2851,7 +3288,7 @@ to the index of the intersecting coordinate-pair in that array.
 
         <tr>
             
-                <td class="name"><code>polygon_feature</code></td>
+                <td class="name"><code>reference_polygon_feature</code></td>
             
 
             <td class="type">
@@ -2890,7 +3327,7 @@ to the index of the intersecting coordinate-pair in that array.
 
             
 
-            <td class="description last">array of geoJSON polygon features.</td>
+            <td class="description last">Array of geoJSON polygon features.</td>
         </tr>
 
     
@@ -2931,7 +3368,7 @@ to the index of the intersecting coordinate-pair in that array.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line340">line 340</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line363">line 363</a>
     </li></ul></dd>
     
 
@@ -3260,7 +3697,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
 
     
-    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(OSM_data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(OSM_data, street_options)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3324,6 +3761,29 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>street_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object containing the Leaflet styling options for streets.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -3361,7 +3821,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line28">line 28</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line37">line 37</a>
     </li></ul></dd>
     
 
@@ -3395,7 +3855,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
 
     
-    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, OSM_data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, OSM_data, unit_options)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3482,6 +3942,29 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>unit_options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object containing the Leaflet & AgentMaps styling options for units.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -3519,7 +4002,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line119">line 119</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line131">line 131</a>
     </li></ul></dd>
     
 
@@ -3770,7 +4253,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 
             
 
-            <td class="description last">ray of features representing units.</td>
+            <td class="description last">Array of features representing units.</td>
         </tr>
 
     
@@ -3793,7 +4276,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 
             
 
-            <td class="description last">ray of Leaflet layers representing streets.</td>
+            <td class="description last">Array of Leaflet layers representing streets.</td>
         </tr>
 
     
@@ -3834,7 +4317,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line313">line 313</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line336">line 336</a>
     </li></ul></dd>
     
 
@@ -4024,7 +4507,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 
         
 <div class="param-desc">
-    - a GeoJSON Point feature with properties and coordinates for agent i, includinga "place" property that will set the agent's initial <a href="global.html#Place">Place</a> and an object "layer_options" propertythat will specify the feature's Leaflet options (like its color, size, etc.). See <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker">https://leafletjs.com/reference-1.3.2.html#circlemarker</a> for all possible options.
+    - a GeoJSON Point feature with properties and coordinates for agent i, includinga "place" property that will set the agent's initial <a href="global.html#Place">Place</a> and an object "layer_options" propertythat will specify the feature's Leaflet options (like its color, size, etc.). All other provided properties will be transferred to the Agent object once it is created.See <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker">https://leafletjs.com/reference-1.3.2.html#circlemarker</a> for all possible layer options.Ex:let point = {	"type": "Feature", 	"properties": {		"layer_options": {			"color": "red",			"radius": .5,		},		"place": {			"unit": 89		},		age: 72,		home_city: "LA"	},	"geometry" {		"type": "Point",		"coordinates": [			14.54589,			57.136239		]	}}
 </div>
 
 
@@ -4797,7 +5280,7 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 10 2018 01:13:41 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 01:21:36 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -44,31 +44,71 @@
 
     <section>
         <article><h1>AgentMaps Documentation</h1><p>For a basic walkthrough on using AgentMaps, see <a href="https://noncomputable.github.io/AgentMaps/#basic-walkthrough">this</a> section of the README.</p>
-<p>The sidebar of this page contains a list of classes and namespaces used by Agentmaps. 
-Click them to see their methods and properties, their purposes, and their intended types.
-If you are looking at the [normal docs] (https://noncomputable.github.io/AgentMaps/docs),
+<p>The sidebar of this page contains a list of classes and functions used by Agentmaps. 
+Click them to see their methods and properties, their purposes, and their types.
+If you are looking at the <a href="https://noncomputable.github.io/AgentMaps/docs">normal docs</a>,
 you will only see the items necessary for using AgentMaps. However, if you are looking at
-the [developer docs] (https://noncomputable.github.io/AgentMaps/devdocs/), you will see
+the <a href="https://noncomputable.github.io/AgentMaps/devdocs/">developer docs</a>, you will see
 everything, including functions used only in the internal implementation of AgentMaps.</p>
-<p>Here I'll explain some features of AgentMaps that the auto-generated docs probably aren't sufficiently helpful to.</p>
-<h4>Table of Contents</h4><p><a href="#basic-structure">Basic Structure of Agentmaps</a>
-<a href="#neighbors">Neighbors</a>
-<a href="#intersections">Intersections</a>
-<a href="#agentfeaturemakers">AgentFeatureMakers</a></p>
-<h2>Basic Structure</h2><p>AgentMap functions as an extension of Leaflet. 
-Since everything in Leaflet is in the L namespace (e.g. L.Map, L.latLng), everything in AgentMaps is in its own namespace A inside that namespace: L.A.</p>
+<p>Here I'll explain some features of AgentMaps that the auto-generated docs probably aren't sufficiently helpful for.</p>
+<h4>Table of Contents</h4><p><a href="#basic-structure">Basic Structure of Agentmaps</a></p>
+<p><a href="#neighbors">Neighbors</a></p>
+<p><a href="#intersections">Intersections</a></p>
+<p><a href="#agentfeaturemakers">AgentFeatureMakers</a></p>
+<p><a href="#update-functions">Update Functions</a></p>
+<p><a href="#feature-styling">Feature Styling</a></p>
+<h2>Basic Structure</h2><p>AgentMaps functions as an extension of Leaflet. 
+Since everything in Leaflet is in the namespace L (e.g. L.Map, L.latLng), everything in AgentMaps is in its own namespace A inside of L, L.A (e.g. L.A.Agentmap, L.A.agent).</p>
 <p>The main object of AgentMaps is an Agentmap (L.A.Agentmap).
 Since AgentMaps is built on top of Leaflet, the Agentmap constructor requires a Leaflet map as an argument.
-All the classes in AgentMaps have lowercase factory functions that return instances of them given their
-constructor's arguments (L.A.agentmap).</p>
-<p>The Agentmap keeps track of its units, streets, and agents as Leaflet FeatureGroups (Agentmap.units, Agentmap.streets, and Agentmap.agents).
+All the classes in AgentMaps have corresponding, lowercase factory functions that return new instances of them provided their
+constructor's arguments. For example, <code>L.A.agentmap(map)</code> is equivalent to <code>new L.A.Agentmap(map)</code>.</p>
+<p>An Agentmap stores its units, streets, and agents as Leaflet FeatureGroups (Agentmap.units, Agentmap.streets, and Agentmap.agents).
 These FeatureGroups can be looped through like any other Leaflet FeatureGroup (using the LayerGroup.eachLayer() method).</p>
 <h2>Neighbors</h2><p>Every unit has a neighbors property (unit.neighbors): a three element array of layer IDs representing the previous unit, the next unit, and the
 unit directly across the street respectively.</p>
-<h2>Intersections</h2><p>Every street has an intersections property (street.intersections): an object mapping street IDs to an array of their intersections with the 
-street in question, where the intersections themselves are 2-element arrays whose first elements are the coordinates of the intersections,
-and whose second elements are the indices of the intersections in each street's own coordinate arrays. </p>
-<h2>AgentFeatureMakers</h2></article>
+<h2>Intersections</h2><p>Every street has an intersections property (street.intersections): an object mapping the ID of another street the given street has intersections with to an array of the specific intersections. Each individual intersection itself is a 2-element array whose first element is the coordinates of the intersection,
+and whose second element is an object mapping the ID of each street to the index of the intersection point in its coordinate array.</p>
+<h2>AgentFeatureMakers</h2><p>The <code>Agentmap.agentify</code> method creates and places agents on the map. Its first parameter is the number of agents to be created.
+Its second parameter is a kind of function called an AgentFeatureMaker that specifies where the agents will be placed, what they look like, and what their properties are.
+The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point whose coordinates are where the agent should be placed, 
+whose <code>properties.place</code> property is a valid <a href="https://noncomputable.github.io/AgentMaps/docs/global.html#Place">Place</a> containing those coordinates,
+whose <code>properties.layer_options</code> property is an object containing options for the agent's CircleMarker 
+(like color, outline, radius, and all the other options listed <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker-option">here</a>). 
+Any other properties defined in the <code>properties</code> property (like, say, <code>properties.phone_number</code>) will be transferred to a new Agent instance. </p>
+<p>For example, the AgentFeatureMaker in an epidemic simulation may return something like this:</p>
+<pre class="prettyprint source lang-javascript"><code>let feature = { 
+    &quot;type&quot;: &quot;Feature&quot;,
+    &quot;properties&quot;: {
+        &quot;place&quot;: {
+            &quot;unit&quot;: random_unit_id
+        },
+        &quot;layer_options&quot;: {
+            &quot;color&quot;: &quot;blue&quot;,
+            &quot;radius&quot;: .5
+        },
+        &quot;infected&quot;: Math.random() > .15 ? false : true,
+        &quot;ticks_until_recovery&quot;: Math.random() * 2000,
+    },
+    &quot;geometry&quot;: {
+        &quot;type&quot;: &quot;Point&quot;,
+        &quot;coordinates&quot;: center_coords
+    },
+};</code></pre><h2>Update Functions</h2><p>On each tick of the simulation, the Agentmap calls its own <code>Agentmap.update_func</code> and then each existing Agent's <code>Agent.update_func</code>, all of which are by default empty.
+To specify what happens during your simulation, you should define update_funcs where you need to.</p>
+<p>If you want some event to happen that doesn't differ for different agents, I suggest specifying it in an <code>Agentmap.update_func</code>.</p>
+<p>If you want some event to vary and occur at different times for different agents, I suggest generating varying <code>Agent.update_func</code>s in a loop like this:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.agents.eachLayer(function(agent) {
+    agent.update_func = function() {
+        //custom operations that vary based on the given agent's properties
+    }
+});</code></pre><p>* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.</p>
+<h2>Feature Styling</h2><p>Every feature that AgentMaps places on the map is an instance of a Leaflet layer. Streets are L.Polylines, units are L.Polygons, and agents are L.CircleMarkers.</p>
+<p>The methods for creating agents (agentify), units (buildingify), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
+specifying the style you want (colors, outlines, transparency, radius, etc.). 
+See the <a href="https://leafletjs.com/reference-1.3.2.html">Leaflet docs</a> for each of the aforementioned classes to learn about all the possible options. </p>
+<p>Buildingify's unit_options parameter is different from the other options parameters: you can provide extra AgentMaps-only options to specify the length, depth, front-buffer (how far the front of a unit is from its street), and side-buffer (how far a unit is from adjacent units on the same street) of the unit in meters.</p>
+<p>You can modify an individual street, unit, or agent's (Leaflet) style after it's already on the map by calling its setStyle method and passing it an options object.</p></article>
     </section>
 
 
@@ -85,7 +125,7 @@ and whose second elements are the indices of the intersections in each street's 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 10 2018 01:13:39 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 01:21:33 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
