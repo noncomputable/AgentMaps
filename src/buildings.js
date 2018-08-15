@@ -14,8 +14,14 @@ getPathFinder = require('./routing').getPathFinder;
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @param {object} street_options - An object containing the Leaflet styling options for streets.
- * @param {object} unit_options - An object containing the Leaflet styling options for units.
+ * @param {object} [street_options] - An object containing the Leaflet styling options for streets.
+ * @param {object} [street_options.style] - Leaflet polyline styling options. See available options here: {@link https://leafletjs.com/reference-1.3.2.html#polyline-l-polyline}.
+ * @param {object} [unit_options] - An object containing the Leaflet & AgentMaps styling options for units.
+ * @param {object} [unit_options.style] - The Leaflet polygon styling options. See available options here: {@link https://leafletjs.com/reference-1.3.2.html#polygon-l-polygon}.
+ * @param {number} [unit_options.front_buffer = 6] - The number of meters beetween the front of unit and its street.
+ * @param {number} [unit_options.side_buffer = 3] - The number of meters between two units on the same street.
+ * @param {number} [unit_options.length = 14] - The length of the unit in meters along the street.
+ * @param {number} [unit_options.depth = 18] - The depth of the unit in meters out from its front.
  */
 function buildingify(bounding_box, OSM_data, street_options, unit_options) {
 	setupStreetFeatures.call(this, OSM_data, street_options);
@@ -120,26 +126,30 @@ function addStreetLayerIntersections(street) {
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @param {object} unit_options - An object containing the Leaflet styling options for units.
+ * @param {object} unit_options - An object containing the Leaflet & AgentMaps styling options for units.
  */
-function setupUnitFeatures(OSM_data, bounding_box, unit_options) {
+function setupUnitFeatures(OSM_data, bounding_box, unit_options = {}) {
+	let default_options = {
+		//	style: {
+				"color": "green",
+				"weight": 1,
+				"opacity": .87,
+	//	},
+			"front_buffer": 6,
+			"side_buffer": 3,
+			"length": 14,
+			"depth": 18
+	};
+
+	unit_options = Object.assign(default_options, unit_options);
+	
 	//Bind getUnitFeatures to "this" so it can access the agentmap as "this.agentmap".
-	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box);
+	let unit_features = getUnitFeatures.bind(this)(OSM_data, bounding_box, unit_options);
 
 	let unit_feature_collection = { 
 		type: "FeatureCollection", 
 		features: unit_features
 	};
-	
-	if (typeof unit_options === "undefined") {
-		unit_options = {
-			style: {
-				"color": "green",
-				"weight": 1,
-				"opacity": .87
-			},
-		};
-	}
 	
 	this.units = L.geoJSON(
 		unit_feature_collection,
@@ -160,21 +170,22 @@ function setupUnitFeatures(OSM_data, bounding_box, unit_options) {
  * @private
  *
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
+ * @param {object} unit_options - An object containing the AgentMaps styling options for units.
  * @returns {Array<Feature>} -  array of features representing real estate units.
  */
-function getUnitFeatures(OSM_data, bounding_box) {
+function getUnitFeatures(OSM_data, bounding_box, unit_options) {
 	let proposed_unit_features = [];
 	
 	this.streets.eachLayer(function(layer) {
 		let street_feature = layer.feature,
 		street_id = layer._leaflet_id,
-		proposed_anchors = getUnitAnchors(street_feature, bounding_box),
-		new_proposed_unit_features = generateUnitFeatures(proposed_anchors, proposed_unit_features, street_id);
+		proposed_anchors = getUnitAnchors(street_feature, bounding_box, unit_options),
+		new_proposed_unit_features = generateUnitFeatures(proposed_anchors, proposed_unit_features, street_id, unit_options);
 		proposed_unit_features.push(...new_proposed_unit_features);
 	});
 
 	unit_features = unitsOutOfStreets(proposed_unit_features, this.streets);
-
+	
 	return unit_features;
 }
 
@@ -186,9 +197,10 @@ function getUnitFeatures(OSM_data, bounding_box) {
  * @param {Array<Array<Feature>>} unit_anchors - Array of pairs of points around which to anchor units along a street.
  * @param {Array<Feature>} proposed_unit_features - Array of features representing building units already proposed for construction.
  * @param {string} street_feature_id - The Leaflet layer ID of the street feature along which the unit is being constructed..
+ * @param {object} unit_options - An object containing the AgentMaps styling options for units.
  * @returns {Array<Feature>} unit_features - Array of features representing units.
  */
-function generateUnitFeatures(unit_anchors, proposed_unit_features, street_feature_id) {
+function generateUnitFeatures(unit_anchors, proposed_unit_features, street_feature_id, unit_options) {
 	//One sub-array of unit features for each side of the road.
 	let unit_features = [[],[]],
 	starting_id = proposed_unit_features.length,
@@ -202,8 +214,8 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 			let anchor_a = anchor_pair[0].geometry.coordinates,
 			anchor_b = anchor_pair[1].geometry.coordinates,
 			anchor_latLng_pair = [anchor_a, anchor_b],
-			street_buffer = 6 / 1000, //Distance between center of street and start of unit.
-			house_depth = 18 / 1000,
+			street_buffer = unit_options.front_buffer / 1000, //Distance between center of street and start of unit.
+			house_depth = unit_options.depth / 1000,
 			angle = bearing(anchor_a, anchor_b),
 			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //Angle of line perpendicular to the anchor segment.
 			unit_feature = { 
@@ -282,17 +294,18 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
  * @private
  * 
  * @param {Feature} street_feature - A GeoJSON feature object representing a street.
+ * @param {object} unit_options - An object containing the AgentMaps styling options for units.
  * @returns {Array<Array<Feature>>} - Array of pairs of points around which to anchor units along a street.  
  */
-function getUnitAnchors(street_feature, bounding_box) {
+function getUnitAnchors(street_feature, bounding_box, unit_options) {
 	let unit_anchors = [],
-	unit_length = 14 / 1000, //Kilometers.
-	unit_buffer = 3 / 1000, //Distance between units, kilometers.
+	unit_length = unit_options.length / 1000, //Kilometers.
+	unit_buffer = unit_options.side_buffer / 1000, //Distance between units, kilometers.
 	endpoint = street_feature.geometry.coordinates[street_feature.geometry.coordinates.length - 1],
 	start_anchor = along(street_feature, 0),
 	end_anchor = along(street_feature, unit_length),
 	distance_along = unit_length;
-	
+
 	while (end_anchor.geometry.coordinates != endpoint) {
 		//Exclude proposed anchors if they're outside of the bounding box.
 		start_coord = L.A.reversedCoordinates(start_anchor.geometry.coordinates), 
