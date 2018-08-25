@@ -109,7 +109,7 @@ function addStreetLayerIntersections(street) {
 			other_street_coords = other_street.getLatLngs().map(L.A.pointToCoordinateArray),
 			identified_intersections = L.A.getIntersections(street_coords, other_street_coords, [street_id, other_street_id]).map(
 				identified_intersection => 
-				[L.A.reversedCoordinates(identified_intersection[0]), identified_intersection[1]]
+				[L.latLng(L.A.reversedCoordinates(identified_intersection[0])), identified_intersection[1]]
 			);
 
 			if (identified_intersections.length > 0) {
