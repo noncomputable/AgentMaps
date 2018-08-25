@@ -66,7 +66,7 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 /**
  * Stop the agent from traveling, reset all the properties of its trip.
  */
-Agent.resetTravelState = function() {
+Agent.resetTrip = function() {
 	for (let key in this.trip) {
 		this.trip[key] = 
 			key === "traveling" ? false : 
@@ -500,7 +500,7 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 		this.trip.path.shift();
 		
 		if (this.trip.path.length === 0) {
-			this.resetTravelState();
+			this.resetTrip();
 		}
 		else {
 			this.travelTo(this.trip.path[0]);
