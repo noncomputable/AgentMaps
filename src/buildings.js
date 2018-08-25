@@ -1,4 +1,4 @@
-/* Here we define buildingify and all other functions and definitions it relies on. */
+/* Functions that help design and generate building units onto the map. */
 
 let bearing = require('@turf/bearing').default,
 destination = require('@turf/destination').default,
@@ -238,12 +238,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_featu
 			let all_proposed_unit_features = unit_features[0].concat(unit_features[1]).concat(proposed_unit_features);
 			if (noOverlaps(unit_feature, all_proposed_unit_features)) { 
 				//Recode index so that it's useful here.
-				if (i === 1) {
-					i = 0;
-				}
-				else {
-					i = 1;
-				}
+				i = i === 1 ? 0 : 1;
 
 				unit_feature.properties.street_id = street_feature_id,
 				unit_feature.properties.street_anchors = anchor_latLng_pair,	
