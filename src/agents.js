@@ -422,6 +422,10 @@ Agent.travel = function(override_speed) {
 		leftover_after_goal = dist_to_sub_goal - dist_to_goal;
 	}
 	
+	if (this.checkArrival(sub_goal_lat_lng, leftover_after_goal)) {
+		return;
+	}
+	
 	//Lat/Lng distance between current point and sub_goal point.
 	let sub_goal_lat_dist = Math.abs(sub_goal_lat_lng.lat - state.current_point.lat),
 	sub_goal_lng_dist = Math.abs(sub_goal_lat_lng.lng - state.current_point.lng);
