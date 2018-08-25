@@ -1,3 +1,5 @@
+/* The Agentmap class, which turns a Leaflet map into a simulation platform. */
+
 let lineSlice = require('@turf/line-slice').default,
 lineDistance = require('@turf/line-distance');
 
@@ -61,10 +63,8 @@ Agentmap.prototype.run = function() {
 				//for previous delays and so the pause delay will look much bigger than it actually is if you subtracted previous delays.
 				this.state.time_start_delay += (total_time - this.state.time_start_delay) - this.state.time;
 			}
-			
-			this.update(rAF_time);
-			
 			this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
+			this.update(rAF_time);
 		}).bind(this);
 
 		this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
@@ -104,7 +104,7 @@ Agentmap.prototype.update = function(rAF_time) {
 	steps_inbetween = Math.floor(animation_time_interval / movement_precision);
 
 	this.agents.eachLayer(function(agent) {
-		agent.update(animation_time_interval, movement_precision, steps_inbetween);
+		agent.update();
 	});
 
 	this.state.prev_time = this.state.time;
@@ -213,7 +213,7 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 			intersection_distances.push(distance);
 		}
 	}
-
+	
 	let smallest_distance = Math.min(...intersection_distances),
 	smallest_distance_index = intersection_distances.indexOf(smallest_distance),
 	closest_intersection_point = L.latLng(intersection_points[smallest_distance_index]);
