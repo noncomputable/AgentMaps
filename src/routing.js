@@ -1,4 +1,4 @@
-//** Convert OSM geojson data into a distance-weighted graph and find the shortest path between two points. **//
+//** Here we have utilities to convert OSM geojson data into a distance-weighted graph and find the shortest path between two points. **//
 
 let path = require("ngraph.path"),
 createGraph = require("ngraph.graph"),
