@@ -32,22 +32,22 @@ let Agent = {};
  * @property {number} feature.AgentMap_id - The agent's instance id, so it can be accessed from inside the Leaflet layer. To avoid putting the actual instance inside the feature object.
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {Place} place - A place object specifying where the agent is currently at.
- * @property {Object} travel_state - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
- * @property {boolean} travel_state.traveling - Whether the agent is currently on a trip.
- * @property {?Point} travel_state.current_point - The point where the agent is currently located.
- * @property {?Point} travel_state.goal_point - The point where the agent is traveling to.
- * @property {?number} travel_state.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
- * @property {?number} travel_state.lng_dir - The longitudinal direction. -1 if traveling to lesser longitude (left), 1 if traveling to greater longitude (right).
- * @property {?number} travel_state.speed - The speed that the agent should travel, in meters per tick.
- * @property {?number} travel_state.angle - The angle between the current point and the goal.
- * @property {?number} travel_state.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
- * @property {Array} travel_state.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the travel_state is changed/reset.
+ * @property {Object} this.trip - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
+ * @property {boolean} this.trip.traveling - Whether the agent is currently on athis.trip.
+ * @property {?Point} this.trip.current_point - The point where the agent is currently located.
+ * @property {?Point} this.trip.goal_point - The point where the agent is traveling to.
+ * @property {?number} this.trip.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
+ * @property {?number} this.trip.lng_dir - The longitudinal direction. -1 if traveling to lesser longitude (left), 1 if traveling to greater longitude (right).
+ * @property {?number} this.trip.speed - The speed that the agent should travel, in meters per tick.
+ * @property {?number} this.trip.angle - The angle between the current point and the goal.
+ * @property {?number} this.trip.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
+ * @property {Array} this.trip.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the trip is changed/reset.
  * @property {?function} update_func - User-defined function to be called on each update.
  */
 Agent.initialize = function(lat_lng, options, agentmap) {
 	this.agentmap = agentmap,
 	this.place = null,
-	this.travel_state = {
+	this.trip = {
 		traveling: false,
 		current_point: null,
 		goal_point: null,
@@ -64,11 +64,11 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 }
 
 /**
- * Stop the agent from traveling, reset all the properties of its travel state.
+ * Stop the agent from traveling, reset all the properties of its trip.
  */
 Agent.resetTravelState = function() {
-	for (let key in this.travel_state) {
-		this.travel_state[key] = 
+	for (let key in this.trip) {
+		this.trip[key] = 
 			key === "traveling" ? false : 
 			key === "path" ? [] :
 			null;
@@ -76,16 +76,30 @@ Agent.resetTravelState = function() {
 };
 
 /**
- * Start a trip along the path specified in the agent's travel_state.
+ * Start travelling along the path specified in the agent's trip.
  * @private
  */
 Agent.startTrip = function() {
-	if (this.travel_state.path.length > 0) {
-		this.travelTo(this.travel_state.path[0]);
+	if (this.trip.path.length > 0) {
+		this.travelTo(this.trip.path[0]);
 	}
 	else {
-		throw new Error("The travel state's path is empty! There's no path to take a trip along!");
+		throw new Error("The travel state's path is empty! There's no path to take athis.trip along!");
 	}
+};
+
+/**
+ * Stop the agent where it is along its trip. 
+ */
+Agent.pauseTrip = function() {
+	this.trip.traveling = false;
+};
+
+/**
+ * Have the agent continue from where it was left off along its trip. 
+ */
+Agent.resumeTrip = function() {
+	this.trip.traveling = true;
 };
 
 /**
@@ -95,33 +109,32 @@ Agent.startTrip = function() {
  * @param {LatLng} goal_point - The point to which the agent should travel.
  */
 Agent.travelTo = function(goal_point) {
-	let state = this.travel_state;
-	state.traveling = true,
-	state.current_point = this.getLatLng(),
-	state.goal_point = goal_point,
-	
+	this.trip.traveling = true,
+	this.trip.current_point = this.getLatLng(),
+	this.trip.goal_point = goal_point,
+		
 	//Negating so that neg result corresponds to the goal being rightward/above, pos result to it being leftward/below.
-	state.lat_dir = Math.sign(- (state.current_point.lat - state.goal_point.lat)),
-	state.lng_dir = Math.sign(- (state.current_point.lng - state.goal_point.lng)),
-	
-	state.angle = bearing(L.A.pointToCoordinateArray(state.current_point), L.A.pointToCoordinateArray(state.goal_point));
-	state.slope = Math.abs(((state.current_point.lat - state.goal_point.lat) / (state.current_point.lng - state.goal_point.lng)));
-	state.speed =  state.goal_point.speed;
+	this.trip.lat_dir = Math.sign(- (this.trip.current_point.lat - this.trip.goal_point.lat)),
+	this.trip.lng_dir = Math.sign(- (this.trip.current_point.lng - this.trip.goal_point.lng)),
+		
+	this.trip.angle = bearing(L.A.pointToCoordinateArray(this.trip.current_point), L.A.pointToCoordinateArray(this.trip.goal_point));
+	this.trip.slope = Math.abs((this.trip.current_point.lat - this.trip.goal_point.lat) / (this.trip.current_point.lng - this.trip.goal_point.lng));
+	this.trip.speed = this.trip.goal_point.speed;
 };
 
 /**
- * Given the agent's currently scheduled trips (its path), get the place from which a new trip should start (namely, the end of the current path).
+ * Given the agent's currently scheduledthis.trips (its path), get the place from which a newthis.trip should start (namely, the end of the current path).
  * That is: If there's already a path in queue, start the new path from the end of the existing one.
  * @private
  *
- * @returns {Place} - The place where a new trip should start.
+ * @returns {Place} - The place where a newthis.trip should start.
  */
- Agent.newTripStartPlace = function() {
-	if (this.travel_state.path.length === 0) { 
+Agent.newTripStartPlace = function() {
+	if (this.trip.path.length === 0) { 
 		start_place = this.place;
 	}
 	else {
-		start_place = this.travel_state.path[this.travel_state.path.length - 1].new_place;
+		start_place = this.trip.path[this.trip.path.length - 1].new_place;
 	}
 
 	return start_place;
@@ -143,7 +156,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
 	if (booleanPointInPolygon(goal_point, goal_polygon)) {
 		goal_lat_lng.new_place = goal_place,
 		goal_lat_lng.speed = speed;
-		this.travel_state.path.push(goal_lat_lng);
+		this.trip.path.push(goal_lat_lng);
 	}
 	else {
 		throw new Error("The goal_lat_lng is not inside of the polygon of the goal_place!");
@@ -171,7 +184,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 		
 		if (booleanPointInPolygon(goal_coords, goal_polygon)) {
 			if (replace_trip === true) {
-				this.travel_state.path.length = 0;
+				this.trip.path.length = 0;
 			}
 			
 			let start_place = this.newTripStartPlace();
@@ -185,13 +198,13 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 				let start_unit_door = this.agentmap.getUnitDoor(start_place.id);
 				start_unit_door.new_place = start_place,
 				start_unit_door.speed = speed;
-				this.travel_state.path.push(start_unit_door);	
+				this.trip.path.push(start_unit_door);	
 				
 				let start_unit_street_id = this.agentmap.units.getLayer(start_place.id).street_id,
 				start_unit_street_point = this.agentmap.getStreetNearDoor(start_place.id);
 				start_unit_street_point.new_place = { type: "street", id: start_unit_street_id },
 				start_unit_street_point.speed = speed;
-				this.travel_state.path.push(start_unit_street_point);
+				this.trip.path.push(start_unit_street_point);
 			}
 			
 			if (goal_place.type === "unit") {
@@ -205,7 +218,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 				let goal_door = this.agentmap.getUnitDoor(goal_place.id);
 				goal_door.new_place = goal_place,
 				goal_door.speed = speed;
-				this.travel_state.path.push(goal_door)
+				this.trip.path.push(goal_door)
 				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 			}
 			else if (goal_place.street === "number") {
@@ -241,8 +254,8 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place, speed) {
 	
 	if (start_place.type === "street" && goal_place.type === "street") {
 		start_street_id = start_place.id,
-		start_street_point = this.travel_state.path.length !== 0 ? 
-			this.travel_state.path[this.travel_state.path.length - 1] :
+		start_street_point = this.trip.path.length !== 0 ? 
+			this.trip.path[this.trip.path.length - 1] :
 			this.getLatLng();
 		start_street_point.new_place = {type: "street", id: start_street_id};
 
@@ -327,14 +340,14 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	}
 	
 	//Exclude the first point if it's already the last point of the already scheduled path.
-	let prev_lat = this.travel_state.path[this.travel_state.path.length - 1].lat,
-	prev_lng = this.travel_state.path[this.travel_state.path.length - 1].lng;
+	let prev_lat = this.trip.path[this.trip.path.length - 1].lat,
+	prev_lng = this.trip.path[this.trip.path.length - 1].lng;
 
 	if (prev_lat === first_lat && prev_lng === first_lng) {
 		street_path_lat_lngs.shift();
 	}
 	
-	this.travel_state.path.push(...street_path_lat_lngs);
+	this.trip.path.push(...street_path_lat_lngs);
 }
 
 /**
@@ -364,7 +377,7 @@ Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int
  * @param {number} speed - The speed (in meters per tick) that the agent should move.
  */
 Agent.setSpeed = function(speed) {
-	for (let spot of this.travel_state.path) {
+	for (let spot of this.trip.path) {
 		spot.speed = speed;
 	}
 }
@@ -375,7 +388,7 @@ Agent.setSpeed = function(speed) {
  * @param {number} multiplier - The number to multiply the agent's scheduled speed by.
  */
 Agent.multiplySpeed = function(multiplier) {
-	for (let spot of this.travel_state.path) {
+	for (let spot of this.trip.path) {
 		spot.speed *= multiplier;
 	}
 }
@@ -386,7 +399,7 @@ Agent.multiplySpeed = function(multiplier) {
  * @param {number} magnitude - The number to add to the agent's scheduled speed.
  */
 Agent.increaseSpeed = function(magnitude) {
-	for (let spot of this.travel_state.path) {
+	for (let spot of this.trip.path) {
 		spot.speed += magnitude;
 	}
 }
@@ -400,15 +413,13 @@ Agent.increaseSpeed = function(magnitude) {
  * @param {number} override_speed - Have the agent step this distance, instead of the distance suggested by the current state's speed property.
  */
 Agent.travel = function(override_speed) {
-	let state = this.travel_state;
-
-	let current_coords = L.A.pointToCoordinateArray(state.current_point),
-	sub_goal_distance = override_speed || state.speed,
-	sub_goal_coords = destination(current_coords, sub_goal_distance * .001, state.angle).geometry.coordinates,
+	let current_coords = L.A.pointToCoordinateArray(this.trip.current_point),
+	sub_goal_distance = override_speed ||this.trip.speed,
+	sub_goal_coords = destination(current_coords, sub_goal_distance * .001,this.trip.angle).geometry.coordinates,
 	sub_goal_lat_lng = L.latLng(L.A.reversedCoordinates(sub_goal_coords));
 
-	let segment_to_goal = lineString([state.current_point, state.goal_point].map(point => L.A.pointToCoordinateArray(point))),
-	segment_to_sub_goal = lineString([state.current_point, sub_goal_lat_lng].map(point => L.A.pointToCoordinateArray(point)));
+	let segment_to_goal = lineString([this.trip.current_point, this.trip.goal_point].map(point => L.A.pointToCoordinateArray(point))),
+	segment_to_sub_goal = lineString([this.trip.current_point, sub_goal_lat_lng].map(point => L.A.pointToCoordinateArray(point)));
 	
 	let dist_to_goal = length(segment_to_goal) * 1000,
 	dist_to_sub_goal = length(segment_to_sub_goal) * 1000,
@@ -417,7 +428,7 @@ Agent.travel = function(override_speed) {
 	//Check if the distance to the sub_goal is greater than the distance to the goal, and if so, make the sub_goal equal the goal
 	//and change the number of meters to the sub_goal to the number of meters to the goal.
 	if (dist_to_goal < dist_to_sub_goal) {
-		sub_goal_lat_lng = state.goal_point,
+		sub_goal_lat_lng = this.trip.goal_point,
 		sub_goal_distance = dist_to_goal,
 		leftover_after_goal = dist_to_sub_goal - dist_to_goal;
 	}
@@ -427,15 +438,15 @@ Agent.travel = function(override_speed) {
 	}
 	
 	//Lat/Lng distance between current point and sub_goal point.
-	let sub_goal_lat_dist = Math.abs(sub_goal_lat_lng.lat - state.current_point.lat),
-	sub_goal_lng_dist = Math.abs(sub_goal_lat_lng.lng - state.current_point.lng);
+	let sub_goal_lat_dist = Math.abs(sub_goal_lat_lng.lat - this.trip.current_point.lat),
+	sub_goal_lng_dist = Math.abs(sub_goal_lat_lng.lng - this.trip.current_point.lng);
 	
 	let half_meters = sub_goal_distance * 2,
 	int_half_meters = Math.floor(half_meters),
-	int_lat_step_value = state.lat_dir * (sub_goal_lat_dist / half_meters),
-	int_lng_step_value = state.lng_dir * (sub_goal_lng_dist / half_meters),
-	final_lat_step_value = state.lat_dir * (sub_goal_lat_dist - Math.abs(int_lat_step_value * int_half_meters)),
-	final_lng_step_value = state.lng_dir * (sub_goal_lng_dist - Math.abs(int_lng_step_value * int_half_meters));
+	int_lat_step_value = this.trip.lat_dir * (sub_goal_lat_dist / half_meters),
+	int_lng_step_value = this.trip.lng_dir * (sub_goal_lng_dist / half_meters),
+	final_lat_step_value = this.trip.lat_dir * (sub_goal_lat_dist - Math.abs(int_lat_step_value * int_half_meters)),
+	final_lng_step_value = this.trip.lng_dir * (sub_goal_lng_dist - Math.abs(int_lng_step_value * int_half_meters));
 	
 	//Intermediary movements.
 	for (let i = 0; i < int_half_meters; ++i) {
@@ -447,7 +458,7 @@ Agent.travel = function(override_speed) {
 	}
 	
 	//Last movement after intermediary movements.
-	if (state.traveling === true) {
+	if (this.trip.traveling === true) {
 		this.move(final_lat_step_value, final_lng_step_value, true);
 		
 		if (this.checkArrival(sub_goal_lat_lng, leftover_after_goal)) {
@@ -467,9 +478,9 @@ Agent.travel = function(override_speed) {
  * @param {number} lng_step_value - The number to add to the agent's longitude.
  */
 Agent.move = function(lat_step_value, lng_step_value) {
-	let new_lat_lng = L.latLng([this.travel_state.current_point.lat + lat_step_value, this.travel_state.current_point.lng + lng_step_value]);
+	let new_lat_lng = L.latLng([this.trip.current_point.lat + lat_step_value, this.trip.current_point.lng + lng_step_value]);
 	this.setLatLng(new_lat_lng);
-	this.travel_state.current_point = new_lat_lng;
+	this.trip.current_point = new_lat_lng;
 };
 
 /**
@@ -481,18 +492,18 @@ Agent.move = function(lat_step_value, lng_step_value) {
  * leftover beyond the goal that it should still move during the tick.
  */
 Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
-	if (this.travel_state.goal_point.distanceTo(this.travel_state.current_point) < .1) {
-		if (typeof(this.travel_state.path[0].new_place) === "object") {
-			this.place = this.travel_state.path[0].new_place;
+	if (this.trip.goal_point.distanceTo(this.trip.current_point) < .1) {
+		if (typeof(this.trip.path[0].new_place) === "object") {
+			this.place = this.trip.path[0].new_place;
 		}
 		
-		this.travel_state.path.shift();
+		this.trip.path.shift();
 		
-		if (this.travel_state.path.length === 0) {
+		if (this.trip.path.length === 0) {
 			this.resetTravelState();
 		}
 		else {
-			this.travelTo(this.travel_state.path[0]);
+			this.travelTo(this.trip.path[0]);
 			
 			//If it still needs to move a certain distance during this tick, move it that distance towards the next goal before returning.
 			if (leftover_after_goal > 0) {
@@ -502,7 +513,7 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 		
 		return true;
 	}
-	else if (sub_goal_lat_lng.distanceTo(this.travel_state.current_point) < .1) {
+	else if (sub_goal_lat_lng.distanceTo(this.trip.current_point) < .1) {
 		return true;
 	}
 };
@@ -514,7 +525,7 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
  * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
  */
 Agent.update = function() {
-	if (this.travel_state.traveling) {
+	if (this.trip.traveling) {
 		this.travel();
 	}
 		
