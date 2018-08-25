@@ -189,8 +189,8 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	street_feature;
 	start_coords = L.A.pointToCoordinateArray(lat_lng);
 
-	if (place.street) {
-		street_id = place.street;
+	if (place.type === "street") {
+		street_id = place.id;
 	}
 	else {
 		throw new Error("place must be a street!");

@@ -33,6 +33,6 @@
  * A place representing either a unit or a street.
  *
  * @typedef {object} Place
- * @property {number} [street] - The ID of a street in the agentmap's street layer group.
- * @property {number} [unit] - The ID of a unit in the agentmap's unit layer group.
+ * @property {string} type - Either "street", "unit", or "unspecified".
+ * @property {number} id - The ID of either a street or unit in the appropriate layer group, if the place is "street" or "unit".
  */

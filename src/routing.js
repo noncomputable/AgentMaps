@@ -66,7 +66,8 @@ function streetsToGraph(streets) {
 			distance = lineDistance(segment);
 			graph.addLink(a_string, b_string, {
 				distance: distance,
-				place: { street: street_id } 
+				place: { type: "street",
+					id: street_id } 
 			});
 		}
 	});
@@ -120,14 +121,14 @@ function getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_ln
 			current_street = this.streets.graph.getLink(encoded_path[i].id, encoded_path[i + 1].id) ||
 				this.streets.graph.getLink(encoded_path[i + 1].id, encoded_path[i].id);
 			
-			if (recent_street === null || current_street.data.place.street !== recent_street.data.place.street) {
+			if (recent_street === null || current_street.data.place.id !== recent_street.data.place.id) {
 				let decoded_coords = decodeCoordString(encoded_path[i].id, current_street.data.place);
 				sparse_path.push(decoded_coords);
 			}
 			
 			//If the last place on the path to the goal is labeled with a different street id than the goal,
 			//add it to the sparse path.
-			if (i === encoded_path.length - 2 && goal_lat_lng.new_place.unit !== encoded_path[i + 1]) {
+			if (i === encoded_path.length - 2 && goal_lat_lng.new_place.id !== encoded_path[i + 1]) {
 				let decoded_coords = decodeCoordString(encoded_path[i + 1].id, current_street.data.place);
 				sparse_path.push(decoded_coords);
 			}
@@ -147,7 +148,7 @@ function getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_ln
 	//If the goal point lies before the first intersection of the goal street, then the 2nd to last point in the
 	//path will have the previous street's id attached to it. If the goal lies on a different street, make
 	//sure the 2nd to last point (thei street path intersection point before the goal) has the same street id as the goal.
-	if (path[path.length - 2].new_place.street !== goal_lat_lng.new_place.street) {
+	if (path[path.length - 2].new_place.id !== goal_lat_lng.new_place.id) {
 		path[path.length - 2].new_place = goal_lat_lng.new_place;
 	}
 	

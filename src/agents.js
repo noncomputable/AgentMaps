@@ -31,7 +31,7 @@ let Agent = {};
  * @param {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {number} feature.AgentMap_id - The agent's instance id, so it can be accessed from inside the Leaflet layer. To avoid putting the actual instance inside the feature object.
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
- * @property {Place} place - A place object containing the id of the place (unit, street, etc.) where the agent is currently at.
+ * @property {Place} place - A place object specifying where the agent is currently at.
  * @property {Object} travel_state - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
  * @property {boolean} travel_state.traveling - Whether the agent is currently on a trip.
  * @property {?Point} travel_state.current_point - The point where the agent is currently located.
@@ -138,7 +138,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
 	let goal_point = L.A.pointToCoordinateArray(goal_lat_lng),
 	//Buffering so that points on the perimeter, like the door, are captured. Might be more
 	//efficient to generate the door so that it's slightly inside the area.
-	goal_polygon = buffer(this.agentmap.units.getLayer(goal_place.unit).toGeoJSON(), .001);
+	goal_polygon = buffer(this.agentmap.units.getLayer(goal_place.id).toGeoJSON(), .001);
 
 	if (booleanPointInPolygon(goal_point, goal_polygon)) {
 		goal_lat_lng.new_place = goal_place,
@@ -154,13 +154,13 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  * Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
- * @param {Place} goal_place - The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.
+ * @param {Place} goal_place - The place to which the agent will travel.
  * @param {number} speed - The speed that the agent should travel, in meters per tick.
  * @param {Boolean} replace_trip - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
  * simply appended to the current scheduled path).
  */
 Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_trip = false) {
-	let goal_layer = this.agentmap.units.getLayer(goal_place.unit) || this.agentmap.streets.getLayer(goal_place.street);
+	let goal_layer = this.agentmap.units.getLayer(goal_place.id) || this.agentmap.streets.getLayer(goal_place.id);
 
 	if (goal_layer) {
 		let goal_coords = L.A.pointToCoordinateArray(goal_lat_lng);
@@ -176,39 +176,39 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 			
 			let start_place = this.newTripStartPlace();
 			
-			if (start_place.unit === goal_place.unit) {
+			if (start_place.id === goal_place.id) {
 				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 				return;
 			}
 			//Move to the street if it's starting at a unit and its goal is elsewhere.
-			else if (typeof(start_place.unit) === "number") {
-				let start_unit_door = this.agentmap.getUnitDoor(start_place.unit);
+			else if (start_place.type === "unit") {
+				let start_unit_door = this.agentmap.getUnitDoor(start_place.id);
 				start_unit_door.new_place = start_place,
 				start_unit_door.speed = speed;
 				this.travel_state.path.push(start_unit_door);	
 				
-				let start_unit_street_id = this.agentmap.units.getLayer(start_place.unit).street_id,
-				start_unit_street_point = this.agentmap.getStreetNearDoor(start_place.unit);
-				start_unit_street_point.new_place = { street: start_unit_street_id },
+				let start_unit_street_id = this.agentmap.units.getLayer(start_place.id).street_id,
+				start_unit_street_point = this.agentmap.getStreetNearDoor(start_place.id);
+				start_unit_street_point.new_place = { type: "street", id: start_unit_street_id },
 				start_unit_street_point.speed = speed;
 				this.travel_state.path.push(start_unit_street_point);
 			}
 			
-			if (typeof(goal_place.unit) === "number") {
-				let goal_street_point = this.agentmap.getStreetNearDoor(goal_place.unit),
-				goal_street_point_place = { street: this.agentmap.units.getLayer(goal_place.unit).street_id };
+			if (goal_place.type === "unit") {
+				let goal_street_point = this.agentmap.getStreetNearDoor(goal_place.id),
+				goal_street_point_place = { type: "street", id: this.agentmap.units.getLayer(goal_place.id).street_id };
 				
 				//Move to the point on the street closest to the goal unit...
 				this.setTravelAlongStreet(goal_street_point, goal_street_point_place, speed);
 
 				//Move from that point into the unit.
-				let goal_door = this.agentmap.getUnitDoor(goal_place.unit);
+				let goal_door = this.agentmap.getUnitDoor(goal_place.id);
 				goal_door.new_place = goal_place,
 				goal_door.speed = speed;
 				this.travel_state.path.push(goal_door)
 				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 			}
-			else if (typeof(goal_place.street) === "number") {
+			else if (goal_place.street === "number") {
 				this.setTravelAlongStreet(goal_lat_lng, goal_place, speed);
 			}
 		}
@@ -226,7 +226,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
  * @private
  *
  * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
- * @param {Place} goal_place - The place to which the agent will travel. Must be of form {"street": street_id}.
+ * @param {Place} goal_place - The place to which the agent will travel. Must be a street.
  * @param {number} speed - The speed that the agent should travel, in meters per tick.
  */
 Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place, speed) {
@@ -239,14 +239,14 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place, speed) {
 	start_street_point,
 	start_street_feature;
 	
-	if (typeof(start_place.street) === "number" && typeof(goal_place.street) === "number") {
-		start_street_id = start_place.street,
+	if (start_place.type === "street" && goal_place.type === "street") {
+		start_street_id = start_place.id,
 		start_street_point = this.travel_state.path.length !== 0 ? 
 			this.travel_state.path[this.travel_state.path.length - 1] :
 			this.getLatLng();
-		start_street_point.new_place = {street: start_street_id};
+		start_street_point.new_place = {type: "street", id: start_street_id};
 
-		goal_street_id = goal_place.street,
+		goal_street_id = goal_place.id,
 		goal_street_feature = this.agentmap.streets.getLayer(goal_street_id).feature,
 		goal_coords = L.A.pointToCoordinateArray(goal_lat_lng),
 		goal_street_point = L.latLng(nearestPointOnLine(goal_street_feature, goal_coords).geometry.coordinates.reverse());
@@ -297,7 +297,7 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	let street_path = start_to_path_beginning < start_to_path_end ?	street_path_unordered :	street_path_unordered.reverse();
 	let street_path_lat_lngs = street_path.map(coords => { 
 		let lat_lng = L.latLng(coords);
-		lat_lng.new_place = { street: street_id },
+		lat_lng.new_place = { type: "street", id: street_id },
 		lat_lng.speed = speed;
 
 		return lat_lng;
@@ -351,7 +351,7 @@ Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int
 	let path = this.agentmap.getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_lng, true);
 
 	for (let i = 0; i <= path.length - 2; i++) {
-		let current_street_id = path[i].new_place.street,
+		let current_street_id = path[i].new_place.id,
 		current_street_feature = this.agentmap.streets.getLayer(current_street_id).feature;
 		
 		this.setTravelOnSameStreet(path[i], path[i + 1], current_street_feature, current_street_id, speed);			
@@ -526,7 +526,7 @@ Agent = L.CircleMarker.extend(Agent);
 /**
  * Returns an agent object.
  *
- * @param {LatLng} lat_lng - A pair of coordinates to place the agent at.
+ * @param {LatLng} lat_lng - A pair of coordinates to locate the agent at.
  * @param {Object} options - An array of options for the agent, namely its layer.
  * @param {Agentmap} agentmap - The agentmap instance in which the agent exists.
  */
@@ -546,27 +546,29 @@ function agent(lat_lng, options, agentmap) {
  * See {@link https://leafletjs.com/reference-1.3.2.html#circlemarker} for all possible layer options.
  *
  * Ex:
- * let point = {
- * 	"type": "Feature", 
- * 	"properties": {
- * 		"layer_options": {
- * 			"color": "red",
- * 			"radius": .5,
- * 		},
- * 		"place": {
- * 			"unit": 89
- * 		},
- * 		age: 72,
- * 		home_city: "LA"
- * 	},
- * 	"geometry" {
- * 		"type": "Point",
- * 		"coordinates": [
- * 			14.54589,
- * 			57.136239
- * 		]
- * 	}
- * }
+ * let point = {					<br/>
+ * 	"type": "Feature",				<br/> 
+ * 	"properties": {					<br/>
+ * 		"layer_options": {			<br/>
+ * 			"color": "red",			<br/>
+ * 			"radius": .5,			<br/>
+ * 		},					<br/>
+ * 		"place": {				<br/>
+ * 			"type": "unit",			<br/>
+ * 			"id": 89			<br/>
+ * 		},					<br/>
+ * 							<br/>
+ * 		age: 72,				<br/>
+ * 		home_city: "LA"				<br/>
+ * 	},						<br/>
+ * 	"geometry" {					<br/>
+ * 		"type": "Point",			<br/>
+ * 		"coordinates": [			<br/>
+ * 			14.54589,			<br/>
+ * 			57.136239			<br/>
+ * 		]					<br/>
+ * 	}						<br/>
+ * }							<br/>
  */
 
 /**
@@ -584,7 +586,7 @@ function seqUnitAgentMaker(i){
 	let unit = this.units.getLayers()[i],
 	unit_id = this.units.getLayerId(unit),
 	center_point = centroid(unit.feature);
-	center_point.properties.place = {"unit": unit_id},
+	center_point.properties.place = {"type": "unit", "id": unit_id},
 	center_point.properties.layer_options = {radius: .5, color: "red", fillColor: "red"}; 
 	
 	return center_point;
@@ -617,8 +619,7 @@ function agentify(count, agentFeatureMaker) {
 		if (!L.A.isPointCoordinates(coordinates)) {
 			throw new Error("Invalid feature returned from agentFeatureMaker: geometry.coordinates must be a 2-element array of numbers.");	
 		}
-		else if (typeof(place.unit) !== "number" &&
-			typeof(place.street) !== "number") {
+		else if (typeof(place.id) !== "number") {
 			throw new Error("Invalid feature returned from agentFeatureMaker: properties.place must be a {unit: unit_id} or {street: street_id} with an existing layer's ID.");	
 		}
 		
