@@ -6,7 +6,8 @@ booleanPointInPolygon = require('@turf/boolean-point-in-polygon').default,
 along = require('@turf/along').default,
 nearestPointOnLine = require('@turf/nearest-point-on-line').default,
 lineSlice = require('@turf/line-slice').default,
-lineDistance = require('@turf/line-distance'),
+length = require('@turf/length').default,
+lineString = require('@turf/helpers').lineString,
 bearing = require('@turf/bearing').default,
 destination = require('@turf/destination').default,
 Agentmap = require('./agentmap').Agentmap,
@@ -158,7 +159,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  * @param {Boolean} replace_trip - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
  * simply appended to the current scheduled path).
  */
-Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed, replace_trip = false) {
+Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_trip = false) {
 	let goal_layer = this.agentmap.units.getLayer(goal_place.unit) || this.agentmap.streets.getLayer(goal_place.street);
 
 	if (goal_layer) {
@@ -406,11 +407,11 @@ Agent.travel = function(override_speed) {
 	sub_goal_coords = destination(current_coords, sub_goal_distance * .001, state.angle).geometry.coordinates,
 	sub_goal_lat_lng = L.latLng(L.A.reversedCoordinates(sub_goal_coords));
 
-	let segment_to_goal = L.polyline([state.current_point, state.goal_point]).toGeoJSON(),
-	segment_to_sub_goal = L.polyline([state.current_point, sub_goal_lat_lng]).toGeoJSON();
+	let segment_to_goal = lineString([state.current_point, state.goal_point].map(point => L.A.pointToCoordinateArray(point))),
+	segment_to_sub_goal = lineString([state.current_point, sub_goal_lat_lng].map(point => L.A.pointToCoordinateArray(point)));
 	
-	let dist_to_goal = lineDistance(segment_to_goal) * 1000,
-	dist_to_sub_goal = lineDistance(segment_to_sub_goal) * 1000,
+	let dist_to_goal = length(segment_to_goal) * 1000,
+	dist_to_sub_goal = length(segment_to_sub_goal) * 1000,
 	leftover_after_goal;
 	
 	//Check if the distance to the sub_goal is greater than the distance to the goal, and if so, make the sub_goal equal the goal
@@ -488,7 +489,8 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 		}
 		else {
 			this.travelTo(this.travel_state.path[0]);
-
+			
+			//If it still needs to move a certain distance during this tick, move it that distance towards the next goal before returning.
 			if (leftover_after_goal > 0) {
 				this.travel(leftover_after_goal);		
 			}
