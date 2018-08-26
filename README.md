@@ -186,7 +186,7 @@ random_unit_center = random_unit.getBounds().getCenter();
 Then we will tell the agent to stop whatever it's doing and start traveling to that unit's center at 1 meter per second:
 
 ```javascript
-agent.setTravelToPlace(random_unit_center, {"unit": random_unit_id}, 1, true);
+agent.setTravelToPlace(random_unit_center, {type: "unit", id: random_unit_id}, 1, true);
 agent.startTrip();
 ```
 
@@ -201,7 +201,7 @@ agentmap.update_func = function() {
 			random_unit_id = agentmap.units.getLayerId(random_unit),
 			random_unit_center = random_unit.getBounds().getCenter();
 
-			agent.setTravelToPlace(random_unit_center, {"unit": random_unit_id}, true);
+			agent.setTravelToPlace(random_unit_center, {type: "unit", id: random_unit_id}, true);
 			agent.startTrip();
 		}
 	}
