@@ -34,7 +34,6 @@ let Agent = {};
  * @property {Place} place - A place object specifying where the agent is currently at.
  * @property {Object} this.trip - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
  * @property {boolean} this.trip.traveling - Whether the agent is currently on a trip.
- * @property {?Point} this.trip.moving_directly - Whether the agent should be ignoring the roads and moving directly to its goal.
  * @property {?Point} this.trip.current_point - The point where the agent is currently located.
  * @property {?Point} this.trip.goal_point - The point where the agent is traveling to.
  * @property {?number} this.trip.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
@@ -50,7 +49,6 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 	this.place = null,
 	this.trip = {
 		traveling: false,
-		moving_directly: false,
 		current_point: null,
 		goal_point: null,
 		lat_dir: null,
@@ -72,17 +70,15 @@ Agent.resetTrip = function() {
 	for (let key in this.trip) {
 		this.trip[key] = 
 			key === "traveling" ? this.trip.traveling : 
-			key === "moving_directly" ? false :
 			key === "path" ? [] :
 			null;
 	}
 };
 
 /**
- * Start travelling along the path specified in the agent's trip.
- * @private
+ * Start traveling along the path specified in the agent's trip..
  */
-Agent.startTrip = function() {
+Agent.startTraveling = function() {
 	if (this.trip.path.length > 0) {
 		this.travelTo(this.trip.path[0]);
 	}
@@ -94,14 +90,14 @@ Agent.startTrip = function() {
 /**
  * Stop the agent where it is along its trip. 
  */
-Agent.pauseTrip = function() {
+Agent.pauseTravel = function() {
 	this.trip.traveling = false;
 };
 
 /**
  * Have the agent continue from where it was left off along its trip. 
  */
-Agent.resumeTrip = function() {
+Agent.resumeTravel = function() {
 	this.trip.traveling = true;
 };
 
@@ -124,7 +120,7 @@ Agent.travelTo = function(goal_point) {
 	this.trip.slope = Math.abs((this.trip.current_point.lat - this.trip.goal_point.lat) / (this.trip.current_point.lng - this.trip.goal_point.lng));
 	this.trip.speed = this.trip.goal_point.speed;
 	
-	if (this.trip.path[0].new_place.type === "unanchored" || this.trip.goal_point.moving_directly === true) {
+	if (this.trip.path[0].new_place.type === "unanchored" || this.trip.path[0].move_directly === true) {
 		this.place = {type: "unanchored"};	
 	}
 };
@@ -193,7 +189,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 	if (start_place.type === "unanchored" || goal_place.type === "unanchored" || move_directly === true) {
 		let goal = goal_lat_lng;
 		goal.new_place = goal_place,
-		goal.moving_directly = move_directly,
+		goal.move_directly = true,
 		goal.speed = speed;
 
 		this.trip.path.push(goal);
@@ -558,7 +554,7 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 };
 
 /**
- * Make the agent proceed with whatever it's doing and update its properties before the browser draws the next frame.
+ * Make the agent proceed with whatever it's doing.
  * @private
  *
  * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
