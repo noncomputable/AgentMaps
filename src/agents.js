@@ -473,6 +473,9 @@ Agent.travel = function(override_speed) {
 	let segment_to_goal = lineString([this.trip.current_point, this.trip.goal_point].map(point => L.A.pointToCoordinateArray(point))),
 	segment_to_sub_goal = lineString([this.trip.current_point, sub_goal_lat_lng].map(point => L.A.pointToCoordinateArray(point)));
 	
+	let goal_lat_dist = Math.abs(this.trip.current_point.lat - this.trip.goal_point.lat),
+	goal_lng_dist = Math.abs(this.trip.current_point.lng - this.trip.goal_point.lng);
+	
 	let dist_to_goal = length(segment_to_goal) * 1000,
 	dist_to_sub_goal = length(segment_to_sub_goal) * 1000,
 	leftover_after_goal;
@@ -506,7 +509,10 @@ Agent.travel = function(override_speed) {
 		
 		//If the agent is moving directly from a large distance, redirect it back towards the goal if it appears off course.
 		if (this.trip.goal_point.move_directly === true) {
-			if (this.trip.current_point.distanceTo(this.trip.goal_point) > dist_to_goal) {
+			let new_goal_lat_dist = Math.abs(this.trip.current_point.lat - this.trip.goal_point.lat),
+			new_goal_lng_dist = Math.abs(this.trip.current_point.lng - this.trip.goal_point.lng);
+
+			if (new_goal_lat_dist > goal_lat_dist || new_goal_lng_dist > goal_lng_dist) {
 				this.travelTo(this.trip.goal_point);
 			}
 		}
