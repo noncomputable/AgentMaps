@@ -1,4 +1,4 @@
-/* Extra JSDocs that aren't particular to any module */
+/* Extra documentation that isn't particular to any module */
 
 /**
  * Represents a latitude/longitude pair. Preferably an instance of L.LatLng:
@@ -33,6 +33,6 @@
  * A place representing either a unit or a street.
  *
  * @typedef {object} Place
- * @property {string} type - Either "street", "unit", or "unspecified".
+ * @property {string} type - Either "street", "unit", or "unanchored".
  * @property {number} id - The ID of either a street or unit in the appropriate layer group, if the place is "street" or "unit".
  */

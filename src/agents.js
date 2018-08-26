@@ -69,7 +69,7 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 Agent.resetTrip = function() {
 	for (let key in this.trip) {
 		this.trip[key] = 
-			key === "traveling" ? false : 
+			key === "traveling" ? this.trip.traveling : 
 			key === "path" ? [] :
 			null;
 	}
@@ -173,8 +173,25 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  * simply appended to the current scheduled path).
  */
 Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_trip = false) {
-	let goal_layer = this.agentmap.units.getLayer(goal_place.id) || this.agentmap.streets.getLayer(goal_place.id);
+	let start_place = this.newTripStartPlace();
+	
+	if (replace_trip === true) {
+		this.resetTrip();
+	}
 
+	//If either the agent is already unanchored or its goal is unanchored, just schedule it to move directly to its goal.
+	if (start_place.type === "unanchored" || goal_place.type === "unanchored") {
+		let unanchored_goal = goal_lat_lng;
+		unanchored_goal.new_place = goal_place,
+		unanchored_goal.speed = speed;
+
+		this.trip.path.push(unanchored_goal);
+
+		return;
+	}
+	
+	//If the goal isn't unanchored, see if it's a street or a unit and schedule the agent appropriately.
+	let goal_layer = this.agentmap.units.getLayer(goal_place.id) || this.agentmap.streets.getLayer(goal_place.id);
 	if (goal_layer) {
 		let goal_coords = L.A.pointToCoordinateArray(goal_lat_lng);
 		
@@ -183,12 +200,6 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 		let goal_polygon = buffer(goal_layer.toGeoJSON(), .001);
 		
 		if (booleanPointInPolygon(goal_coords, goal_polygon)) {
-			if (replace_trip === true) {
-				this.trip.path.length = 0;
-			}
-			
-			let start_place = this.newTripStartPlace();
-			
 			if (start_place.id === goal_place.id) {
 				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 				return;
@@ -298,9 +309,11 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	//lineSlice, regardless of the specified starting point, will give a segment with the same coordinate order 
 	//as the original lineString array. So, if the goal point comes earlier in the array (e.g. it's on the far left),
 	//it'll end up being the first point in the path, instead of the last, and the agent will move to it directly,
-	//ignoring the street, and then travel along the street from the goal point to its original point (backwards).
+	//ignoring the street points that should come before it. It would then travel along the street from the goal point 
+	//to its original point (backwards).
 	//To fix this, I'm reversing the order of the coordinates in the segment if the last point in the line is closer
-	//to the agent's starting point than the first point on the line (implying it's a situation of the kind described above). 
+	//to the agent's starting point than the first point on the line (implying the last point in the array is the starting 
+	//point, not the goal). 
 	
 	let start_coords = L.A.pointToCoordinateArray(start_lat_lng),
 	goal_coords = L.A.pointToCoordinateArray(goal_lat_lng),
@@ -526,7 +539,15 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
  */
 Agent.update = function() {
 	if (this.trip.traveling) {
-		this.travel();
+		//Check if there's a scheduled path that the agent hasn't started traveling on yet,
+		//and if so, start traveling on it.
+		if (this.trip.goal_point === null && this.trip.path.length !== 0) {
+			this.startTrip();
+		}
+		
+		if (this.trip.goal_point !== null) {
+			this.travel();
+		}
 	}
 		
 	this.update_func();
@@ -583,7 +604,7 @@ function agent(lat_lng, options, agentmap) {
  */
 
 /**
- * A standard {@link agentFeatureMaker}, which sets an agent's location to be the point at the center of the iᵗʰ unit of the map,
+ * A standard {@link agentFeatureMaker}, which sets an agent's location to be the point near the center of the iᵗʰ unit of the map,
  * its place property to be that unit's, and its layer_options to be red and of radius .5 meters.
  * 
  * @memberof Agentmap
