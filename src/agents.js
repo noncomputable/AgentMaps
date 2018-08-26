@@ -65,6 +65,8 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 
 /**
  * Reset all the properties of its trip, but don't change whether it's allowed to be traveling or not.
+ * @memberof Agent
+ * @instance
  */
 Agent.resetTrip = function() {
 	for (let key in this.trip) {
@@ -77,6 +79,8 @@ Agent.resetTrip = function() {
 
 /**
  * Start traveling along the path specified in the agent's trip..
+ * @memberof Agent
+ * @instance
  */
 Agent.startTraveling = function() {
 	if (this.trip.path.length > 0) {
@@ -89,6 +93,8 @@ Agent.startTraveling = function() {
 
 /**
  * Stop the agent where it is along its trip. 
+ * @memberof Agent
+ * @instance
  */
 Agent.pauseTravel = function() {
 	this.trip.traveling = false;
@@ -96,6 +102,8 @@ Agent.pauseTravel = function() {
 
 /**
  * Have the agent continue from where it was left off along its trip. 
+ * @memberof Agent
+ * @instance
  */
 Agent.resumeTravel = function() {
 	this.trip.traveling = true;
@@ -103,6 +111,8 @@ Agent.resumeTravel = function() {
 
 /**
  * Set the agent to travel to some point on the map.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {LatLng} goal_point - The point to which the agent should travel.
@@ -128,6 +138,8 @@ Agent.travelTo = function(goal_point) {
 /**
  * Given the agent's currently scheduledthis.trips (its path), get the place from which a newthis.trip should start (namely, the end of the current path).
  * That is: If there's already a path in queue, start the new path from the end of the existing one.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @returns {Place} - The place where a newthis.trip should start.
@@ -145,6 +157,8 @@ Agent.newTripStartPlace = function() {
 
 /**
  * Schedule the agent to travel to a point within the unit he is in.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {LatLng} goal_lat_lng - LatLng coordinate object for a point in the same unit the agent is in.
@@ -168,6 +182,8 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
 
 /**
  * Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+ * @memberof Agent
+ * @instance
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
  * @param {Place} goal_place - The place to which the agent will travel.
@@ -255,6 +271,8 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 
 /**
  * Schedule the agent to travel to a point along the streets, via streets.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {LatLng} goal_lat_lng - The coordinates of a point on a street to which the agent should travel.
@@ -305,6 +323,8 @@ Agent.setTravelAlongStreet = function(goal_lat_lng, goal_place, speed) {
 
 /**
  * Schedule the agent to travel between two points on the same street.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param start_lat_lng {LatLng} - The coordinates of the point on the street from which the agent will be traveling.
@@ -375,6 +395,8 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 
 /**
  * Schedule the agent up to travel between two points on a street network.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {LatLng} start_lat_lng - The coordinates of the point on the street from which the agent will be traveling.
@@ -396,6 +418,8 @@ Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int
 
 /**
  * Set a new, constant speed for the agent to move along its currently scheduled path.
+ * @memberof Agent
+ * @instance
  *
  * @param {number} speed - The speed (in meters per tick) that the agent should move.
  */
@@ -414,6 +438,8 @@ Agent.setSpeed = function(speed) {
 
 /**
  * Multiply the speed the agent moves along its currently scheduled path by a constant.
+ * @memberof Agent
+ * @instance
  *
  * @param {number} multiplier - The number to multiply the agent's scheduled speed by.
  */
@@ -431,6 +457,8 @@ Agent.multiplySpeed = function(multiplier) {
 
 /**
  * Increase the speed the agent moves along its currently scheduled path by a constant.
+ * @memberof Agent
+ * @instance
  *
  * @param {number} magnitude - The number to add to the agent's scheduled speed.
  */
@@ -448,6 +476,8 @@ Agent.increaseSpeed = function(magnitude) {
 
 /**
  * Check whether a given speed is greater than the minimum.
+ * @memberof Agent
+ * @instance
  *
  * @param {number} speed - A number representing the speed of an agent in meters per second.
  */
@@ -461,6 +491,8 @@ Agent.checkSpeed = function(speed) {
  * Continue to move the agent directly along the points in its path, at approximately the speed associated with each point in the path.
  * Since two points along the path may be far apart, the agent will make multiple intermediary movements too, splitting up its transfer
  * from its current point to its goal point into a sub-path with multiple sub-goals.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {number} override_speed - Have the agent step this distance, instead of the distance suggested by the current state's speed property.
@@ -533,6 +565,8 @@ Agent.travel = function(override_speed) {
 
 /** 
  * Move the agent a given latitude and longitude.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {number} lat_step_value - The number to add to the agent's latitude.
@@ -546,6 +580,8 @@ Agent.move = function(lat_step_value, lng_step_value) {
 
 /**
  * Check if the agent has arrived at the next goal in its path or to a sub_goal along the way and perform appropriate arrival operations.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {LatLng} sub_goal_lat_lng - A sub_goal on the way to the goal (possibly the goal itself).
@@ -581,6 +617,8 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 
 /**
  * Make the agent proceed with whatever it's doing.
+ * @memberof Agent
+ * @instance
  * @private
  *
  * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
@@ -625,37 +663,37 @@ function agent(lat_lng, options, agentmap) {
  * will be transferred to the Agent object once it is created.
  * See {@link https://leafletjs.com/reference-1.3.2.html#circlemarker} for all possible layer options.
  *
- * Ex:
- * let point = {					<br/>
- * 	"type": "Feature",				<br/> 
- * 	"properties": {					<br/>
- * 		"layer_options": {			<br/>
- * 			"color": "red",			<br/>
- * 			"radius": .5,			<br/>
- * 		},					<br/>
- * 		"place": {				<br/>
- * 			"type": "unit",			<br/>
- * 			"id": 89			<br/>
- * 		},					<br/>
- * 							<br/>
- * 		age: 72,				<br/>
- * 		home_city: "LA"				<br/>
- * 	},						<br/>
- * 	"geometry" {					<br/>
- * 		"type": "Point",			<br/>
- * 		"coordinates": [			<br/>
- * 			14.54589,			<br/>
- * 			57.136239			<br/>
- * 		]					<br/>
- * 	}						<br/>
- * }							<br/>
+ * @example
+ * let point = {					
+ * 	"type": "Feature",				 
+ * 	"properties": {					
+ * 		"layer_options": {			
+ * 			"color": "red",			
+ * 			"radius": .5,			
+ * 		},					
+ * 		"place": {				
+ * 			"type": "unit",			
+ * 			"id": 89			
+ * 		},					
+ * 							
+ * 		age: 72,				
+ * 		home_city: "LA"				
+ * 	},						
+ * 	"geometry" {					
+ * 		"type": "Point",			
+ * 		"coordinates": [			
+ * 			14.54589,			
+ * 			57.136239			
+ * 		]					
+ * 	}						
+ * }							
  */
 
 /**
  * A standard {@link agentFeatureMaker}, which sets an agent's location to be the point near the center of the iᵗʰ unit of the map,
  * its place property to be that unit's, and its layer_options to be red and of radius .5 meters.
- * 
  * @memberof Agentmap
+ * @instance
  * @type {agentFeatureMaker}
  */
 function seqUnitAgentMaker(i){
@@ -674,6 +712,8 @@ function seqUnitAgentMaker(i){
 
 /**
  * Generate some number of agents and place them on the map.
+ * @memberof Agentmap
+ * @instance
  *
  * @param {number} count - The desired number of agents.
  * @param {agentFeatureMaker} agentFeatureMaker - A callback that determines an agent i's feature properties and geometry (always a Point).
