@@ -399,6 +399,8 @@ Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int
  * @param {number} speed - The speed (in meters per tick) that the agent should move.
  */
 Agent.setSpeed = function(speed) {
+	this.checkSpeed(speed); 
+
 	if (this.trip.goal_point !== null) {
 		this.trip.speed = speed;
 	}
@@ -417,10 +419,12 @@ Agent.setSpeed = function(speed) {
 Agent.multiplySpeed = function(multiplier) {
 	if (this.trip.goal_point !== null) {
 		this.trip.speed *= multiplier;
+		this.checkSpeed(this.trip.speed);
 	}
 	
 	for (let spot of this.trip.path) {
 		spot.speed *= multiplier;
+		this.checkSpeed(spot.speed);
 	}
 }
 
@@ -432,10 +436,23 @@ Agent.multiplySpeed = function(multiplier) {
 Agent.increaseSpeed = function(magnitude) {
 	if (this.trip.goal_point !== null) {
 		this.trip.speed += magnitude;
+		this.checkSpeed(this.trip.speed);
 	}
 	
 	for (let spot of this.trip.path) {
 		spot.speed += magnitude;
+		this.checkSpeed(spot.speed);
+	}
+}
+
+/**
+ * Check whether a given speed is greater than the minimum.
+ *
+ * @param {number} speed - A number representing the speed of an agent in meters per second.
+ */
+Agent.checkSpeed = function(speed) {
+	if (speed < .1) {
+		throw new Error("Cannot assign speed below .1 to agent!");
 	}
 }
 
