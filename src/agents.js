@@ -120,6 +120,10 @@ Agent.travelTo = function(goal_point) {
 	this.trip.angle = bearing(L.A.pointToCoordinateArray(this.trip.current_point), L.A.pointToCoordinateArray(this.trip.goal_point));
 	this.trip.slope = Math.abs((this.trip.current_point.lat - this.trip.goal_point.lat) / (this.trip.current_point.lng - this.trip.goal_point.lng));
 	this.trip.speed = this.trip.goal_point.speed;
+	
+	if (this.trip.path[0].new_place.type === "unanchored") {
+		this.place = {type: "unanchored"};	
+	}
 };
 
 /**
@@ -173,6 +177,8 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  * simply appended to the current scheduled path).
  */
 Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_trip = false) {
+	goal_lat_lng = L.latLng(goal_lat_lng);
+
 	let start_place = this.newTripStartPlace();
 	
 	if (replace_trip === true) {
@@ -181,11 +187,11 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 
 	//If either the agent is already unanchored or its goal is unanchored, just schedule it to move directly to its goal.
 	if (start_place.type === "unanchored" || goal_place.type === "unanchored") {
-		let unanchored_goal = goal_lat_lng;
-		unanchored_goal.new_place = goal_place,
-		unanchored_goal.speed = speed;
+		let goal = goal_lat_lng;
+		goal.new_place = goal_place,
+		goal.speed = speed;
 
-		this.trip.path.push(unanchored_goal);
+		this.trip.path.push(goal);
 
 		return;
 	}
@@ -353,13 +359,15 @@ Agent.setTravelOnSameStreet = function(start_lat_lng, goal_lat_lng, street_featu
 	}
 	
 	//Exclude the first point if it's already the last point of the already scheduled path.
-	let prev_lat = this.trip.path[this.trip.path.length - 1].lat,
-	prev_lng = this.trip.path[this.trip.path.length - 1].lng;
+	if (this.trip.path.length > 0) {
+		let prev_lat = this.trip.path[this.trip.path.length - 1].lat,
+		prev_lng = this.trip.path[this.trip.path.length - 1].lng;
 
-	if (prev_lat === first_lat && prev_lng === first_lng) {
-		street_path_lat_lngs.shift();
+		if (prev_lat === first_lat && prev_lng === first_lng) {
+			street_path_lat_lngs.shift();
+		}
 	}
-	
+		
 	this.trip.path.push(...street_path_lat_lngs);
 }
 
