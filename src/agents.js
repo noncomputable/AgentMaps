@@ -202,8 +202,9 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 	if (goal_layer) {
 		let goal_coords = L.A.pointToCoordinateArray(goal_lat_lng);
 		
-		//Buffering so that points on the perimeter, like the door, are captured. Might be more
-		//efficient to generate the door so that it's slightly inside the area.
+		//Buffering so that points on the perimeter, like the door, are captured. 
+		//Also expands street lines into thin polygons (booleanPointInPolygon requires polys).
+		//Might be more efficient to generate the door so that it's slightly inside the area.
 		let goal_polygon = buffer(goal_layer.toGeoJSON(), .001);
 		
 		if (booleanPointInPolygon(goal_coords, goal_polygon)) {
