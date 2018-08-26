@@ -504,20 +504,22 @@ Agent.travel = function(override_speed) {
 	for (let i = 0; i < int_half_meters; ++i) {
 		this.move(int_lat_step_value, int_lng_step_value);	
 		
+		//If the agent is moving directly from a large distance, redirect it back towards the goal if it appears off course.
+		if (this.trip.goal_point.move_directly === true) {
+			if (this.trip.current_point.distanceTo(this.trip.goal_point) > dist_to_goal) {
+				this.travelTo(this.trip.goal_point);
+			}
+		}
+		
 		if (this.checkArrival(sub_goal_lat_lng, leftover_after_goal)) {
 			return;
 		}
 	}
 	
 	//Last movement after intermediary movements.
-	if (this.trip.traveling === true) {
-		this.move(final_lat_step_value, final_lng_step_value, true);
+	this.move(final_lat_step_value, final_lng_step_value, true);
 		
-		if (this.checkArrival(sub_goal_lat_lng, leftover_after_goal)) {
-			return;
-		}
-	}
-	else {
+	if (this.checkArrival(sub_goal_lat_lng, leftover_after_goal)) {
 		return;
 	}
 };
@@ -581,7 +583,7 @@ Agent.update = function() {
 		//Check if there's a scheduled path that the agent hasn't started traveling on yet,
 		//and if so, start traveling on it.
 		if (this.trip.goal_point === null && this.trip.path.length !== 0) {
-			this.startTrip();
+			this.startTraveling();
 		}
 		
 		if (this.trip.goal_point !== null) {
