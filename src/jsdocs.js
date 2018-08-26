@@ -30,7 +30,7 @@
  */
 
 /**
- * A place representing either a unit or a street.
+ * A object describing a location.
  *
  * @typedef {object} Place
  * @property {string} type - Either "street", "unit", or "unanchored".
