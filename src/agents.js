@@ -33,7 +33,8 @@ let Agent = {};
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {Place} place - A place object specifying where the agent is currently at.
  * @property {Object} this.trip - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
- * @property {boolean} this.trip.traveling - Whether the agent is currently on athis.trip.
+ * @property {boolean} this.trip.traveling - Whether the agent is currently on a trip.
+ * @property {?Point} this.trip.moving_directly - Whether the agent should be ignoring the roads and moving directly to its goal.
  * @property {?Point} this.trip.current_point - The point where the agent is currently located.
  * @property {?Point} this.trip.goal_point - The point where the agent is traveling to.
  * @property {?number} this.trip.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
@@ -49,6 +50,7 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 	this.place = null,
 	this.trip = {
 		traveling: false,
+		moving_directly: false,
 		current_point: null,
 		goal_point: null,
 		lat_dir: null,
@@ -64,12 +66,13 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 }
 
 /**
- * Stop the agent from traveling, reset all the properties of its trip.
+ * Reset all the properties of its trip, but don't change whether it's allowed to be traveling or not.
  */
 Agent.resetTrip = function() {
 	for (let key in this.trip) {
 		this.trip[key] = 
 			key === "traveling" ? this.trip.traveling : 
+			key === "moving_directly" ? false :
 			key === "path" ? [] :
 			null;
 	}
@@ -121,7 +124,7 @@ Agent.travelTo = function(goal_point) {
 	this.trip.slope = Math.abs((this.trip.current_point.lat - this.trip.goal_point.lat) / (this.trip.current_point.lng - this.trip.goal_point.lng));
 	this.trip.speed = this.trip.goal_point.speed;
 	
-	if (this.trip.path[0].new_place.type === "unanchored") {
+	if (this.trip.path[0].new_place.type === "unanchored" || this.trip.goal_point.moving_directly === true) {
 		this.place = {type: "unanchored"};	
 	}
 };
@@ -172,11 +175,12 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
  * @param {Place} goal_place - The place to which the agent will travel.
- * @param {number} speed - The speed that the agent should travel, in meters per tick.
- * @param {Boolean} replace_trip - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
+ * @param {number} [speed=1] - The speed that the agent should travel, in meters per tick.
+ * @param {Boolean} [move_directly=false] - Whether to ignore the streets & roads and move directly to the goal.
+ * @param {Boolean} [replace_trip=false] - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
  * simply appended to the current scheduled path).
  */
-Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_trip = false) {
+Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_directly = false, replace_trip = false) {
 	goal_lat_lng = L.latLng(goal_lat_lng);
 
 	let start_place = this.newTripStartPlace();
@@ -186,9 +190,10 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, replace_t
 	}
 
 	//If either the agent is already unanchored or its goal is unanchored, just schedule it to move directly to its goal.
-	if (start_place.type === "unanchored" || goal_place.type === "unanchored") {
+	if (start_place.type === "unanchored" || goal_place.type === "unanchored" || move_directly === true) {
 		let goal = goal_lat_lng;
 		goal.new_place = goal_place,
+		goal.moving_directly = move_directly,
 		goal.speed = speed;
 
 		this.trip.path.push(goal);
