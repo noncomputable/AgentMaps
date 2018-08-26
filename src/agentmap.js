@@ -16,10 +16,7 @@ lineDistance = require('@turf/line-distance');
  * @property {boolean} state.running - Whether the simulation is running or not.
  * @property {boolean} state.paused - Whether the simulation is paused.
  * @property {?number} state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
- * @property {?number} state.time - The time elapsed since the start of the simulation.
  * @property {?number} state.ticks - The number of ticks elapsed since the start of the simulation.
- * @property {?number} state.prev_time - The time (time in seconds) when the last update was started.
- * @property {?number} state.time_start_delay - Ticks corresponding to the time of the last animation frame before the trip started. Subtracted from all subsequent time measurements so that the clock starts at 0, instead of whatever the actual time of that initial animation frame was.
  * @property {object} settings - Settings for the agentmap, filled with defaults.
  * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
  * @property {?function} update_func - User-defined function to be called on each update.
@@ -34,13 +31,7 @@ Agentmap = function (map) {
 		running: false,
 		paused: false,
 		animation_frame_id: null,
-		time: null,
 		ticks: null,
-		prev_time: null,
-		time_start_delay: null
-	},
-	this.settings = {
-		movement_precision: .001
 	},
 	this.update_func = function() {};
 };
@@ -53,18 +44,12 @@ Agentmap.prototype.run = function() {
 		this.state.running = true;
 
 		let animation_update = (function (rAF_time) {
-			let total_time = rAF_time * .001;
 			
 			if (this.state.paused === true) {
-				this.state.paused = false,
-				//The delay specifically due to the pause isn't the interval from the time at pause to the time at unpause,
-				//but the interval from the time at pause (state.time, which already accounts for previous delays) to 
-				//the time at unpause the already accumulated delays; the unpause time alone is much higher without accounting
-				//for previous delays and so the pause delay will look much bigger than it actually is if you subtracted previous delays.
-				this.state.time_start_delay += (total_time - this.state.time_start_delay) - this.state.time;
+				this.state.paused = false;
 			}
 			this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
-			this.update(rAF_time);
+			this.update();
 		}).bind(this);
 
 		this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
@@ -78,36 +63,18 @@ Agentmap.prototype.run = function() {
  * @param {number} rAF_time - Time passed by the browser's most recent animation frame.
  */
 Agentmap.prototype.update = function(rAF_time) {
-	let total_time = rAF_time * .001;
 	this.state.ticks += 1;
 	
-	if (this.state.time === null) {
-		this.state.time = 0,
-		this.state.prev_time = 0,
+	if (this.state.ticks === null) {
 		this.state.ticks = 0;
-
-		//requestAnimationFrame doesn't start with timetamp 0; the first timetamp will typically be pretty large; 
-		//we want to store this initial timetamp and subtract it from each subsequent timetamp so that time 
-		//are counted from 0, not whatever timetamp the initial call to rAF happened to return. 
-		this.state.time_start_delay = total_time;
-	}
-	else {
-		//See the comment immediately above.
-		this.state.time = total_time - this.state.time_start_delay;
 	}
 
 	//Execute user-provided per-tick instructions.
 	this.update_func();
 
-	let movement_precision = this.settings.movement_precision,
-	animation_time_interval = this.state.time - this.state.prev_time,
-	steps_inbetween = Math.floor(animation_time_interval / movement_precision);
-
 	this.agents.eachLayer(function(agent) {
 		agent.update();
 	});
-
-	this.state.prev_time = this.state.time;
 };
 
 /**
@@ -118,10 +85,7 @@ Agentmap.prototype.clear = function() {
 	this.state.running = false,
 	this.state.paused = false,
 	this.state.animation_frame_id = null,
-	this.state.time = null,
 	this.state.ticks = null,
-	this.state.prev_time = null,
-	this.state.time_start_delay = null;
 	
 	this.agents.clearLayers();
 	this.streets.clearLayers();
