@@ -104,7 +104,7 @@ Agentmap.prototype.pause = function() {
 /**
  * Get a point through which an agent can exit/enter a unit.
  *
- * @param {number} unit_id - The unique id of the unit whose door you want.
+ * @param {number} unit_id - The unique ID of the unit whose door you want.
  * @returns {LatLng} - The coordinates of the center point of the segment of the unit parallel to the street.
  */
 Agentmap.prototype.getUnitDoor = function(unit_id) {
@@ -125,7 +125,7 @@ Agentmap.prototype.getUnitDoor = function(unit_id) {
 /**
  * Get the point on the adjacent street in front of the unit's door.
  *
- * @param {number} unit_id - The unique id of the unit whose door's corresponding point on the street you want.
+ * @param {number} unit_id - The unique ID of the unit whose door's corresponding point on the street you want.
  * @returns {LatLng} - The coordinates point of the adjacent street directly in front of unit's door.
  */
 Agentmap.prototype.getStreetNearDoor = function(unit_id) {
@@ -140,6 +140,42 @@ Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 	
 	return street_point;
 };
+
+/**
+ * Given a unit and a pair of coordinates between 0 and 1, return a corresponding point inside the unit, offset from its interior, front-right corner.
+ * 
+ * @param {number} unit_id - The unique ID of the unit whose interior point you want.
+ * @param {number} x - A point between 0 and 1 representing a position along the width of a unit.
+ * @param {number} y - A point between 0 and 1 representing a position along the depth of a unit.
+ * @returns {LatLng} - The global coordinates of the specified position within the unit.
+ */
+Agentmap.prototype.getUnitPoint = function(unit_id, x, y) {
+	if (x < 0 || x > 1 || y < 0 || y > 1) {
+		throw new Error("x and y must both be between 0 and 1!");
+	}
+	
+	let unit = this.units.getLayer(unit_id),
+	unit_corners = unit.getLatLngs()[0],
+	front_right = unit_corners[0],
+	front_left = unit_corners[1],
+	back_right = unit_corners[3],
+	front_length = front_left.lng - front_right.lng,
+	side_length = back_right.lat - front_right.lat,
+	front_slope = (front_right.lat - front_left.lat) / (front_right.lng - front_left.lng),
+	side_slope = (front_right.lat - back_right.lat) / (front_right.lng - back_right.lng);
+	
+	//Get the coordinate of the position along the front (x) axis.
+	let lng_along_front = front_right.lng + front_length * x,
+	lat_along_front = front_right.lat + (front_length * x) * front_slope,
+	point_along_front = L.latLng(lat_along_front, lng_along_front);
+	return point_along_front;
+	
+	//From the position on the front axis, get the coordinate of a position along a line parallel to the side (y) axis.
+	//lat_along_side = side_length * y * side_slope; 
+	//let lat_lng = L.latLng(pos_along_front, pos_along_side);
+
+	return lat_lng;
+}
 
 /**
  * Given a point on a street, find the nearest intersection on that street (with any other street).
