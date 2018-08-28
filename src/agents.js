@@ -185,9 +185,11 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  * simply appended to the current scheduled path).
  */
 Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_directly = false, replace_trip = false) {
-	goal_lat_lng = L.latLng(goal_lat_lng);
+	this.checkSpeed(speed);
 
-	let start_place = this.newTripStartPlace();
+
+	let start_place = this.newTripStartPlace(),
+	goal_lat_lng = L.latLng(goal_lat_lng);
 	
 	if (replace_trip === true) {
 		this.resetTrip();
@@ -205,8 +207,9 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 		return;
 	}
 	
-	//If the goal isn't unanchored, see if it's a street or a unit and schedule the agent appropriately.
 	let goal_layer = this.agentmap.units.getLayer(goal_place.id) || this.agentmap.streets.getLayer(goal_place.id);
+	
+	//If the goal isn't unanchored, see if it's a street or a unit and schedule the agent appropriately.
 	if (goal_layer) {
 		let goal_coords = L.A.pointToCoordinateArray(goal_lat_lng);
 		
@@ -584,7 +587,7 @@ Agent.step = function(lat_step_value, lng_step_value) {
  */
 Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 	let fine_controlled_already = false;
-
+	
 	if (this.trip.goal_point.distanceTo(this.trip.current_point) < .1) {
 		this.place = this.trip.path[0].new_place;
 		arrived = true; 
