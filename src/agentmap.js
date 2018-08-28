@@ -19,7 +19,7 @@ lineDistance = require('@turf/line-distance');
  * @property {?number} state.ticks - The number of ticks elapsed since the start of the simulation.
  * @property {object} settings - Settings for the agentmap, filled with defaults.
  * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
- * @property {?function} update_func - User-defined function to be called on each update.
+ * @property {?function} controller - User-defined function to be called on each update.
  */
 Agentmap = function (map) {
 	this.map = map,
@@ -33,7 +33,7 @@ Agentmap = function (map) {
 		animation_frame_id: null,
 		ticks: null,
 	},
-	this.update_func = function() {};
+	this.controller = function() {};
 };
 
 /**
@@ -70,7 +70,7 @@ Agentmap.prototype.update = function(rAF_time) {
 	}
 
 	//Execute user-provided per-tick instructions.
-	this.update_func();
+	this.controller();
 
 	this.agents.eachLayer(function(agent) {
 		agent.controller();
