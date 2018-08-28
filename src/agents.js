@@ -42,7 +42,8 @@ let Agent = {};
  * @property {?number} this.trip.angle - The angle between the current point and the goal.
  * @property {?number} this.trip.slope - The slope of the line segment formed by the two points between which the agent is traveling at this time during its trip.
  * @property {Array} this.trip.path - A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the trip is changed/reset.
- * @property {?function} update_func - User-defined function to be called on each update.
+ * @property {?function} controller - User-defined function to be called on each update (each tick).
+ * @property {?function} fine_controller - User-defined function to be called before & after each movemnt (on each step an agent performs during a tick).
  */
 Agent.initialize = function(lat_lng, options, agentmap) {
 	this.agentmap = agentmap,
@@ -58,7 +59,8 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 		speed: null,
 		path: [],
 	},
-	this.update_func = function() {};
+	this.controller = function() {},
+	this.fine_controller = function() {};
 
 	L.CircleMarker.prototype.initialize.call(this, lat_lng, options);
 }
@@ -85,9 +87,6 @@ Agent.resetTrip = function() {
 Agent.startTraveling = function() {
 	if (this.trip.path.length > 0) {
 		this.travelTo(this.trip.path[0]);
-	}
-	else {
-		throw new Error("The travel state's path is empty! There's no path to take athis.trip along!");
 	}
 };
 
@@ -538,7 +537,10 @@ Agent.travel = function(override_speed) {
 	
 	//Intermediary movements.
 	for (let i = 0; i < int_half_meters; ++i) {
-		this.move(int_lat_step_value, int_lng_step_value);	
+		this.step(int_lat_step_value, int_lng_step_value);	
+		
+		//Call the agent's fine_controller after each movement.
+		this.fine_controller();
 		
 		//If the agent is moving directly from a large distance, redirect it back towards the goal if it appears off course.
 		if (this.trip.goal_point.move_directly === true) {
@@ -556,7 +558,7 @@ Agent.travel = function(override_speed) {
 	}
 	
 	//Last movement after intermediary movements.
-	this.move(final_lat_step_value, final_lng_step_value, true);
+	this.step(final_lat_step_value, final_lng_step_value, true);
 		
 	if (this.checkArrival(sub_goal_lat_lng, leftover_after_goal)) {
 		return;
@@ -572,7 +574,7 @@ Agent.travel = function(override_speed) {
  * @param {number} lat_step_value - The number to add to the agent's latitude.
  * @param {number} lng_step_value - The number to add to the agent's longitude.
  */
-Agent.move = function(lat_step_value, lng_step_value) {
+Agent.step = function(lat_step_value, lng_step_value) {
 	let new_lat_lng = L.latLng([this.trip.current_point.lat + lat_step_value, this.trip.current_point.lng + lng_step_value]);
 	this.setLatLng(new_lat_lng);
 	this.trip.current_point = new_lat_lng;
@@ -616,14 +618,11 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 };
 
 /**
- * Make the agent proceed with whatever it's doing.
+ * Make the agent proceed along its trip.
  * @memberof Agent
  * @instance
- * @private
- *
- * @param {number} rAF_time - The time when the browser's most recent animation frame was released.
  */
-Agent.update = function() {
+Agent.moveIt = function() {
 	if (this.trip.traveling) {
 		//Check if there's a scheduled path that the agent hasn't started traveling on yet,
 		//and if so, start traveling on it.
@@ -632,11 +631,16 @@ Agent.update = function() {
 		}
 		
 		if (this.trip.goal_point !== null) {
+			//Call the agent's fine_controller before it begins moving to its next goal.
+			//it should do it before all the startTravelings too but this seems like it should be reorganized maybe just change
+			//this.trip.traveling to this.trip.paused and that'll restructure it all sensible this.fine_controller();
+			
 			this.travel();
 		}
 	}
-		
-	this.update_func();
+	else {
+		this.startTraveling();	
+	}
 }
 
 Agent = L.CircleMarker.extend(Agent);
