@@ -167,19 +167,9 @@ Agent.newTripStartPlace = function() {
  * @param {number} speed - The speed that the agent should travel, in meters per tick.
  */
 Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
-	let goal_point = L.A.pointToCoordinateArray(goal_lat_lng),
-	//Buffering so that points on the perimeter, like the door, are captured. Might be more
-	//efficient to generate the door so that it's slightly inside the area.
-	goal_polygon = buffer(this.agentmap.units.getLayer(goal_place.id).toGeoJSON(), .001);
-
-	if (booleanPointInPolygon(goal_point, goal_polygon)) {
-		goal_lat_lng.new_place = goal_place,
-		goal_lat_lng.speed = speed;
-		this.trip.path.push(goal_lat_lng);
-	}
-	else {
-		throw new Error("The goal_lat_lng is not inside of the polygon of the goal_place!");
-	}
+	goal_lat_lng.new_place = goal_place,
+	goal_lat_lng.speed = speed;
+	this.trip.path.push(goal_lat_lng);
 };
 
 /**
@@ -226,7 +216,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 		let goal_polygon = buffer(goal_layer.toGeoJSON(), .001);
 		
 		if (booleanPointInPolygon(goal_coords, goal_polygon)) {
-			if (start_place.id === goal_place.id) {
+			if (start_place.type === "unit" && goal_place.type === "unit" && start_place.id === goal_place.id) {
 				this.setTravelInUnit(goal_lat_lng, goal_place, speed);
 				return;
 			}
