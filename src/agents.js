@@ -33,7 +33,8 @@ let Agent = {};
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {Place} place - A place object specifying where the agent is currently at.
  * @property {Object} this.trip - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
- * @property {boolean} this.trip.traveling - Whether the agent is currently on a trip.
+ * @property {boolean} this.trip.moving - Whether the agent currently moving.
+ * @property {boolean} this.trip.paused - Whether the agent should be allowed to move along its trip.
  * @property {?Point} this.trip.current_point - The point where the agent is currently located.
  * @property {?Point} this.trip.goal_point - The point where the agent is traveling to.
  * @property {?number} this.trip.lat_dir - The latitudinal direction. -1 if traveling to lower latitude (down), 1 if traveling to higher latitude (up).
@@ -49,7 +50,8 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 	this.agentmap = agentmap,
 	this.place = null,
 	this.trip = {
-		traveling: false,
+		paused: false,
+		moving: false,
 		current_point: null,
 		goal_point: null,
 		lat_dir: null,
@@ -73,18 +75,19 @@ Agent.initialize = function(lat_lng, options, agentmap) {
 Agent.resetTrip = function() {
 	for (let key in this.trip) {
 		this.trip[key] = 
-			key === "traveling" ? this.trip.traveling : 
+			key === "paused" ? false : 
+			key === "moving" ? false : 
 			key === "path" ? [] :
 			null;
 	}
 };
 
 /**
- * Start traveling along the path specified in the agent's trip..
+ * Set the agent up to start traveling along the path specified in the agent's trip..
  * @memberof Agent
  * @instance
  */
-Agent.startTraveling = function() {
+Agent.startTrip = function() {
 	if (this.trip.path.length > 0) {
 		this.travelTo(this.trip.path[0]);
 	}
@@ -95,8 +98,8 @@ Agent.startTraveling = function() {
  * @memberof Agent
  * @instance
  */
-Agent.pauseTravel = function() {
-	this.trip.traveling = false;
+Agent.pauseTrip = function() {
+	this.trip.paused = true;
 };
 
 /**
@@ -104,8 +107,8 @@ Agent.pauseTravel = function() {
  * @memberof Agent
  * @instance
  */
-Agent.resumeTravel = function() {
-	this.trip.traveling = true;
+Agent.resumeTrip = function() {
+	this.trip.paused = false;
 };
 
 /**
@@ -117,7 +120,6 @@ Agent.resumeTravel = function() {
  * @param {LatLng} goal_point - The point to which the agent should travel.
  */
 Agent.travelTo = function(goal_point) {
-	this.trip.traveling = true,
 	this.trip.current_point = this.getLatLng(),
 	this.trip.goal_point = goal_point,
 		
@@ -591,17 +593,26 @@ Agent.step = function(lat_step_value, lng_step_value) {
  * leftover beyond the goal that it should still move during the tick.
  */
 Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
+	let fine_controlled_already = false;
+
 	if (this.trip.goal_point.distanceTo(this.trip.current_point) < .1) {
-		if (typeof(this.trip.path[0].new_place) === "object") {
-			this.place = this.trip.path[0].new_place;
-		}
-		
+		this.place = this.trip.path[0].new_place;
+		arrived = true; 
+
 		this.trip.path.shift();
 		
 		if (this.trip.path.length === 0) {
 			this.resetTrip();
 		}
 		else {
+			//Since if either the agent's new place is unanchored or it's moving directly, Agent.travelTo 
+			//will change the agent's place from the goal it just arrived at to "unanchored", 
+			//call its fine controller before that happens.
+			if (this.trip.path[0].new_place === "unanchored" ||this.trip.path[0].move_directly === true) {
+				this.fine_controller();
+				fine_controlled_already = true;
+			}
+			
 			this.travelTo(this.trip.path[0]);
 			
 			//If it still needs to move a certain distance during this tick, move it that distance towards the next goal before returning.
@@ -610,11 +621,20 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 			}
 		}
 		
+		this.trip.moving = false;
+
 		return true;
 	}
 	else if (sub_goal_lat_lng.distanceTo(this.trip.current_point) < .1) {
+		this.trip.moving = false;
+		
 		return true;
 	}
+	
+	//If the agent's fine_controller wasn't already called above, do it now.
+	if (!fine_controlled_already) {
+		this.fine_controller();
+	}	
 };
 
 /**
@@ -623,23 +643,23 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
  * @instance
  */
 Agent.moveIt = function() {
-	if (this.trip.traveling) {
-		//Check if there's a scheduled path that the agent hasn't started traveling on yet,
-		//and if so, start traveling on it.
-		if (this.trip.goal_point === null && this.trip.path.length !== 0) {
-			this.startTraveling();
-		}
+	//Make sure the agent isn't paused or already moving.
+	if (!this.trip.paused && !this.trip.moving) {
+		//Call the agent's fine_controller before it begins moving.
+		this.fine_controller();
 		
+		//Check if the agent has a goal point, and if so travel towards it.
 		if (this.trip.goal_point !== null) {
-			//Call the agent's fine_controller before it begins moving to its next goal.
-			//it should do it before all the startTravelings too but this seems like it should be reorganized maybe just change
-			//this.trip.traveling to this.trip.paused and that'll restructure it all sensible this.fine_controller();
-			
+			this.trip.moving = true; 
 			this.travel();
 		}
-	}
-	else {
-		this.startTraveling();	
+		//Otherwise, if there's a scheduled path that the agent hasn't started traveling on yet,
+		//start traveling on it.
+		else if (this.trip.path.length !== 0) {
+			this.trip.moving = true; 
+			this.startTrip();
+			this.travel();
+		}
 	}
 }
 

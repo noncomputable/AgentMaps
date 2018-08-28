@@ -73,7 +73,7 @@ Agentmap.prototype.update = function(rAF_time) {
 	this.update_func();
 
 	this.agents.eachLayer(function(agent) {
-		agent.update();
+		agent.controller();
 	});
 };
 
@@ -142,7 +142,7 @@ Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 };
 
 /**
- * Given a unit and a pair of coordinates between 0 and 1, return a corresponding point inside the unit, offset from its interior, front-right corner.
+ * Given a unit and a pair of coordinates between 0 and 1, return a corresponding point inside the unit, offset from its firs corner along the street.
  * 
  * @param {number} unit_id - The unique ID of the unit whose interior point you want.
  * @param {number} x - A point between 0 and 1 representing a position along the width of a unit.
@@ -160,7 +160,7 @@ Agentmap.prototype.getUnitPoint = function(unit_id, x, y) {
 	front_left = unit_corners[1],
 	back_right = unit_corners[3],
 	front_length = front_left.lng - front_right.lng,
-	side_length = back_right.lat - front_right.lat,
+	side_length = back_right.lng - front_right.lng,
 	front_slope = (front_right.lat - front_left.lat) / (front_right.lng - front_left.lng),
 	side_slope = (front_right.lat - back_right.lat) / (front_right.lng - back_right.lng);
 	
@@ -168,13 +168,14 @@ Agentmap.prototype.getUnitPoint = function(unit_id, x, y) {
 	let lng_along_front = front_right.lng + front_length * x,
 	lat_along_front = front_right.lat + (front_length * x) * front_slope,
 	point_along_front = L.latLng(lat_along_front, lng_along_front);
-	return point_along_front;
 	
-	//From the position on the front axis, get the coordinate of a position along a line parallel to the side (y) axis.
-	//lat_along_side = side_length * y * side_slope; 
-	//let lat_lng = L.latLng(pos_along_front, pos_along_side);
+	//From the position on the front axis, get the coordinate of a position along a line perpendicular to the front and 
+	//parallel to the side (y) axis.
+	let lng_along_side = point_along_front.lng + side_length * y,
+	lat_along_side = point_along_front.lat + (side_length * y) * side_slope,
+	point_in_depth = L.latLng(lat_along_side, lng_along_side);
 
-	return lat_lng;
+	return point_in_depth;
 }
 
 /**
