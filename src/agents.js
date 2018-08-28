@@ -131,6 +131,7 @@ Agent.travelTo = function(goal_point) {
 	this.trip.slope = Math.abs((this.trip.current_point.lat - this.trip.goal_point.lat) / (this.trip.current_point.lng - this.trip.goal_point.lng));
 	this.trip.speed = this.trip.goal_point.speed;
 	
+	//If the agent won't be at any particular place at least until it reaches its next goal, mark its place as unanchored.
 	if (this.trip.path[0].new_place.type === "unanchored" || this.trip.path[0].move_directly === true) {
 		this.place = {type: "unanchored"};	
 	}
