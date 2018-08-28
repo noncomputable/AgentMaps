@@ -533,10 +533,7 @@ Agent.travel = function(override_speed) {
 	//Intermediary movements.
 	for (let i = 0; i < int_half_meters; ++i) {
 		this.step(int_lat_step_value, int_lng_step_value);	
-		
-		//Call the agent's fine_controller after each movement.
-		this.fine_controller();
-		
+			
 		//If the agent is moving directly from a large distance, redirect it back towards the goal if it appears off course.
 		if (this.trip.goal_point.move_directly === true) {
 			let new_goal_lat_dist = Math.abs(this.trip.current_point.lat - this.trip.goal_point.lat),

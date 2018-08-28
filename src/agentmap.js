@@ -63,8 +63,6 @@ Agentmap.prototype.run = function() {
  * @param {number} rAF_time - Time passed by the browser's most recent animation frame.
  */
 Agentmap.prototype.update = function(rAF_time) {
-	this.state.ticks += 1;
-	
 	if (this.state.ticks === null) {
 		this.state.ticks = 0;
 	}
@@ -75,6 +73,8 @@ Agentmap.prototype.update = function(rAF_time) {
 	this.agents.eachLayer(function(agent) {
 		agent.controller();
 	});
+	
+	this.state.ticks += 1;
 };
 
 /**
