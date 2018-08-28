@@ -59,17 +59,16 @@ Agentmap.prototype.run = function() {
 /**
  * Update the simulation at the given time.
  * @private
- *
- * @param {number} rAF_time - Time passed by the browser's most recent animation frame.
  */
-Agentmap.prototype.update = function(rAF_time) {
+Agentmap.prototype.update = function() {
 	if (this.state.ticks === null) {
 		this.state.ticks = 0;
 	}
 
-	//Execute user-provided per-tick instructions.
+	//Execute user-provided per-tick instructions for the agentmap.
 	this.controller();
 
+	//Execute user-provided per-tick instructions for each agent.
 	this.agents.eachLayer(function(agent) {
 		agent.controller();
 	});
