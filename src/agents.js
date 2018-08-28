@@ -179,7 +179,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  *
  * @param {LatLng} goal_lat_lng - The point within the place to which the agent is to travel.
  * @param {Place} goal_place - The place to which the agent will travel.
- * @param {number} [speed=1] - The speed that the agent should travel, in meters per tick.
+ * @param {number} [speed=1] - The speed in meters per tick that the agent should try to travel. Must be >= .1.
  * @param {Boolean} [move_directly=false] - Whether to ignore the streets & roads and move directly to the goal.
  * @param {Boolean} [replace_trip=false] - Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip is
  * simply appended to the current scheduled path).
