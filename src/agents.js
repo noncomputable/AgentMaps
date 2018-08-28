@@ -413,7 +413,7 @@ Agent.setTravelOnStreetNetwork = function(start_lat_lng, goal_lat_lng, start_int
  * @memberof Agent
  * @instance
  *
- * @param {number} speed - The speed (in meters per tick) that the agent should move.
+ * @param {number} speed - The speed (in meters per tick) that the agent should move. Must be >= .1.
  */
 Agent.setSpeed = function(speed) {
 	this.checkSpeed(speed); 
@@ -433,7 +433,8 @@ Agent.setSpeed = function(speed) {
  * @memberof Agent
  * @instance
  *
- * @param {number} multiplier - The number to multiply the agent's scheduled speed by.
+ * @param {number} multiplier - The number to multiply the agent's scheduled speed by. 
+ * All scheduled speeds must be >= .1.
  */
 Agent.multiplySpeed = function(multiplier) {
 	if (this.trip.goal_point !== null) {
@@ -453,6 +454,7 @@ Agent.multiplySpeed = function(multiplier) {
  * @instance
  *
  * @param {number} magnitude - The number to add to the agent's scheduled speed.
+ * All scheduled speeds must be >= .1
  */
 Agent.increaseSpeed = function(magnitude) {
 	if (this.trip.goal_point !== null) {
