@@ -32,6 +32,7 @@ let Agent = {};
  * @property {number} feature.AgentMap_id - The agent's instance id, so it can be accessed from inside the Leaflet layer. To avoid putting the actual instance inside the feature object.
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {Place} place - A place object specifying where the agent is currently at.
+ * @property {number} [steps_made=0] - The number of steps the agent has moved since the beginning.
  * @property {Object} this.trip - Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
  * @property {boolean} this.trip.moving - Whether the agent currently moving.
  * @property {boolean} this.trip.paused - Whether the agent should be allowed to move along its trip.
@@ -49,6 +50,7 @@ let Agent = {};
 Agent.initialize = function(lat_lng, options, agentmap) {
 	this.agentmap = agentmap,
 	this.place = null,
+	this.steps_made = 0,
 	this.trip = {
 		paused: false,
 		moving: false,
@@ -571,10 +573,12 @@ Agent.travel = function(override_speed) {
  */
 Agent.step = function(lat_step_value, lng_step_value) {
 	let new_lat_lng = L.latLng([this.trip.current_point.lat + lat_step_value, this.trip.current_point.lng + lng_step_value]);
-	this.trip.current_point = new_lat_lng;
+	
+	this.trip.current_point = new_lat_lng,
+	this.steps_made++;
 
-	//Only redraw the Agent's position if the simulation resolution is on max.
-	if (this.agentmap.resolution === "max") {
+	//Only redraw the Agent's position if the number of steps the agent has moved is a multiple of the agentmap.animation_gap.
+	if (this.steps_made > 0 && this.steps_made % this.agentmap.animation_gap === 0) {
 		this.setLatLng(new_lat_lng);
 	} 
 	else {
@@ -593,14 +597,7 @@ Agent.step = function(lat_step_value, lng_step_value) {
  * leftover beyond the goal that it should still move during the tick.
  */
 Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
-	let fine_controlled_already = false;
-	
 	if (this.trip.goal_point.distanceTo(this.trip.current_point) < .1) {
-		//Display the agent's new location only after arriving at the goal if the simulation is medium or high resolution.
-		if (this.agentmap.resolution === "med" || this.agentmap.resolution === "high") {
-			this.setLatLng(this._latlng);
-		}
-
 		this.place = this.trip.path[0].new_place;
 		arrived = true; 
 
@@ -610,14 +607,6 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 			this.resetTrip();
 		}
 		else {
-			//Since if either the agent's new place is unanchored or it's moving directly, Agent.travelTo 
-			//will change the agent's place from the goal it just arrived at to "unanchored", 
-			//call its fine controller before that happens.
-			if (this.trip.path[0].new_place === "unanchored" ||this.trip.path[0].move_directly === true) {
-				this.fine_controller();
-				fine_controlled_already = true;
-			}
-			
 			this.travelTo(this.trip.path[0]);
 			
 			//If it still needs to move a certain distance during this tick, move it that distance towards the next goal before returning.
@@ -635,11 +624,6 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 		
 		return true;
 	}
-	
-	//If the agent's fine_controller wasn't already called above, do it now.
-	if (!fine_controlled_already) {
-		this.fine_controller();
-	}	
 };
 
 /**
@@ -664,11 +648,6 @@ Agent.moveIt = function() {
 			this.trip.moving = true; 
 			this.startTrip();
 			this.travel();
-		}
-
-		//Animate the agents after they finish their movements only if the resolution is set to high.
-		if (this.agentmap.resolution === "high") {
-			this.setLatLng(this._latlng);
 		}
 	}
 }
@@ -756,7 +735,7 @@ function agentify(count, agentFeatureMaker) {
 	let agentmap = this;
 
 	if (!(this.agents instanceof L.LayerGroup)) {
-		this.agents = L.layerGroup().addTo(this.map);
+		this.agents = L.featureGroup().addTo(this.map);
 	}
 
 	let agents_existing = agentmap.agents.getLayers().length;
