@@ -8,7 +8,7 @@ lineDistance = require('@turf/line-distance');
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
- * @param {number} [animation_gap=1] - The number of meters agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be an integer.
+ * @param {number} [animation_interval=1] - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be an integer.
  * @property {object} map - A Leaflet Map instance.
  * @property {FeatureGroup} agents - A featureGroup containing all agents.
  * @property {FeatureGroup} units - A featureGroup containing all units.
@@ -18,11 +18,11 @@ lineDistance = require('@turf/line-distance');
  * @property {boolean} state.paused - Whether the simulation is paused.
  * @property {?number} state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
  * @property {?number} state.ticks - The number of ticks elapsed since the start of the simulation.
- * @property {number} animation_gap - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be an integer.
+ * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be an integer.
  * @property {?function} controller - User-defined function to be called on each update.
  */
-Agentmap = function (map, animation_gap = 1) {
-	Agentmap.checkAnimGapOption(animation_gap);
+Agentmap = function (map, animation_interval = 1) {
+	Agentmap.checkAnimGapOption(animation_interval);
 
 	this.map = map,
 	this.units = null,
@@ -36,31 +36,31 @@ Agentmap = function (map, animation_gap = 1) {
 		ticks: null,
 	},
 	this.controller = function() {},
-	this.animation_gap = animation_gap
+	this.animation_interval = animation_interval
 };
 
 /**
- * Change the animation gap of the simulation & redraw the agents.
+ * Change the animation interval of the simulation & redraw the agents.
  *
- * @param {number} animation_gap - The desired animation gap to give the simulation. Must be an integer.
+ * @param {number} animation_interval - The desired animation interval to give the simulation. Must be an integer.
  */
-Agentmap.prototype.setAnimationGap = function(animation_gap) {
-	Agentmap.checkAnimGapOption(animation_gap);
+Agentmap.prototype.setAnimationGap = function(animation_interval) {
+	Agentmap.checkAnimGapOption(animation_interval);
 
-	this.animation_gap = animation_gap;
+	this.animation_interval = animation_interval;
 
 	this.agents.eachLayer(agent => agent.setLatLng(agent._latlng));
 }
 
 /**
- * Check whether the animation gap option provided is valid.
+ * Check whether the animation interval option provided is valid.
  * @private
  *
- * @param {number} animation_gap - An input specifying an animation gap distance.
+ * @param {number} animation_interval - An input specifying an animation interval distance.
  */
-Agentmap.checkAnimGapOption = function(animation_gap) {
-	if (!Number.isInteger(animation_gap) && animation_gap >= 0) {
-		throw new Error("The animation_gap must be a non-negative integer!");
+Agentmap.checkAnimGapOption = function(animation_interval) {
+	if (!Number.isInteger(animation_interval) && animation_interval >= 0) {
+		throw new Error("The animation_interval must be a non-negative integer!");
 	}
 }
 

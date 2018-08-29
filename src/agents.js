@@ -577,8 +577,8 @@ Agent.step = function(lat_step_value, lng_step_value) {
 	this.trip.current_point = new_lat_lng,
 	this.steps_made++;
 
-	//Only redraw the Agent's position if the number of steps the agent has moved is a multiple of the agentmap.animation_gap.
-	if (this.steps_made > 0 && this.steps_made % this.agentmap.animation_gap === 0) {
+	//Only redraw the Agent's position if the number of steps the agent has moved is a multiple of the agentmap.animation_interval.
+	if (this.steps_made > 0 && this.steps_made % this.agentmap.animation_interval === 0) {
 		this.setLatLng(new_lat_lng);
 	} 
 	else {
