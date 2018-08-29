@@ -11,13 +11,13 @@ getPathFinder = require('./routing').getPathFinder;
 
 /**
  * Generate and setup the desired map features (e.g. streets, houses).
+ * @memberof Agentmap
+ * @instance
  *
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {object} OSM_data - A GeoJSON Feature Collection object containing the OSM features inside the bounding box.
- * @param {object} [street_options] - An object containing the Leaflet styling options for streets.
- * @param {object} [street_options.style] - Leaflet polyline styling options. See available options here: {@link https://leafletjs.com/reference-1.3.2.html#polyline-l-polyline}.
- * @param {object} [unit_options] - An object containing the Leaflet & AgentMaps styling options for units.
- * @param {object} [unit_options.style] - The Leaflet polygon styling options. See available options here: {@link https://leafletjs.com/reference-1.3.2.html#polygon-l-polygon}.
+ * @param {object} [street_options] - An object containing the Leaflet styling options for streets. See available options here: {@link https://leafletjs.com/reference-1.3.2.html#polyline-l-polyline}.
+ * @param {object} [unit_options] - An object containing the Leaflet & AgentMaps styling options for units. See available Leaflet options here: {@link https://leafletjs.com/reference-1.3.2.html#polygon-l-polygon}.
  * @param {number} [unit_options.front_buffer = 6] - The number of meters beetween the front of unit and its street.
  * @param {number} [unit_options.side_buffer = 3] - The number of meters between two units on the same street.
  * @param {number} [unit_options.length = 14] - The length of the unit in meters along the street.
