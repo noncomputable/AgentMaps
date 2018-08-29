@@ -188,7 +188,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 	this.checkSpeed(speed);
 
 
-	let start_place = this.newTripStartPlace(),
+	let start_place = this.newTripStartPlace();
 	goal_lat_lng = L.latLng(goal_lat_lng);
 	
 	if (replace_trip === true) {
