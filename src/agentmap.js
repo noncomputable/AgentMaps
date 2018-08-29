@@ -8,6 +8,7 @@ lineDistance = require('@turf/line-distance');
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
+ * @param {string} resolution - The resolution with which to animate the simulation: "low", "med", and "high". Note: the higher the resolution, the slower the speed. 
  * @property {object} map - A Leaflet Map instance.
  * @property {FeatureGroup} agents - A featureGroup containing all agents.
  * @property {FeatureGroup} units - A featureGroup containing all units.
@@ -21,7 +22,9 @@ lineDistance = require('@turf/line-distance');
  * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
  * @property {?function} controller - User-defined function to be called on each update.
  */
-Agentmap = function (map) {
+Agentmap = function (map, resolution = "high") {
+	Agentmap.checkResolutionOption(resolution);
+
 	this.map = map,
 	this.units = null,
 	this.streets = null,
@@ -33,8 +36,36 @@ Agentmap = function (map) {
 		animation_frame_id: null,
 		ticks: null,
 	},
-	this.controller = function() {};
+	this.controller = function() {},
+	this.resolution = resolution;
 };
+
+/**
+ * Change the resolution of the simulation animation.
+ *
+ * @param {string} resolution - The desired resolution ("low", "med", or "high")
+ */
+Agentmap.prototype.setResolution = function(resolution) {
+	Agentmap.checkResolutionOption(resolution);
+
+	this.resolution = resolution;
+
+	this.agents.eachLayer(agent => agent.setLatLng(agent._latlng));
+}
+
+/**
+ * Check whether the resolution option provided is valid.
+ * @private
+ *
+ * @param {string} resolution - A given input specifying the simulation's resolution level.
+ */
+Agentmap.checkResolutionOption = function(resolution) {
+	let options = ["low", "med", "high"];
+
+	if (!options.includes(resolution)) {
+		throw new Error("The resolution option must be either 'low', 'med', or 'high'!");
+	}
+}
 
 /**
  * Get an animation frame, have the agents update & get ready to be drawn, and keep doing that until paused or reset.
