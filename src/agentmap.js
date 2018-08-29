@@ -8,7 +8,7 @@ lineDistance = require('@turf/line-distance');
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
- * @param {string} resolution - The resolution with which to animate the simulation: "low", "med", and "high". Note: the higher the resolution, the slower the speed. 
+ * @param {string} resolution - The resolution with which to animate the simulation: "low", "med", "high", or "max". Note: the higher the resolution, the slower the speed. 
  * @property {object} map - A Leaflet Map instance.
  * @property {FeatureGroup} agents - A featureGroup containing all agents.
  * @property {FeatureGroup} units - A featureGroup containing all units.
@@ -22,7 +22,7 @@ lineDistance = require('@turf/line-distance');
  * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
  * @property {?function} controller - User-defined function to be called on each update.
  */
-Agentmap = function (map, resolution = "high") {
+Agentmap = function (map, resolution = "max") {
 	Agentmap.checkResolutionOption(resolution);
 
 	this.map = map,
@@ -43,7 +43,7 @@ Agentmap = function (map, resolution = "high") {
 /**
  * Change the resolution of the simulation animation.
  *
- * @param {string} resolution - The desired resolution ("low", "med", or "high")
+ * @param {string} resolution - The desired resolution ("low", "med", "high", or "max")
  */
 Agentmap.prototype.setResolution = function(resolution) {
 	Agentmap.checkResolutionOption(resolution);
@@ -60,10 +60,10 @@ Agentmap.prototype.setResolution = function(resolution) {
  * @param {string} resolution - A given input specifying the simulation's resolution level.
  */
 Agentmap.checkResolutionOption = function(resolution) {
-	let options = ["low", "med", "high"];
+	let options = ["low", "med", "high", "max"];
 
 	if (!options.includes(resolution)) {
-		throw new Error("The resolution option must be either 'low', 'med', or 'high'!");
+		throw new Error("The resolution option must be either 'low', 'med', 'high', or 'max'!");
 	}
 }
 

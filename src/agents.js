@@ -573,7 +573,8 @@ Agent.step = function(lat_step_value, lng_step_value) {
 	let new_lat_lng = L.latLng([this.trip.current_point.lat + lat_step_value, this.trip.current_point.lng + lng_step_value]);
 	this.trip.current_point = new_lat_lng;
 
-	if (this.agentmap.resolution === "high") {
+	//Only redraw the Agent's position if the simulation resolution is on max.
+	if (this.agentmap.resolution === "max") {
 		this.setLatLng(new_lat_lng);
 	} 
 	else {
@@ -595,8 +596,8 @@ Agent.checkArrival = function(sub_goal_lat_lng, leftover_after_goal) {
 	let fine_controlled_already = false;
 	
 	if (this.trip.goal_point.distanceTo(this.trip.current_point) < .1) {
-		//Display the agent's new location only after arriving at the goal if the simulation is medium resolution.
-		if (this.agentmap.resolution === "med") {
+		//Display the agent's new location only after arriving at the goal if the simulation is medium or high resolution.
+		if (this.agentmap.resolution === "med" || this.agentmap.resolution === "high") {
 			this.setLatLng(this._latlng);
 		}
 
@@ -663,6 +664,11 @@ Agent.moveIt = function() {
 			this.trip.moving = true; 
 			this.startTrip();
 			this.travel();
+		}
+
+		//Animate the agents after they finish their movements only if the resolution is set to high.
+		if (this.agentmap.resolution === "high") {
+			this.setLatLng(this._latlng);
 		}
 	}
 }
