@@ -33,7 +33,7 @@ In short, it's something like a bare-bones SimCity factory.
 
 ## Prerequisites
 
-First of all, you can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@1/dist/agentmaps.js>.
+First of all, you can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@2.0.0/site/dist/agentmaps.js>.
 
 Making simulations with AgentMaps will be a lot easier for you if you can:
 
