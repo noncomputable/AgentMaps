@@ -188,8 +188,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
  */
 Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_directly = false, replace_trip = false) {
 	this.checkSpeed(speed);
-
-
+	
 	let start_place = this.newTripStartPlace();
 	goal_lat_lng = L.latLng(goal_lat_lng);
 	
