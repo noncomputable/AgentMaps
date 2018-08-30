@@ -55,14 +55,14 @@ function setup() {
 		unit_id = random_unit._leaflet_id,
 		unit_center = random_unit.getCenter();
 
-		agent.setTravelToPlace(unit_center, {type: "unit", id: unit_id}, 1);
+		agent.scheduleTrip(unit_center, {type: "unit", id: unit_id}, 1);
 		
 		//Find and move to a random, unanchored point in the neighborhood.
 		let random_lat = bounding_box[0][0] + Math.random() * -(bounding_box[0][0] - bounding_box[1][0]),
 		random_lng = bounding_box[0][1] + Math.random() * -(bounding_box[0][1] - bounding_box[1][1]),
 		random_lat_lng = L.latLng(random_lat, random_lng);
 
-		agent.setTravelToPlace(random_lat_lng, {type: "unanchored"}, 1);
+		agent.scheduleTrip(random_lat_lng, {type: "unanchored"}, 1);
 		
 		//Find and move to a random street's intersection.
 		let random_street_index = Math.floor(Math.random() * agentmap.streets.count()),
@@ -71,7 +71,7 @@ function setup() {
 		cross_streets = Object.keys(random_street.intersections),
 		intersection = random_street.intersections[cross_streets[0]][0][0];
 
-		agent.setTravelToPlace(intersection, {type: "street", id: street_id}, 2);
+		agent.scheduleTrip(intersection, {type: "street", id: street_id}, 2);
 		
 		//Find and move to a random unit door on the same street...
 		let street_units = agentmap.units.getLayers().filter(function(unit) {
@@ -85,7 +85,7 @@ function setup() {
 			new_unit_id = new_random_unit._leaflet_id,
 			new_unit_door = agentmap.getUnitDoor(new_unit_id);
 
-			agent.setTravelToPlace(new_unit_door, {type: "unit", id: new_unit_id}, .5);
+			agent.scheduleTrip(new_unit_door, {type: "unit", id: new_unit_id}, .5);
 			
 			//Also, move to the door of one of that unit's nextdoor neighbors, if it has any.
 			
@@ -93,7 +93,7 @@ function setup() {
 			if (neighbor_id !== -1) {
 				let neighbor_unit_door = agentmap.getUnitDoor(neighbor_id);
 				
-				agent.setTravelToPlace(neighbor_unit_door, {type: "unit", id: neighbor_id}, .4);
+				agent.scheduleTrip(neighbor_unit_door, {type: "unit", id: neighbor_id}, .4);
 			}
 		}
 

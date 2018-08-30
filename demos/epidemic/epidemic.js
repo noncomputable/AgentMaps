@@ -319,7 +319,7 @@ function commuteToWork(agent) {
 	
 	//Schedule the agent to move to a random point in its workplace and replace the currently scheduled trip.
 	let random_workplace_point = agent.agentmap.getUnitPoint(agent.workplace_id, Math.random(), Math.random());
-	agent.setTravelToPlace(random_workplace_point, {"type": "unit", "id": agent.workplace_id}, 1);
+	agent.scheduleTrip(random_workplace_point, {"type": "unit", "id": agent.workplace_id}, 1);
 }
 
 function commuteToHome(agent) {
@@ -327,7 +327,7 @@ function commuteToHome(agent) {
 
 	//Schedule the agent to move to a random point in its home and replace the currently scheduled trip.
 	let random_home_point = agent.agentmap.getUnitPoint(agent.home_id, Math.random(), Math.random());
-	agent.setTravelToPlace(random_home_point, {"type": "unit", "id": agent.home_id}, 1);
+	agent.scheduleTrip(random_home_point, {"type": "unit", "id": agent.home_id}, 1);
 }
 
 //See whether the agent has arrived at its target place and mark its commute as ended.
