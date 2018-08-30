@@ -265,6 +265,8 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 	}
 };
 
+Agent.scheduleTrip = Agent.setTravelToPlace;
+
 /**
  * Schedule the agent to travel to a point along the streets, via streets.
  * @memberof Agent
