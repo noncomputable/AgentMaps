@@ -22,7 +22,7 @@ lineDistance = require('@turf/line-distance');
  * @property {?function} controller - User-defined function to be called on each update.
  */
 Agentmap = function (map, animation_interval = 1) {
-	Agentmap.checkAnimGapOption(animation_interval);
+	Agentmap.checkAnimIntervalOption(animation_interval);
 
 	this.map = map,
 	this.units = null,
@@ -44,8 +44,8 @@ Agentmap = function (map, animation_interval = 1) {
  *
  * @param {number} animation_interval - The desired animation interval to give the simulation. Must be an integer.
  */
-Agentmap.prototype.setAnimationGap = function(animation_interval) {
-	Agentmap.checkAnimGapOption(animation_interval);
+Agentmap.prototype.setAnimationInterval = function(animation_interval) {
+	Agentmap.checkAnimIntervalOption(animation_interval);
 
 	this.animation_interval = animation_interval;
 
@@ -58,7 +58,7 @@ Agentmap.prototype.setAnimationGap = function(animation_interval) {
  *
  * @param {number} animation_interval - An input specifying an animation interval distance.
  */
-Agentmap.checkAnimGapOption = function(animation_interval) {
+Agentmap.checkAnimIntervalOption = function(animation_interval) {
 	if (!Number.isInteger(animation_interval) && animation_interval >= 0) {
 		throw new Error("The animation_interval must be a non-negative integer!");
 	}
