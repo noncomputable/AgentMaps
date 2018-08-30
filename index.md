@@ -33,7 +33,7 @@ In short, it's something like a bare-bones SimCity factory.
 
 ## Prerequisites
 
-First of all, you can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@1/dist/agentmaps.js>.
+First of all, you can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@2.0.0/site/dist/agentmaps.js>.
 
 Making simulations with AgentMaps will be a lot easier for you if you can:
 
@@ -129,7 +129,7 @@ agentmap.buildingify(map_data, bounding_points);
 
 Now you can place agents on the map according to the rules of a custom agentFeatureMaker function. We'll use the built-in seqUnitAgentMaker,
 which just assigns a number to each agent it generates in sequence, counting up from 0 to the number of agents you want, and places each agent 
-in the center of the corresponding unit. We'll make 50:
+in the center of the unit with the same index as that number in the list of units. We'll make 50:
 
 ```javascript
 agentmap.agentify(50, agentmap.seqUnitAgentMaker);
@@ -137,25 +137,25 @@ agentmap.agentify(50, agentmap.seqUnitAgentMaker);
 
 The simulation will start once we call `agentmap.run()`. The simulation is divided into consecutive "ticks", starting at tick 0.
 On each tick, the following happens:
-* The Agentmap runs its user-defined `Agentmap.update_func()` (which we haven't defined yet)
-* Each agent moves further along its scheduled path (we haven't yet scheduled anything for our agents)
-* Each agent runs its own user-defined `Agent.update_func()` (we'll leave that empty)
+* The Agentmap runs its user-defined `Agentmap.controller()` (which we haven't defined yet)
+* Each agent runs its own user-defined `Agent.controller()` (we'll leave that empty)
+* Before and after each step an agent takes during the tick, it runs its own user-defined `Agent.fine_controller()` (we'll leave that empty too)
 
 The number of ticks elapsed at any point in the simulation is set in `agentmap.state.ticks`, functioning as a kind of clock. 
 We can call `agentmap.pause()` to stop the simulation, during which the ticks elapsed won't change, and then `agentmap.run()` to continue it.
 
-So, let's define an update function for our Agentmap:
+So, let's define a controller function for our Agentmap:
 
 ```javascript
-agentmap.update_func = function() {
+agentmap.controller = function() {
 
 };
 ```
 
-What do we want to happen on each tick? That is, what will we put in the update function's body?
+What do we want to happen on each tick? That is, what will we put in the controller function's body?
 A simple simulation will involve the agents moving to a random unit every 300 ticks.
 
-So first, we will have the `Agentmap.update_func` check if the current number of ticks is a multiple of 300,
+So first, we will have the `Agentmap.controller` check if the current number of ticks is a multiple of 300,
 as we only want anything to happen every 300 ticks:
 
 ```javascript
@@ -174,7 +174,7 @@ agentmap.agents.eachLayer(function(agent) {
 ```
 
 Now, for each agent, we'll generate a random number between 0 and the total number of units, and
-store a unit whose index is that number, its ID, and the coordinates of its center:
+store the unit whose index is that number, its ID, and the coordinates of its center:
 
 ```javascript
 let random_index = Math.floor(agentmap.units.count() * Math.random()),
@@ -183,17 +183,24 @@ random_unit_id = agentmap.units.getLayerId(random_unit),
 random_unit_center = random_unit.getBounds().getCenter();
 ```
 
-Then we will tell the agent to stop whatever it's doing and start traveling to that unit's center at 1 meter per second:
+Then we will tell the agent to stop whatever it's doing and start traveling to that unit's center at approximately 1 meter per tick:
 
 ```javascript
-agent.setTravelToPlace(random_unit_center, {"unit": random_unit_id}, 1, true);
+agent.setTravelToPlace(random_unit_center, {type: "unit", id: random_unit_id}, 1, false, true);
 agent.startTrip();
 ```
 
-Altogether, our Agentmap's update\_func will look like this:
+We want the agent to move along whatever path it has scheduled at each tick, so we will add the following to the end of our
+controller function, outside of the 300 tick condition:
 
 ```javascript
-agentmap.update_func = function() {
+agent.moveIt();
+```
+
+Altogether, our Agentmap's controller will look like this:
+
+```javascript
+agentmap.controller = function() {
 	if (agentmap.state.ticks % 300 === 0) {
 		agentmap.agents.eachLayer(function(agent) {
 			let random_index = Math.floor(agentmap.units.count() * Math.random()),
@@ -201,14 +208,16 @@ agentmap.update_func = function() {
 			random_unit_id = agentmap.units.getLayerId(random_unit),
 			random_unit_center = random_unit.getBounds().getCenter();
 
-			agent.setTravelToPlace(random_unit_center, {"unit": random_unit_id}, true);
+			agent.setTravelToPlace(random_unit_center, {type: "unit", id: random_unit_id}, true);
 			agent.startTrip();
 		}
 	}
+
+	agent.moveIt();
 }
 ```
 
-Finally, now that we've got our Agentmap, buildings and agents loaded, and an update\_func defined, we can add:
+Finally, now that we've got our Agentmap, buildings and agents loaded, and a controller defined, we can add:
 
 ```javascript
 agentmap.run();

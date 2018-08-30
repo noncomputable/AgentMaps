@@ -1,0 +1,67 @@
+body {
+	background-image: url("background-im.jpg");
+}
+
+h2 {
+	text-align: center; 
+	font-family: 'Lucida Console';
+}
+
+#main {
+	text-align: center;
+}
+
+#data {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+#commander {
+	margin-top: 5px;
+}
+
+#map {
+	border: 1px solid white;
+	height: 400px; 
+	width: 500px; 
+	display: inline-block; 
+	vertical-align: top; 
+	border-radius: 5px;
+}
+
+.datum {
+	background: rgba(34, 153, 84, .5); 
+	border: 1px solid #7dcea0; 
+	border-radius: 2.5px; 
+	width: 20%; 
+	min-height: 25px; 
+	margin: auto; 
+	padding-top: .5%;
+}
+
+.datum_value {
+	display: inline;
+}
+
+.option {
+	display: inline-grid;
+	padding-bottom: 5px;
+}
+
+.slider {
+	width: 75%;
+	height: 15px;
+	border: 1px solid #7dcea0;
+	border-radius: 5px;
+	background: grey;
+	outline: none;
+	opacity: .7;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 8px;
+	margin-top: 5px;
+}
+
+.slider:hover {
+	opacity: .9;
+}

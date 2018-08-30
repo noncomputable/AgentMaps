@@ -26,7 +26,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>let lineSlice = require('@turf/line-slice').default,
+            <pre class="prettyprint source linenums"><code>/* The Agentmap class, which turns a Leaflet map into a simulation platform. */
+
+let lineSlice = require('@turf/line-slice').default,
 lineDistance = require('@turf/line-distance');
 
 /**
@@ -34,6 +36,7 @@ lineDistance = require('@turf/line-distance');
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
+ * @param {number} [animation_interval=1] - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be an integer.
  * @property {object} map - A Leaflet Map instance.
  * @property {FeatureGroup} agents - A featureGroup containing all agents.
  * @property {FeatureGroup} units - A featureGroup containing all units.
@@ -42,15 +45,13 @@ lineDistance = require('@turf/line-distance');
  * @property {boolean} state.running - Whether the simulation is running or not.
  * @property {boolean} state.paused - Whether the simulation is paused.
  * @property {?number} state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
- * @property {?number} state.time - The time elapsed since the start of the simulation.
  * @property {?number} state.ticks - The number of ticks elapsed since the start of the simulation.
- * @property {?number} state.prev_time - The time (time in seconds) when the last update was started.
- * @property {?number} state.time_start_delay - Ticks corresponding to the time of the last animation frame before the trip started. Subtracted from all subsequent time measurements so that the clock starts at 0, instead of whatever the actual time of that initial animation frame was.
- * @property {object} settings - Settings for the agentmap, filled with defaults.
- * @property {number} settings.movement_precision - On each interval of this many miliseconds between requestAnimationFrame calls, the agent's movements will be updated (for more precise movements than just updating on each call to requestAnimationFrame (60 fps max)).
- * @property {?function} update_func - User-defined function to be called on each update.
+ * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be an integer.
+ * @property {?function} controller - User-defined function to be called on each update.
  */
-Agentmap = function (map) {
+Agentmap = function (map, animation_interval = 1) {
+	Agentmap.checkAnimIntervalOption(animation_interval);
+
 	this.map = map,
 	this.units = null,
 	this.streets = null,
@@ -60,16 +61,36 @@ Agentmap = function (map) {
 		running: false,
 		paused: false,
 		animation_frame_id: null,
-		time: null,
 		ticks: null,
-		prev_time: null,
-		time_start_delay: null
 	},
-	this.settings = {
-		movement_precision: .001
-	},
-	this.update_func = function() {};
+	this.controller = function() {},
+	this.animation_interval = animation_interval
 };
+
+/**
+ * Change the animation interval of the simulation &amp; redraw the agents.
+ *
+ * @param {number} animation_interval - The desired animation interval to give the simulation. Must be an integer.
+ */
+Agentmap.prototype.setAnimationInterval = function(animation_interval) {
+	Agentmap.checkAnimIntervalOption(animation_interval);
+
+	this.animation_interval = animation_interval;
+
+	this.agents.eachLayer(agent => agent.setLatLng(agent._latlng));
+}
+
+/**
+ * Check whether the animation interval option provided is valid.
+ * @private
+ *
+ * @param {number} animation_interval - An input specifying an animation interval distance.
+ */
+Agentmap.checkAnimIntervalOption = function(animation_interval) {
+	if (!Number.isInteger(animation_interval) &amp;&amp; animation_interval >= 0) {
+		throw new Error("The animation_interval must be a non-negative integer!");
+	}
+}
 
 /**
  * Get an animation frame, have the agents update &amp; get ready to be drawn, and keep doing that until paused or reset.
@@ -79,20 +100,12 @@ Agentmap.prototype.run = function() {
 		this.state.running = true;
 
 		let animation_update = (function (rAF_time) {
-			let total_time = rAF_time * .001;
 			
 			if (this.state.paused === true) {
-				this.state.paused = false,
-				//The delay specifically due to the pause isn't the interval from the time at pause to the time at unpause,
-				//but the interval from the time at pause (state.time, which already accounts for previous delays) to 
-				//the time at unpause the already accumulated delays; the unpause time alone is much higher without accounting
-				//for previous delays and so the pause delay will look much bigger than it actually is if you subtracted previous delays.
-				this.state.time_start_delay += (total_time - this.state.time_start_delay) - this.state.time;
+				this.state.paused = false;
 			}
-			
-			this.update(rAF_time);
-			
 			this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
+			this.update();
 		}).bind(this);
 
 		this.state.animation_frame_id = L.Util.requestAnimFrame(animation_update);
@@ -102,40 +115,21 @@ Agentmap.prototype.run = function() {
 /**
  * Update the simulation at the given time.
  * @private
- *
- * @param {number} rAF_time - Time passed by the browser's most recent animation frame.
  */
-Agentmap.prototype.update = function(rAF_time) {
-	let total_time = rAF_time * .001;
-	this.state.ticks += 1;
-	
-	if (this.state.time === null) {
-		this.state.time = 0,
-		this.state.prev_time = 0,
+Agentmap.prototype.update = function() {
+	if (this.state.ticks === null) {
 		this.state.ticks = 0;
-
-		//requestAnimationFrame doesn't start with timetamp 0; the first timetamp will typically be pretty large; 
-		//we want to store this initial timetamp and subtract it from each subsequent timetamp so that time 
-		//are counted from 0, not whatever timetamp the initial call to rAF happened to return. 
-		this.state.time_start_delay = total_time;
-	}
-	else {
-		//See the comment immediately above.
-		this.state.time = total_time - this.state.time_start_delay;
 	}
 
-	//Execute user-provided per-tick instructions.
-	this.update_func();
+	//Execute user-provided per-tick instructions for the agentmap.
+	this.controller();
 
-	let movement_precision = this.settings.movement_precision,
-	animation_time_interval = this.state.time - this.state.prev_time,
-	steps_inbetween = Math.floor(animation_time_interval / movement_precision);
-
+	//Execute user-provided per-tick instructions for each agent.
 	this.agents.eachLayer(function(agent) {
-		agent.update(animation_time_interval, movement_precision, steps_inbetween);
+		agent.controller();
 	});
-
-	this.state.prev_time = this.state.time;
+	
+	this.state.ticks += 1;
 };
 
 /**
@@ -146,10 +140,7 @@ Agentmap.prototype.clear = function() {
 	this.state.running = false,
 	this.state.paused = false,
 	this.state.animation_frame_id = null,
-	this.state.time = null,
 	this.state.ticks = null,
-	this.state.prev_time = null,
-	this.state.time_start_delay = null;
 	
 	this.agents.clearLayers();
 	this.streets.clearLayers();
@@ -168,7 +159,7 @@ Agentmap.prototype.pause = function() {
 /**
  * Get a point through which an agent can exit/enter a unit.
  *
- * @param {number} unit_id - The unique id of the unit whose door you want.
+ * @param {number} unit_id - The unique ID of the unit whose door you want.
  * @returns {LatLng} - The coordinates of the center point of the segment of the unit parallel to the street.
  */
 Agentmap.prototype.getUnitDoor = function(unit_id) {
@@ -189,7 +180,7 @@ Agentmap.prototype.getUnitDoor = function(unit_id) {
 /**
  * Get the point on the adjacent street in front of the unit's door.
  *
- * @param {number} unit_id - The unique id of the unit whose door's corresponding point on the street you want.
+ * @param {number} unit_id - The unique ID of the unit whose door's corresponding point on the street you want.
  * @returns {LatLng} - The coordinates point of the adjacent street directly in front of unit's door.
  */
 Agentmap.prototype.getStreetNearDoor = function(unit_id) {
@@ -206,6 +197,43 @@ Agentmap.prototype.getStreetNearDoor = function(unit_id) {
 };
 
 /**
+ * Given a unit and a pair of coordinates between 0 and 1, return a corresponding point inside the unit, offset from its first corner along the street.
+ * 
+ * @param {number} unit_id - The unique ID of the unit whose interior point you want.
+ * @param {number} x - A point between 0 and 1 representing a position along the width of a unit.
+ * @param {number} y - A point between 0 and 1 representing a position along the depth of a unit.
+ * @returns {LatLng} - The global coordinates of the specified position within the unit.
+ */
+Agentmap.prototype.getUnitPoint = function(unit_id, x, y) {
+	if (x &lt; 0 || x > 1 || y &lt; 0 || y > 1) {
+		throw new Error("x and y must both be between 0 and 1!");
+	}
+	
+	let unit = this.units.getLayer(unit_id),
+	unit_corners = unit.getLatLngs()[0],
+	front_right = unit_corners[0],
+	front_left = unit_corners[1],
+	back_right = unit_corners[3],
+	front_length = front_left.lng - front_right.lng,
+	side_length = back_right.lng - front_right.lng,
+	front_slope = (front_right.lat - front_left.lat) / (front_right.lng - front_left.lng),
+	side_slope = (front_right.lat - back_right.lat) / (front_right.lng - back_right.lng);
+	
+	//Get the coordinate of the position along the front (x) axis.
+	let lng_along_front = front_right.lng + front_length * x,
+	lat_along_front = front_right.lat + (front_length * x) * front_slope,
+	point_along_front = L.latLng(lat_along_front, lng_along_front);
+	
+	//From the position on the front axis, get the coordinate of a position along a line perpendicular to the front and 
+	//parallel to the side (y) axis.
+	let lng_along_side = point_along_front.lng + side_length * y,
+	lat_along_side = point_along_front.lat + (side_length * y) * side_slope,
+	point_in_depth = L.latLng(lat_along_side, lng_along_side);
+
+	return point_in_depth;
+}
+
+/**
  * Given a point on a street, find the nearest intersection on that street (with any other street).
  * 
  * @param {LatLng} lat_lng - The coordinates of the point on the street to search from.
@@ -217,8 +245,8 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	street_feature;
 	start_coords = L.A.pointToCoordinateArray(lat_lng);
 
-	if (place.street) {
-		street_id = place.street;
+	if (place.type === "street") {
+		street_id = place.id;
 	}
 	else {
 		throw new Error("place must be a street!");
@@ -241,7 +269,7 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 			intersection_distances.push(distance);
 		}
 	}
-
+	
 	let smallest_distance = Math.min(...intersection_distances),
 	smallest_distance_index = intersection_distances.indexOf(smallest_distance),
 	closest_intersection_point = L.latLng(intersection_points[smallest_distance_index]);
@@ -283,13 +311,13 @@ exports.agentmap = agentmapFactory;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentify">agentify</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 01:21:36 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 30 2018 01:00:03 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -15,48 +15,117 @@ Here I'll explain some features of AgentMaps that the auto-generated docs probab
 
 [Basic Structure of Agentmaps](#basic-structure)
 
+[Moving To Places](#moving-to-places)
+
 [Neighbors](#neighbors)
 
 [Intersections](#intersections)
 
 [AgentFeatureMakers](#agentfeaturemakers)
 
-[Update Functions](#update-functions)
+[Controllers](#controllers)
+
+[Animation Speed](#animation-speed)
 
 [Feature Styling](#feature-styling)
 
-## Basic Structure
+[Navigating Streets](#navigating-streets)
 
-AgentMaps functions as an extension of Leaflet. 
-Since everything in Leaflet is in the namespace L (e.g. L.Map, L.latLng), everything in AgentMaps is in its own namespace A inside of L, L.A (e.g. L.A.Agentmap, L.A.agent).
+[Navigating Within Units](#navigating-within-units)
 
-The main object of AgentMaps is an Agentmap (L.A.Agentmap).
+## <a name="basic-structure"></a>Basic Structure
+
+AgentMaps functions as an extension of [Leaflet](https://github.com/Leaflet/Leaflet). 
+Since everything in Leaflet is in the namespace `L` (e.g. `L.Map`, `L.latLng`), everything in AgentMaps is in its own namespace `A` inside of `L`, `L.A` (e.g. `L.A.Agentmap`, `L.A.agent`).
+
+The main object of AgentMaps is an Agentmap ([L.A.Agentmap](./Agentmap.html)).
 Since AgentMaps is built on top of Leaflet, the Agentmap constructor requires a Leaflet map as an argument.
 All the classes in AgentMaps have corresponding, lowercase factory functions that return new instances of them provided their
 constructor's arguments. For example, `L.A.agentmap(map)` is equivalent to `new L.A.Agentmap(map)`.
 
-An Agentmap stores its units, streets, and agents as Leaflet FeatureGroups (Agentmap.units, Agentmap.streets, and Agentmap.agents).
-These FeatureGroups can be looped through like any other Leaflet FeatureGroup (using the LayerGroup.eachLayer() method).
+An Agentmap stores its units, streets, and agents as Leaflet [FeatureGroups](https://leafletjs.com/reference-1.3.4.html#featuregroup) (`Agentmap.units`, `Agentmap.streets`, and `Agentmap.agents`).
+These FeatureGroups can be looped through like any other Leaflet FeatureGroup (using the [FeatureGroup.eachLayer()](https://leafletjs.com/reference-1.3.4.html#featuregroup-eachlayer) method).
 
-## Neighbors
+## <a name="moving-to-places"></a>Moving To Places
 
-Every unit has a neighbors property (unit.neighbors): a three element array of layer IDs representing the previous unit, the next unit, and the
+The agents' [Agent.setTravelToPlace](./Agent.html#.setTravelToPlace) method makes scheduling trips between any places on the map very convenient. 
+`Agent.setTravelToPlace` works by keeping track of the kind of place the agent is at and is going to at any given time. The [place](./global.html#Place)
+can be either a unit, a street,
+or "unanchored", meaning anywhere on the map with no relation to whatever features (streets or units) may or may not be there. 
+
+Depending on where an agent is, and where it intends to travel to, the agent will travel in different ways. 
+If it's leaving from or going to an unanchored place, it will ignore the roads and travel directly. 
+If it's moving between streets or units, it will by default move along the roads and in and out through the front ("doors") of the units.
+
+To schedule an agent to move somewhere, all you need to do is give `Agent.setTravelToPlace` two arguments: the coordinates of where you want the agent to go and a [Place](./global.html#Place) object describing what's there.
+Optionally you can provide three more arguments: 
+* A custom speed greater than or equal to .1 (1 by default)
+* A true/false value specifying whether the agent should ignore the roads and move directly to its goal (false by default, and redundant if the agent is moving from or going to an unanchored place) 
+* A true/false value specifying whether the agent should give up on its current trip and empty (false by default).
+
+Beyond just scheduling an agent to move somewhere, for information about actually _making_ it move, see the section on [controllers](#controllers).
+
+*Note*: Over long distances, as agent movements aren't precise enough for multi-hundred mile paths to slope properly, the agent's path may be very roundabout.
+
+## <a name="neighbors"></a>Neighbors
+
+Every unit has a neighbors property, `unit.neighbors`: a three element array of layer IDs representing the previous unit, the next unit, and the
 unit directly across the street respectively.
 
-## Intersections
+## <a name="intersections"></a>Intersections
 
 Every street has an intersections property (street.intersections): an object mapping the ID of another street the given street has intersections with to an array of the specific intersections. Each individual intersection itself is a 2-element array whose first element is the coordinates of the intersection,
 and whose second element is an object mapping the ID of each street to the index of the intersection point in its coordinate array.
 
-## AgentFeatureMakers
+Here's an example of a street.intersections object:
 
-The `Agentmap.agentify` method creates and places agents on the map. Its first parameter is the number of agents to be created.
-Its second parameter is a kind of function called an AgentFeatureMaker that specifies where the agents will be placed, what they look like, and what their properties are.
-The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point whose coordinates are where the agent should be placed, 
+```javascript
+street.intersections = {
+  "68": [
+    [
+      {
+        "lat": 40.64315,
+        "lng": -73.522418
+      },
+      {
+        "57": 36,
+        "68": 48
+      }
+    ],
+    [
+      {
+        "lat": 40.64355,
+        "lng": -73.523129
+      },
+      {
+        "57": 32,
+        "62": 9
+      }
+    ]
+  ],
+  "61": [
+      {
+        "lat": 40.646255,
+        "lng": -73.524835
+      },
+      {
+        "57": 23,
+        "61": 0
+      }
+   ]
+};
+```
+
+## <a name="agentfeaturemakers"></a>AgentFeatureMakers
+
+The `Agentmap.agentify` [method](./Agentmap.html#.agentify) creates and places agents on the map. Its first parameter is the number of agents to be created.
+Its second parameter is a kind of function called an [AgentFeatureMaker](./global.html#agentFeatureMaker) that specifies where the agents will be placed, what they look like, and what their properties are.
+
+The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
 whose `properties.place` property is a valid [Place](https://noncomputable.github.io/AgentMaps/docs/global.html#Place) containing those coordinates,
-whose `properties.layer_options` property is an object containing options for the agent's CircleMarker 
+and whose `properties.layer_options` property is an object containing options for the agent's CircleMarker 
 (like color, outline, radius, and all the other options listed [here](https://leafletjs.com/reference-1.3.2.html#circlemarker-option)). 
-Any other properties defined in the `properties` property (like, say, `properties.phone_number`) will be transferred to a new Agent instance. 
+Any other properties defined in the `properties` property (like, say, `feature.properties.phone_number`) will be transferred to a new Agent instance. 
 
 For example, the AgentFeatureMaker in an epidemic simulation may return something like this:
 ```javascript
@@ -80,32 +149,76 @@ let feature = {
 };
 ```
 
-## Update Functions
+## <a name="controllers"></a>Controllers
 
-On each tick of the simulation, the Agentmap calls its own `Agentmap.update_func` and then each existing Agent's `Agent.update_func`, all of which are by default empty.
-To specify what happens during your simulation, you should define update\_funcs where you need to.
+What actually happens on the Agentmap and to each Agent is determined by the controller functions you define. On each tick of the simulation, the Agentmap calls its own `Agentmap.controller` and then each existing Agent's `Agent.controller`, all of which are by default empty.
 
-If you want some event to happen that doesn't differ for different agents, I suggest specifying it in an `Agentmap.update_func`.
+Whatever trip an Agent has scheduled (with `Agent.setTravelToPlace`), it will only actually move when its `Agent.moveIt` method is called by its controller function. You can place the call to `Agent.moveIt` anywhere within the controller function depending on what (if anything) you want to have happen before or after the agent moves.
 
-If you want some event to vary and occur at different times for different agents, I suggest generating varying `Agent.update_func`s in a loop like this:
+Since on each tick, an Agent will move according to the speed specified by the next point in its scheduled path, you may have an Agent move a large distance per tick, and only be able to access its position before and after you make the movement (by calling Agent.moveIt) within the controller function. If you would like more precision, at the cost of some performance, you can define an `Agent.fine_controller` function, which is called before and after each individual step an Agent makes (approximately half a meter).
+
+To specify what happens during your simulation, you should define controllers where you need to.
+
+If you want some event to happen that doesn't differ for different agents, I suggest specifying it in an `Agentmap.controller`.
+
+If you want some event to vary and occur at different times for different agents, I suggest generating varying `Agent.controller`s in a loop like this:
 ```javascript
 agentmap.agents.eachLayer(function(agent) {
-	agent.update_func = function() {
+	agent.controller = function() {
 		//custom operations that vary based on the given agent's properties
 	}
 });
 ```
-
 \* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.
 
-## Feature Styling
+## <a name="animation-speed"></a>Animation Speed
+
+You can pause or resume an Agent's trip with its [Agent.pauseTrip](./Agent.html#.pauseTrip) and [Agent.resumeTrip](./Agent.html#.resumeTrip) methods. You can also alter the speeds an Agent is scheduled to travel using several methods: [Agent.setSpeed](./Agent.html#.increaseSpeed), [Agent.multiplySpeed](./Agent.html#.multiplySpeed), and [Agent.increaseSpeed](./Agent.html#.increaseSpeed). But that's not the kind of speed this section is about.
+
+Time in an AgentMap is measured by ticks (recorded in `Agentmap.state.ticks`). A tick can be interpreted differently based on what you have Agents do on each tick: it can be a second, a minute, an hour, or something less standard. But how long does it take for a tick to elapse in real life; that is, how long will your computer take to complete the operations that should happen during a tick?
+
+Typically, it's a few miliseconds. But the more Agents you have and the more complex instructions you give them, the longer it'll take, and the slower your simulation will run. The biggest drain on speed is animation: drawing and redrawing tens or hundreds of Agents everytime they take a tiny step takes a lot of resources and a (relatively) long time.
+
+To help deal with this, an Agentmap's constructor, along with a Leaflet map, accepts an "animation\_interval" argument, a nonnegative integer. An Agent will only be animated every `Agentmap.animation_interval` steps, where a step is typically less than a meter. 
+
+By default, it is 1, meaning it will be redrawn after every step. The higher the value, the choppier the animation will look, but the faster it should proceed. 
+
+Zero is a special value: if `Agentmap.animation_interval` is 0, then the animation will stop completely while the simulation continues under-the-hood.
+
+You can also change the `animation_interval` after creating the Agentmap with the [Agentmap.setAnimationInterval](./Agentmap.html#.setAnimationInterval) method.
+
+## <a name="feature-styling"></a>Feature Styling
 
 Every feature that AgentMaps places on the map is an instance of a Leaflet layer. Streets are L.Polylines, units are L.Polygons, and agents are L.CircleMarkers.
 
-The methods for creating agents (agentify), units (buildingify), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
+The methods for creating agents ([agentify](./Agentmap.html#.agentify)), units ([buildingify](./Agentmap.html#.buildingify)), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
 specifying the style you want (colors, outlines, transparency, radius, etc.). 
-See the [Leaflet docs](https://leafletjs.com/reference-1.3.2.html) for each of the aforementioned classes to learn about all the possible options. 
+See the [Leaflet docs](https://leafletjs.com/reference-1.3.2.html) for each of the aforementioned classes to learn about all the possible options.
 
-Buildingify's unit\_options parameter is different from the other options parameters: you can provide extra AgentMaps-only options to specify the length, depth, front-buffer (how far the front of a unit is from its street), and side-buffer (how far a unit is from adjacent units on the same street) of the unit in meters.
+An options object may look something like this:
 
-You can modify an individual street, unit, or agent's (Leaflet) style after it's already on the map by calling its setStyle method and passing it an options object.
+```javascript
+let options = {
+	radius: .5,
+	color: "pink",
+	weight: 3,
+	opacity: .5
+};
+```
+
+Buildingify's unit\_options parameter is different from the other options parameters: you can provide extra AgentMaps-only options to specify the length, depth, front-buffer (how far the front of a unit is from its street), and side-buffer (how far a unit is from adjacent units on the same street) of the units in meters.
+
+You can modify an individual street, unit, or agent's (Leaflet) style after it's already on the map by calling its [setStyle](https://leafletjs.com/reference-1.3.4.html#path-setstyle) method and passing it an options object.
+
+## <a name="navigating-streets"></a>Navigating Streets
+
+Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a [graph](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics) with the help of the [ngraph.graph](https://github.com/anvaka/ngraph.graph) library. Then, it uses [ngraph.path](https://github.com/anvaka/ngraph.path) to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.
+
+The graph is stored in the `Agentmap.streets.graph` property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph [README](https://github.com/anvaka/ngraph.graph/blob/master/README.md).
+
+## <a name="navigating-within-units"></a>Navigating Within Units
+
+Every Agentmap has an [Agentmap.getUnitPoint](./Agentmap.html#.getUnitPoint) method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. 
+
+Given a unit ID, an x value between 0 and 1, and a y value between 0 and 1, `Agentmap.getUnitPoint` will get a position down the width and into the depth of a unit according to the supplied x and y values, and return the global coordinates of the position it lands on.
+More specifically, starting from the front corner of the unit that comes first along its street, getUnitPoint will effectively return a [LatLng](./Global.html#LatLng) representing the position x * 100 percent along its width and y * 100 percent into its depth.

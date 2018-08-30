@@ -177,6 +177,8 @@
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -208,6 +210,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">The agent's instance id, so it can be accessed from inside the Leaflet layer. To avoid putting the actual instance inside the feature object.</td>
         </tr>
@@ -236,6 +242,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">The agentmap instance in which the agent exists.</td>
@@ -266,15 +276,56 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
-            <td class="description last">A place object containing the id of the place (unit, street, etc.) where the agent is currently at.</td>
+            <td class="description last">A place object specifying where the agent is currently at.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>travel_state</code></td>
+                <td class="name"><code>steps_made</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The number of steps the agent has moved since the beginning.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>this.trip</code></td>
             
 
             <td class="type">
@@ -294,6 +345,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Properties detailing information about the agent's trip that change sometimes, but needs to be accessed by future updates.
@@ -323,7 +378,7 @@
 
         <tr>
             
-                <td class="name"><code>traveling</code></td>
+                <td class="name"><code>moving</code></td>
             
 
             <td class="type">
@@ -345,7 +400,36 @@
 
             
 
-            <td class="description last">Whether the agent is currently on a trip.</td>
+            <td class="description last">Whether the agent currently moving.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>paused</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Whether the agent should be allowed to move along its trip.</td>
         </tr>
 
     
@@ -507,6 +591,37 @@
 
         <tr>
             
+                <td class="name"><code>angle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The angle between the current point and the goal.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>slope</code></td>
             
 
@@ -560,7 +675,7 @@
 
             
 
-            <td class="description last">A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the travel_state is changed/reset.</td>
+            <td class="description last">A sequence of LatLngs; the agent will move from one to the next, popping each one off after it arrives until the end of the street; or, until the trip is changed/reset.</td>
         </tr>
 
     
@@ -574,7 +689,7 @@
 
         <tr>
             
-                <td class="name"><code>update_func</code></td>
+                <td class="name"><code>controller</code></td>
             
 
             <td class="type">
@@ -597,8 +712,47 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
-            <td class="description last">User-defined function to be called on each update.</td>
+            <td class="description last">User-defined function to be called on each update (each tick).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fine_controller</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">User-defined function to be called before & after each movemnt (on each step an agent performs during a tick).</td>
         </tr>
 
     
@@ -637,7 +791,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line20">line 20</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line24">line 24</a>
     </li></ul></dd>
     
 
@@ -691,7 +845,7 @@
     
 
     
-    <h4 class="name" id=".setTravelToPlace"><span class="type-signature">(static) </span>setTravelToPlace<span class="signature">(goal_lat_lng, goal_place, speed, replace_trip)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".checkSpeed"><span class="type-signature">(static) </span>checkSpeed<span class="signature">(speed)</span><span class="type-signature"></span></h4>
     
 
     
@@ -699,7 +853,7 @@
 
 
 <div class="description">
-    Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+    Check whether a given speed is greater than the minimum.
 </div>
 
 
@@ -735,6 +889,894 @@
 
         <tr>
             
+                <td class="name"><code>speed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A number representing the speed of an agent in meters per second.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line482">line 482</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".increaseSpeed"><span class="type-signature">(static) </span>increaseSpeed<span class="signature">(magnitude)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Increase the speed the agent moves along its currently scheduled path by a constant.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>magnitude</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number to add to the agent's scheduled speed.All scheduled speeds must be >= .1</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line463">line 463</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".moveIt"><span class="type-signature">(static) </span>moveIt<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Make the agent proceed along its trip.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line633">line 633</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".multiplySpeed"><span class="type-signature">(static) </span>multiplySpeed<span class="signature">(multiplier)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Multiply the speed the agent moves along its currently scheduled path by a constant.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>multiplier</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number to multiply the agent's scheduled speed by. All scheduled speeds must be >= .1.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line443">line 443</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".pauseTrip"><span class="type-signature">(static) </span>pauseTrip<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Stop the agent where it is along its trip.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".resetTrip"><span class="type-signature">(static) </span>resetTrip<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reset all the properties of its trip, but don't change whether it's allowed to be traveling or not.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line77">line 77</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".resumeTrip"><span class="type-signature">(static) </span>resumeTrip<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Have the agent continue from where it was left off along its trip.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line112">line 112</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".setSpeed"><span class="type-signature">(static) </span>setSpeed<span class="signature">(speed)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set a new, constant speed for the agent to move along its currently scheduled path.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>speed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The speed (in meters per tick) that the agent should move. Must be >= .1.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line422">line 422</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".setTravelToPlace"><span class="type-signature">(static) </span>setTravelToPlace<span class="signature">(goal_lat_lng, goal_place, speed<span class="signature-attributes">opt</span>, move_directly<span class="signature-attributes">opt</span>, replace_trip<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
                 <td class="name"><code>goal_lat_lng</code></td>
             
 
@@ -748,7 +1790,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">The point within the place to which the agent is to travel.</td>
@@ -771,10 +1825,22 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The place to which the agent will travel. Must be of form {"unit": unit_id} or {"street": street_id}.</td>
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The place to which the agent will travel.</td>
         </tr>
 
     
@@ -794,10 +1860,65 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The speed that the agent should travel, in meters per tick.</td>
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">The speed in meters per tick that the agent should try to travel. Must be >= .1.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>move_directly</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">Whether to ignore the streets & roads and move directly to the goal.</td>
         </tr>
 
     
@@ -817,7 +1938,23 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
             
 
             <td class="description last">Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip issimply appended to the current scheduled path).</td>
@@ -861,7 +1998,93 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line155">line 155</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line189">line 189</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".startTrip"><span class="type-signature">(static) </span>startTrip<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the agent up to start traveling along the path specified in the agent's trip..
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line92">line 92</a>
     </li></ul></dd>
     
 
@@ -905,13 +2128,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentify">agentify</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#buildingify">buildingify</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 01:21:33 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 30 2018 00:59:57 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
