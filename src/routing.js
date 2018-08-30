@@ -92,6 +92,8 @@ function getPathFinder(graph) {
 
 /**
  * Get a path between two points on a graph.
+ * @memberof Agentmap
+ * @instance
  * @private
  *
  * @param start_int_lat_lng {LatLng} - The coordinates of the nearest intersection on the same street at the start_lat_lng.
@@ -150,7 +152,87 @@ function getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_ln
 		path[path.length - 2].new_place = goal_lat_lng.new_place;
 	}
 
+	//If the second [to last] point--namely the intersection closest to the start [goal]--is further from the third
+	//[to last] point than the goal, and all three points are on the same street, remove the second [to last] point.
+	if (path.length >= 3) {
+		checkStartExcess.call(this, path);
+		checkEndExcess.call(this, path);
+	}
+	
 	return path;
+}
+
+//checkStartExcess and checkEndExcess are _much_ easier to follow given distinct variable names,
+//and so they are not abstracted into one more general function.
+
+/** 
+ * If the first two points after the start point share the same street as the start point, and the
+ * third point is closer to the first (start) point than it is to the second point, remove the 
+ * second point, as it's a superfluous detour.<br/><br/>
+ *
+ * Typically happens when the start point's nearest intersection is beyond it on the street,
+ * and so the path would have an agent travel from the start, then to the intersection,
+ * then backwards to the third point.
+ * @private
+ *
+ * @param {Array<LatLng>} path - An array of LatLngs representing a path for an agent to travel along.
+ */
+function checkStartExcess(path) {
+	let start_street = this.streets.getLayer(path[0].new_place.id),
+	second_street_id = path[1].new_place.id,	
+	start_second_intersections = start_street.intersections[second_street_id],
+	second_is_intersection = typeof(start_second_intersections) === "undefined" ? false :
+		start_second_intersections.some(intersection => 
+		intersection[0].lat === path[1].lat && intersection[0].lng === path[1].lng),
+	third_street_id = path[2].new_place.id,
+	start_third_intersections = start_street.intersections[third_street_id],
+	third_is_intersection = typeof(start_third_intersections) === "undefined" ? false :
+		start_third_intersections.some(intersection =>
+		intersection[0].lat === path[2].lat && intersection[0].lng === path[2].lng);
+
+	if ((second_is_intersection || second_street_id === path[0].new_place.id) && 
+		(third_is_intersection || third_street_id === path[0].new_place.id)) {
+		if (path[2].distanceTo(path[0]) <
+			path[2].distanceTo(path[1])) {
+			path.splice(1, 1);
+		}
+	}
+}
+
+/** 
+ * If the last two points before the goal point share the same street as the goal point, and the
+ * first point is closer to the third (goal) point than it is to the second point, remove the 
+ * second point, as it's a superfluous detour.<br/><br/>
+ *
+ * Typically happens when the goal point's nearest intersection is beyond it on the street,
+ * and so the path would have an agent travel from the first point, then to the intersection (second point),
+ * then backwards to the (third) goal point.<br/><br/>
+ *
+ * @private
+ *
+ * @param {Array<LatLng>} path - An array of LatLngs representing a path for an agent to travel along.
+ */
+function checkEndExcess(path) {
+	let goal_street = this.streets.getLayer(path[path.length - 1].new_place.id),
+	second_to_last_street_id = path[path.length - 2].new_place.id,
+	goal_second_to_last_intersections = goal_street.intersections[second_to_last_street_id],
+	second_to_last_is_intersection = typeof(goal_second_to_last_intersections) === "undefined" ? false :
+		goal_second_to_last_intersections.some(intersection => 
+		intersection[0].lat === path[path.length - 1].lat && intersection[0].lng === path[path.length - 1].lng),
+	third_last_street_id = path[path.length - 3].new_place.id,
+	goal_third_last_intersections = goal_street.intersections[third_last_street_id],
+	third_last_is_intersection = typeof(goal_third_last_intersections) === "undefined" ? false :
+		goal_third_last_intersections.some(intersection =>
+		intersection[0].lat === path[path.length - 3].lat && intersection[0].lng === path[path.length - 3].lng);
+
+	if ((second_to_last_is_intersection || second_to_last_street_id === path[path.length - 1].new_place.id) &&
+		(third_last_is_intersection || third_last_street_id === path[path.length - 1].new_place.id) && 
+		path.length >= 3) {
+		if (path[path.length - 3].distanceTo(path[path.length - 1]) <
+			path[path.length - 3].distanceTo(path[path.length - 2])) {
+			path.splice(path.length - 2, 1);
+		}
+	}
 }
 
 /**
