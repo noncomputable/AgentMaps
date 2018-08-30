@@ -69,19 +69,19 @@ All the classes in AgentMaps have corresponding, lowercase factory functions tha
 constructor's arguments. For example, <code>L.A.agentmap(map)</code> is equivalent to <code>new L.A.Agentmap(map)</code>.</p>
 <p>An Agentmap stores its units, streets, and agents as Leaflet <a href="https://leafletjs.com/reference-1.3.4.html#featuregroup">FeatureGroups</a> (<code>Agentmap.units</code>, <code>Agentmap.streets</code>, and <code>Agentmap.agents</code>).
 These FeatureGroups can be looped through like any other Leaflet FeatureGroup (using the <a href="https://leafletjs.com/reference-1.3.4.html#featuregroup-eachlayer">FeatureGroup.eachLayer()</a> method).</p>
-<h2><a name="moving-to-places"></a>Moving To Places</h2><p>The agents' <a href="./Agent.html#.setTravelToPlace">Agent.setTravelToPlace</a> method makes scheduling trips between any places on the map very convenient. 
-<code>Agent.setTravelToPlace</code> works by keeping track of the kind of place the agent is at and is going to at any given time. The <a href="./global.html#Place">place</a>
+<h2><a name="moving-to-places"></a>Moving To Places</h2><p>The agents' <a href="./Agent.html#.scheduleTrip">Agent.scheduleTrip</a> method makes scheduling trips between any places on the map very convenient. 
+<code>Agent.scheduleTrip</code> works by keeping track of the kind of place the agent is at and is going to at any given time. The <a href="./global.html#Place">place</a>
 can be either a unit, a street,
 or &quot;unanchored&quot;, meaning anywhere on the map with no relation to whatever features (streets or units) may or may not be there. </p>
 <p>Depending on where an agent is, and where it intends to travel to, the agent will travel in different ways. 
 If it's leaving from or going to an unanchored place, it will ignore the roads and travel directly. 
 If it's moving between streets or units, it will by default move along the roads and in and out through the front (&quot;doors&quot;) of the units.</p>
-<p>To schedule an agent to move somewhere, all you need to do is give <code>Agent.setTravelToPlace</code> two arguments: the coordinates of where you want the agent to go and a <a href="./global.html#Place">Place</a> object describing what's there.
+<p>To schedule an agent to move somewhere, all you need to do is give <code>Agent.scheduleTrip</code> two arguments: the coordinates of where you want the agent to go and a <a href="./global.html#Place">Place</a> object describing what's there.
 Optionally you can provide three more arguments: </p>
 <ul>
 <li>A custom speed greater than or equal to .1 (1 by default)</li>
 <li>A true/false value specifying whether the agent should ignore the roads and move directly to its goal (false by default, and redundant if the agent is moving from or going to an unanchored place) </li>
-<li>A true/false value specifying whether the agent should give up on its current trip and empty (false by default).</li>
+<li>A true/false value specifying whether the agent should give up on its current trip, emptying its schedule (false by default).</li>
 </ul>
 <p>Beyond just scheduling an agent to move somewhere, for information about actually <em>making</em> it move, see the section on <a href="#controllers">controllers</a>.</p>
 <p><em>Note</em>: Over long distances, as agent movements aren't precise enough for multi-hundred mile paths to slope properly, the agent's path may be very roundabout.</p>
@@ -135,7 +135,8 @@ Any other properties defined in the <code>properties</code> property (like, say,
     &quot;type&quot;: &quot;Feature&quot;,
     &quot;properties&quot;: {
         &quot;place&quot;: {
-            &quot;unit&quot;: random_unit_id
+            &quot;type&quot;: &quot;unit&quot;,
+            &quot;id&quot;: random_unit_id
         },
         &quot;layer_options&quot;: {
             &quot;color&quot;: &quot;blue&quot;,
@@ -149,7 +150,8 @@ Any other properties defined in the <code>properties</code> property (like, say,
         &quot;coordinates&quot;: center_coords
     },
 };</code></pre><h2><a name="controllers"></a>Controllers</h2><p>What actually happens on the Agentmap and to each Agent is determined by the controller functions you define. On each tick of the simulation, the Agentmap calls its own <code>Agentmap.controller</code> and then each existing Agent's <code>Agent.controller</code>, all of which are by default empty.</p>
-<p>Whatever trip an Agent has scheduled (with <code>Agent.setTravelToPlace</code>), it will only actually move when its <code>Agent.moveIt</code> method is called by its controller function. You can place the call to <code>Agent.moveIt</code> anywhere within the controller function depending on what (if anything) you want to have happen before or after the agent moves.</p>
+<p>Whatever trip an Agent has scheduled (with <code>Agent.scheduleTrip</code>), it will only actually move when its <code>Agent.moveIt</code> method is called (usually by its controller function). 
+You can place the call to <code>Agent.moveIt</code> anywhere within the controller function depending on what (if anything) you want to have happen before or after the agent moves.</p>
 <p>Since on each tick, an Agent will move according to the speed specified by the next point in its scheduled path, you may have an Agent move a large distance per tick, and only be able to access its position before and after you make the movement (by calling Agent.moveIt) within the controller function. If you would like more precision, at the cost of some performance, you can define an <code>Agent.fine_controller</code> function, which is called before and after each individual step an Agent makes (approximately half a meter).</p>
 <p>To specify what happens during your simulation, you should define controllers where you need to.</p>
 <p>If you want some event to happen that doesn't differ for different agents, I suggest specifying it in an <code>Agentmap.controller</code>.</p>
@@ -160,14 +162,14 @@ Any other properties defined in the <code>properties</code> property (like, say,
     }
 });</code></pre><p>* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.</p>
 <h2><a name="animation-speed"></a>Animation Speed</h2><p>You can pause or resume an Agent's trip with its <a href="./Agent.html#.pauseTrip">Agent.pauseTrip</a> and <a href="./Agent.html#.resumeTrip">Agent.resumeTrip</a> methods. You can also alter the speeds an Agent is scheduled to travel using several methods: <a href="./Agent.html#.increaseSpeed">Agent.setSpeed</a>, <a href="./Agent.html#.multiplySpeed">Agent.multiplySpeed</a>, and <a href="./Agent.html#.increaseSpeed">Agent.increaseSpeed</a>. But that's not the kind of speed this section is about.</p>
-<p>Time in an AgentMap is measured by ticks (recorded in <code>Agentmap.state.ticks</code>). A tick can be interpreted differently based on what you have Agents do on each tick: it can be a second, a minute, an hour, or something less standard. But how long does it take for a tick to elapse in real life; that is, how long will your computer take to complete the operations that should happen during a tick?</p>
+<p>Time in an Agentmap is measured by ticks (recorded in <code>Agentmap.state.ticks</code>). A tick can be interpreted differently based on what you have Agents do on each tick: it can be a second, a minute, an hour, or something less standard. But how long does it take for a tick to elapse in real life; that is, how long will your computer take to complete the operations that should happen during a tick?</p>
 <p>Typically, it's a few miliseconds. But the more Agents you have and the more complex instructions you give them, the longer it'll take, and the slower your simulation will run. The biggest drain on speed is animation: drawing and redrawing tens or hundreds of Agents everytime they take a tiny step takes a lot of resources and a (relatively) long time.</p>
 <p>To help deal with this, an Agentmap's constructor, along with a Leaflet map, accepts an &quot;animation_interval&quot; argument, a nonnegative integer. An Agent will only be animated every <code>Agentmap.animation_interval</code> steps, where a step is typically less than a meter. </p>
 <p>By default, it is 1, meaning it will be redrawn after every step. The higher the value, the choppier the animation will look, but the faster it should proceed. </p>
 <p>Zero is a special value: if <code>Agentmap.animation_interval</code> is 0, then the animation will stop completely while the simulation continues under-the-hood.</p>
-<p>You can also change the <code>animation_interval</code> after creating the Agentmap with the <a href="./Agentmap.html#.setAnimationInterval">Agentmap.setAnimationInterval</a> method.</p>
+<p>You can also change the <code>animation_interval</code> after creating the Agentmap with the <a href="./Agentmap.html#setAnimationInterval">Agentmap.setAnimationInterval</a> method.</p>
 <h2><a name="feature-styling"></a>Feature Styling</h2><p>Every feature that AgentMaps places on the map is an instance of a Leaflet layer. Streets are L.Polylines, units are L.Polygons, and agents are L.CircleMarkers.</p>
-<p>The methods for creating agents (<a href="./Agentmap.html#.agentify">agentify</a>), units (<a href="./Agentmap.html#.buildingify">buildingify</a>), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
+<p>The methods for creating agents (<a href="./Agentmap.html#agentify">agentify</a>), units (<a href="./Agentmap.html#buildingify">buildingify</a>), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
 specifying the style you want (colors, outlines, transparency, radius, etc.). 
 See the <a href="https://leafletjs.com/reference-1.3.2.html">Leaflet docs</a> for each of the aforementioned classes to learn about all the possible options.</p>
 <p>An options object may look something like this:</p>
@@ -199,7 +201,7 @@ More specifically, starting from the front corner of the unit that comes first a
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 30 2018 00:59:57 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 30 2018 11:47:29 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

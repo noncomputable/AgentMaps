@@ -48,8 +48,8 @@ These FeatureGroups can be looped through like any other Leaflet FeatureGroup (u
 
 ## <a name="moving-to-places"></a>Moving To Places
 
-The agents' [Agent.setTravelToPlace](./Agent.html#.setTravelToPlace) method makes scheduling trips between any places on the map very convenient. 
-`Agent.setTravelToPlace` works by keeping track of the kind of place the agent is at and is going to at any given time. The [place](./global.html#Place)
+The agents' [Agent.scheduleTrip](./Agent.html#.scheduleTrip) method makes scheduling trips between any places on the map very convenient. 
+`Agent.scheduleTrip` works by keeping track of the kind of place the agent is at and is going to at any given time. The [place](./global.html#Place)
 can be either a unit, a street,
 or "unanchored", meaning anywhere on the map with no relation to whatever features (streets or units) may or may not be there. 
 
@@ -57,11 +57,11 @@ Depending on where an agent is, and where it intends to travel to, the agent wil
 If it's leaving from or going to an unanchored place, it will ignore the roads and travel directly. 
 If it's moving between streets or units, it will by default move along the roads and in and out through the front ("doors") of the units.
 
-To schedule an agent to move somewhere, all you need to do is give `Agent.setTravelToPlace` two arguments: the coordinates of where you want the agent to go and a [Place](./global.html#Place) object describing what's there.
+To schedule an agent to move somewhere, all you need to do is give `Agent.scheduleTrip` two arguments: the coordinates of where you want the agent to go and a [Place](./global.html#Place) object describing what's there.
 Optionally you can provide three more arguments: 
 * A custom speed greater than or equal to .1 (1 by default)
 * A true/false value specifying whether the agent should ignore the roads and move directly to its goal (false by default, and redundant if the agent is moving from or going to an unanchored place) 
-* A true/false value specifying whether the agent should give up on its current trip and empty (false by default).
+* A true/false value specifying whether the agent should give up on its current trip, emptying its schedule (false by default).
 
 Beyond just scheduling an agent to move somewhere, for information about actually _making_ it move, see the section on [controllers](#controllers).
 
@@ -133,7 +133,8 @@ let feature = {
 	"type": "Feature",
 	"properties": {
 		"place": {
-			"unit": random_unit_id
+			"type": "unit",
+			"id": random_unit_id
 		},
 		"layer_options": {
 			"color": "blue",
@@ -153,7 +154,8 @@ let feature = {
 
 What actually happens on the Agentmap and to each Agent is determined by the controller functions you define. On each tick of the simulation, the Agentmap calls its own `Agentmap.controller` and then each existing Agent's `Agent.controller`, all of which are by default empty.
 
-Whatever trip an Agent has scheduled (with `Agent.setTravelToPlace`), it will only actually move when its `Agent.moveIt` method is called by its controller function. You can place the call to `Agent.moveIt` anywhere within the controller function depending on what (if anything) you want to have happen before or after the agent moves.
+Whatever trip an Agent has scheduled (with `Agent.scheduleTrip`), it will only actually move when its `Agent.moveIt` method is called (usually by its controller function). 
+You can place the call to `Agent.moveIt` anywhere within the controller function depending on what (if anything) you want to have happen before or after the agent moves.
 
 Since on each tick, an Agent will move according to the speed specified by the next point in its scheduled path, you may have an Agent move a large distance per tick, and only be able to access its position before and after you make the movement (by calling Agent.moveIt) within the controller function. If you would like more precision, at the cost of some performance, you can define an `Agent.fine_controller` function, which is called before and after each individual step an Agent makes (approximately half a meter).
 
@@ -175,7 +177,7 @@ agentmap.agents.eachLayer(function(agent) {
 
 You can pause or resume an Agent's trip with its [Agent.pauseTrip](./Agent.html#.pauseTrip) and [Agent.resumeTrip](./Agent.html#.resumeTrip) methods. You can also alter the speeds an Agent is scheduled to travel using several methods: [Agent.setSpeed](./Agent.html#.increaseSpeed), [Agent.multiplySpeed](./Agent.html#.multiplySpeed), and [Agent.increaseSpeed](./Agent.html#.increaseSpeed). But that's not the kind of speed this section is about.
 
-Time in an AgentMap is measured by ticks (recorded in `Agentmap.state.ticks`). A tick can be interpreted differently based on what you have Agents do on each tick: it can be a second, a minute, an hour, or something less standard. But how long does it take for a tick to elapse in real life; that is, how long will your computer take to complete the operations that should happen during a tick?
+Time in an Agentmap is measured by ticks (recorded in `Agentmap.state.ticks`). A tick can be interpreted differently based on what you have Agents do on each tick: it can be a second, a minute, an hour, or something less standard. But how long does it take for a tick to elapse in real life; that is, how long will your computer take to complete the operations that should happen during a tick?
 
 Typically, it's a few miliseconds. But the more Agents you have and the more complex instructions you give them, the longer it'll take, and the slower your simulation will run. The biggest drain on speed is animation: drawing and redrawing tens or hundreds of Agents everytime they take a tiny step takes a lot of resources and a (relatively) long time.
 
@@ -185,13 +187,13 @@ By default, it is 1, meaning it will be redrawn after every step. The higher the
 
 Zero is a special value: if `Agentmap.animation_interval` is 0, then the animation will stop completely while the simulation continues under-the-hood.
 
-You can also change the `animation_interval` after creating the Agentmap with the [Agentmap.setAnimationInterval](./Agentmap.html#.setAnimationInterval) method.
+You can also change the `animation_interval` after creating the Agentmap with the [Agentmap.setAnimationInterval](./Agentmap.html#setAnimationInterval) method.
 
 ## <a name="feature-styling"></a>Feature Styling
 
 Every feature that AgentMaps places on the map is an instance of a Leaflet layer. Streets are L.Polylines, units are L.Polygons, and agents are L.CircleMarkers.
 
-The methods for creating agents ([agentify](./Agentmap.html#.agentify)), units ([buildingify](./Agentmap.html#.buildingify)), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
+The methods for creating agents ([agentify](./Agentmap.html#agentify)), units ([buildingify](./Agentmap.html#buildingify)), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
 specifying the style you want (colors, outlines, transparency, radius, etc.). 
 See the [Leaflet docs](https://leafletjs.com/reference-1.3.2.html) for each of the aforementioned classes to learn about all the possible options.
 

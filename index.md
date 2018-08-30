@@ -183,11 +183,10 @@ random_unit_id = agentmap.units.getLayerId(random_unit),
 random_unit_center = random_unit.getBounds().getCenter();
 ```
 
-Then we will tell the agent to stop whatever it's doing and start traveling to that unit's center at approximately 1 meter per tick:
+Then we will schedule for the agent a trip to that unit's center at approximately 1 meter per tick:
 
 ```javascript
-agent.setTravelToPlace(random_unit_center, {type: "unit", id: random_unit_id}, 1, false, true);
-agent.startTrip();
+agent.scheduleTrip(random_unit_center, {type: "unit", id: random_unit_id}, 1, false, true);
 ```
 
 We want the agent to move along whatever path it has scheduled at each tick, so we will add the following to the end of our
@@ -208,8 +207,7 @@ agentmap.controller = function() {
 			random_unit_id = agentmap.units.getLayerId(random_unit),
 			random_unit_center = random_unit.getBounds().getCenter();
 
-			agent.setTravelToPlace(random_unit_center, {type: "unit", id: random_unit_id}, true);
-			agent.startTrip();
+			agent.scheduleTrip(random_unit_center, {type: "unit", id: random_unit_id}, false, true);
 		}
 	}
 
