@@ -11,7 +11,7 @@ Given a neighborhood, AgentMaps lets you quickly and easily:
 
 AgentMaps lets you turn this:
 
-![noagentmaps](resources/noagentmaps.png | width = 100 | height = 100)
+![noagentmaps](resources/noagentmaps.png | width = 100)
 
 into something like this:
 
