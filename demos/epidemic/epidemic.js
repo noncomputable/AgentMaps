@@ -153,7 +153,7 @@ function epidemicAgentMaker(i) {
 		
 		//Approximately many ticks until any agent goes to work or back home will be based on these numbers.
 		let go_work_base_interval = 600,
-		go_home_base_interval = 1000;
+		go_home_base_interval = 800;
 		
 		//Randomize how early or late agents make their commute.
 		let sign = Math.random() < .5 ? 1 : -1,
