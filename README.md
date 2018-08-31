@@ -6,7 +6,7 @@ Given a neighborhood, AgentMaps lets you quickly and easily:
 
 * Build units along the streets.
 * Spawn agents onto the map.
-* Schedule them to move them between places on the map.
+* Schedule them to move between places on the map.
 * Change their appearance and properties.
 
 ### Documentation
