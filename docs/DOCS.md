@@ -78,7 +78,7 @@ To setup an Agentmap and build its streets and units, you need to provide some i
 * [GeoJSON](http://geojson.org/) data representing its streets
 * The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood, LatLng order
 
-You can get this information with both the OpenStreetMap [web interface](http://openstreetmap.org) its [Overpass API](http://overpass-api.de). For converting between formats, you can use [OSMToGeoJSON](https://tyrasd.github.io/osmtogeojson/).
+You can get this information with both the OpenStreetMap [web interface](http://openstreetmap.org) and its [Overpass API](http://overpass-api.de). For converting between formats, you can use [OSMToGeoJSON](https://tyrasd.github.io/osmtogeojson/).
 
 The [Agentmap.buildingify](./Agentmap.html#buildingify) method does this work. If the GeoJSON data for the neighborhood is
 stored in a variable `my_data` and the coordinates of the top left and bottom right corners of the bounding rectangle are `[43.3071, -88.0158]` and `[43.2884, -87.9759]` respectively, the corresponding call to `Agentmap.buildingify` would look something like:
@@ -88,13 +88,13 @@ agentmap.buildingify(my_data, [[43.3071, -88.0158], [43.2884, -87.9759]]);
 ```
 `Agentmap.buildingify` accepts more arguments specifying the dimension and appearance of the units and streets it will build. For more on that, see the section on [Feature Styling](#feature-styling).
 
+*Note*: `Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
 ## <a name="navigating-streets"></a>Navigating Streets
 
 Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a [graph](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics) with the help of the [ngraph.graph](https://github.com/anvaka/ngraph.graph) library. Then, it uses [ngraph.path](https://github.com/anvaka/ngraph.path) to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.
 
 The graph is stored in the `Agentmap.streets.graph` property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph [README](https://github.com/anvaka/ngraph.graph/blob/master/README.md).
 
-*Note*: `Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
 ## <a name="navigating-within-units"></a>Navigating Within Units
 
 Every Agentmap has an [Agentmap.getUnitPoint](./Agentmap.html#.getUnitPoint) method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. 
