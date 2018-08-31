@@ -6,7 +6,7 @@
 let animation_interval_input = document.getElementById("animation_interval");
 
 //Set bounds for the area on the map where the simulation will run (gotten from openstreetmap.org).
-let bounding_box = [[40.6469, -73.5255], [40.6390, -73.5183]];
+let bounding_box = [[39.9058, -86.0910], [39.8992, -86.1017]];
 
 //Create and setup the Leaflet map object.
 let map = L.map("map").fitBounds(bounding_box).setZoom(16);

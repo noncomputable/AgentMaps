@@ -53,8 +53,9 @@ AgentMaps expects geographic data in the form of [GeoJSON](http://geojson.org/),
 so it would be useful to take a look at that.
 
 How do you get the GeoJSON data of some neighborhood you're interested in? I use [OpenStreetMap](https://www.openstreetmap.org/) (OSM), 
-a free, collaborative map of the world! You can get a JSON file by using the "export" tool on the OSM website; 
-you can also use it to get the coordinates of the two points bounding your neighborhood.
+a free, collaborative map of the world! You can get an OSM file by using the "export" tool on the OSM website; 
+you can also use it to get the coordinates of the two points bounding your neighborhood. Then, using [OSMToGeoJSON](https://tyrasd.github.io/osmtogeojson/),
+you can plug in your OSM file and get the JSON in return.
 
 All of the above is pretty important to be able to contribute to AgentMaps or understand its internal implementation as well.
 
@@ -75,9 +76,9 @@ These FeatureGroups can be looped through like any other Leaflet FeatureGroup (u
 
 To setup an Agentmap and build its streets and units, you need to provide some information about the neighborhood of interest:
 * [GeoJSON](http://geojson.org/) data representing its streets
-* The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood.
+* The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood, LatLng order
 
-This information is easily accessible via both the OpenStreetMap [web interface](http://openstreetmap.org) and its [Overpass API](http://overpass-api.de).
+You can get this information with both the OpenStreetMap [web interface](http://openstreetmap.org) its [Overpass API](http://overpass-api.de). For converting between formats, you can use [OSMToGeoJSON](https://tyrasd.github.io/osmtogeojson/).
 
 The [Agentmap.buildingify](./Agentmap.html#buildingify) method does this work. If the GeoJSON data for the neighborhood is
 stored in a variable `my_data` and the coordinates of the top left and bottom right corners of the bounding rectangle are `[43.3071, -88.0158]` and `[43.2884, -87.9759]` respectively, the corresponding call to `Agentmap.buildingify` would look something like:
@@ -93,6 +94,7 @@ Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network a
 
 The graph is stored in the `Agentmap.streets.graph` property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph [README](https://github.com/anvaka/ngraph.graph/blob/master/README.md).
 
+*Note*: `Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
 ## <a name="navigating-within-units"></a>Navigating Within Units
 
 Every Agentmap has an [Agentmap.getUnitPoint](./Agentmap.html#.getUnitPoint) method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. 

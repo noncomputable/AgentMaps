@@ -74,8 +74,9 @@ install it with <a href="https://www.npmjs.com/package/leaflet">npm</a> and bund
 <p>AgentMaps expects geographic data in the form of <a href="http://geojson.org/">GeoJSON</a>, a format for representing geospatial information, 
 so it would be useful to take a look at that.</p>
 <p>How do you get the GeoJSON data of some neighborhood you're interested in? I use <a href="https://www.openstreetmap.org/">OpenStreetMap</a> (OSM), 
-a free, collaborative map of the world! You can get a JSON file by using the &quot;export&quot; tool on the OSM website; 
-you can also use it to get the coordinates of the two points bounding your neighborhood.</p>
+a free, collaborative map of the world! You can get an OSM file by using the &quot;export&quot; tool on the OSM website; 
+you can also use it to get the coordinates of the two points bounding your neighborhood. Then, using <a href="https://tyrasd.github.io/osmtogeojson/">OSMToGeoJSON</a>,
+you can plug in your OSM file and get the JSON in return.</p>
 <p>All of the above is pretty important to be able to contribute to AgentMaps or understand its internal implementation as well.</p>
 <h2><a name="basic-structure"></a>Basic Structure</h2><p>AgentMaps functions as an extension of <a href="https://github.com/Leaflet/Leaflet">Leaflet</a>. 
 Since everything in Leaflet is in the namespace <code>L</code> (e.g. <code>L.Map</code>, <code>L.latLng</code>), everything in AgentMaps is in its own namespace <code>A</code> inside of <code>L</code>, <code>L.A</code> (e.g. <code>L.A.Agentmap</code>, <code>L.A.agent</code>).</p>
@@ -88,14 +89,15 @@ These FeatureGroups can be looped through like any other Leaflet FeatureGroup (u
 <h2><a name="generating-buildings"></a>Generating Buildings</h2><p>To setup an Agentmap and build its streets and units, you need to provide some information about the neighborhood of interest:</p>
 <ul>
 <li><a href="http://geojson.org/">GeoJSON</a> data representing its streets</li>
-<li>The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood.</li>
+<li>The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood, LatLng order</li>
 </ul>
-<p>This information is easily accessible via both the OpenStreetMap <a href="http://openstreetmap.org">web interface</a> and its <a href="http://overpass-api.de">Overpass API</a>.</p>
+<p>You can get this information with both the OpenStreetMap <a href="http://openstreetmap.org">web interface</a> its <a href="http://overpass-api.de">Overpass API</a>. For converting between formats, you can use <a href="https://tyrasd.github.io/osmtogeojson/">OSMToGeoJSON</a>.</p>
 <p>The <a href="./Agentmap.html#buildingify">Agentmap.buildingify</a> method does this work. If the GeoJSON data for the neighborhood is
 stored in a variable <code>my_data</code> and the coordinates of the top left and bottom right corners of the bounding rectangle are <code>[43.3071, -88.0158]</code> and <code>[43.2884, -87.9759]</code> respectively, the corresponding call to <code>Agentmap.buildingify</code> would look something like:</p>
 <pre class="prettyprint source lang-javascript"><code>agentmap.buildingify(my_data, [[43.3071, -88.0158], [43.2884, -87.9759]]);</code></pre><p><code>Agentmap.buildingify</code> accepts more arguments specifying the dimension and appearance of the units and streets it will build. For more on that, see the section on <a href="#feature-styling">Feature Styling</a>.</p>
 <h2><a name="navigating-streets"></a>Navigating Streets</h2><p>Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics">graph</a> with the help of the <a href="https://github.com/anvaka/ngraph.graph">ngraph.graph</a> library. Then, it uses <a href="https://github.com/anvaka/ngraph.path">ngraph.path</a> to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.</p>
 <p>The graph is stored in the <code>Agentmap.streets.graph</code> property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph <a href="https://github.com/anvaka/ngraph.graph/blob/master/README.md">README</a>.</p>
+<p><em>Note</em>: <code>Agentmap.buildingify</code> does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. </p>
 <h2><a name="navigating-within-units"></a>Navigating Within Units</h2><p>Every Agentmap has an <a href="./Agentmap.html#.getUnitPoint">Agentmap.getUnitPoint</a> method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. </p>
 <p>Given a unit ID, an x value between 0 and 1, and a y value between 0 and 1, <code>Agentmap.getUnitPoint</code> will get a position down the width and into the depth of a unit according to the supplied x and y values, and return the global coordinates of the position it lands on.
 More specifically, starting from the front corner of the unit that comes first along its street, getUnitPoint will effectively return a <a href="./Global.html#LatLng">LatLng</a> representing the position x <em> 100 percent along its width and y </em> 100 percent into its depth.</p>
@@ -151,13 +153,13 @@ and whose second element is an object mapping the ID of each street to the index
    ]
 };</code></pre><h2><a name="agentfeaturemakers"></a>AgentFeatureMakers</h2><p>The <code>Agentmap.agentify</code> <a href="./Agentmap.html#agentify">method</a> creates and places agents on the map. Its first parameter is the number of agents to be created.
 Its second parameter is a kind of function called an <a href="./global.html#agentFeatureMaker">AgentFeatureMaker</a> that specifies where the agents will be placed, what they look like, and what their properties are.</p>
-<p>The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
+<p>The AgentFeatureMaker you provide should behave as follows: given the leaflet ID of the agent, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
 whose <code>properties.place</code> property is a valid <a href="https://noncomputable.github.io/AgentMaps/docs/global.html#Place">Place</a> containing those coordinates,
 and whose <code>properties.layer_options</code> property is an object containing options for the agent's CircleMarker 
 (like color, outline, radius, and all the other options listed <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker-option">here</a>). 
 Any other properties defined in the <code>properties</code> property (like, say, <code>feature.properties.phone_number</code>) will be transferred to a new Agent instance. </p>
 <p>For example, the AgentFeatureMaker in an epidemic simulation may look something like this:</p>
-<pre class="prettyprint source lang-javascript"><code>function epidemicAgentMaker = function(i) {
+<pre class="prettyprint source lang-javascript"><code>function epidemicAgentMaker = function(id) {
     let feature = { 
         &quot;type&quot;: &quot;Feature&quot;,
         &quot;properties&quot;: {
@@ -208,6 +210,11 @@ You can place the call to <code>Agent.moveIt</code> anywhere within the controll
         //custom operations that vary based on the given agent's properties
     }
 });</code></pre><p>* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.</p>
+<p>You can start, pause, and resume an AgentMaps simulation using the <a href="./Agentmap.html#.run">Agentmap.run</a> and <a href="./Agentmap.html#.pause">Agentmap.pause</a> methods. When <code>Agentmap.run</code> is called, 
+the Agentmap and Agents will run their controller functions, the Agentmap will increment the tick counter (<code>Agentmap.state.ticks</code>), 
+a new animation frame will be requested to do the same thing over again.</p>
+<p>When <code>Agentmap.pause()</code> is called, the ticks will stop incrementing, the request for the next animation frame will be cancelled, and the controller functions will stop being called. Calling <code>Agentmap.run()</code> after pausing will set things back in motion.</p>
+<p><a href="./Agentmap.html/#clear">Agentmap.clear</a> will reset the Agentmap's state (including the tick counter) and remove all the AgentMaps layers from the map.</p>
 <h2><a name="animation-speed"></a>Animation Speed</h2><p>You can pause or resume an Agent's trip with its <a href="./Agent.html#.pauseTrip">Agent.pauseTrip</a> and <a href="./Agent.html#.resumeTrip">Agent.resumeTrip</a> methods. You can also alter the speeds an Agent is scheduled to travel using several methods: <a href="./Agent.html#.increaseSpeed">Agent.setSpeed</a>, <a href="./Agent.html#.multiplySpeed">Agent.multiplySpeed</a>, and <a href="./Agent.html#.increaseSpeed">Agent.increaseSpeed</a>. But that's not the kind of speed this section is about.</p>
 <p>Time in an Agentmap is measured by ticks (recorded in <code>Agentmap.state.ticks</code>). A tick can be interpreted differently based on what you have Agents do on each tick: it can be a second, a minute, an hour, or something less standard. But how long does it take for a tick to elapse in real life; that is, how long will your computer take to complete the operations that should happen during a tick?</p>
 <p>Typically, it's a few miliseconds. But the more Agents you have and the more complex instructions you give them, the longer it'll take, and the slower your simulation will run. The biggest drain on speed is animation: drawing and redrawing tens or hundreds of Agents everytime they take a tiny step takes a lot of resources and a (relatively) long time.</p>
@@ -231,7 +238,7 @@ You can place the call to <code>Agent.moveIt</code> anywhere within the controll
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 31 2018 04:04:20 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 31 2018 17:05:58 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -34,10 +34,12 @@ let map_data = {
 };
 ```
 
-Have two opposite corners of a rectangle containing the neighborhood of interest stored as an array of the corners' coordinates (i.e. [[lat, lon], [lat, lon]]):
+You can use the sample data from the demos [here](../demos/simple/map_data.js).
+
+Have the top left and bottom right corners of a rectangle containing the neighborhood stored as an array of the corners' coordinates (i.e. [[lat, lon], [lat, lon]]):
 
 ```javascript
-let bounding_points = [[43.3071, -88.0158], [43.2884, -87.9759]];
+let bounding_points = [[39.9058, -86.0910], [39.8992, -86.1017]]; 
 ```
 
 Create a Leaflet map in the "demo\_map" `<div>` of our HTML document:

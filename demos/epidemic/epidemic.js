@@ -8,7 +8,7 @@ speed_controller_input = document.getElementById("speed_controller"),
 infection_probability_input = document.getElementById("infection_probability");
 
 //Set bounds for the area on the map where the simulation will run (gotten from openstreetmap.org).
-let bounding_box = [[40.6469, -73.5255], [40.6390, -73.5183]];
+let bounding_box = [[39.9058, -86.0910], [39.8992, -86.1017]];
 
 //Create and setup the Leaflet map object.
 let map = L.map("map").fitBounds(bounding_box).setZoom(16);
@@ -31,9 +31,9 @@ function setup() {
 	agentmap.buildingify(bounding_box, map_data, undefined, {"color": "black", "weight": 1.5, "opacity": .6});
 
 	//Split the map's units into residential and commercial zones.
-	let perimeter_streets = ["Judith Drive", "Jason Drive"],
-	upper_streets = ["Ira Road", "Timothy Road", "Susan Road", "Lydia Court", "Ardis Place", "Ricky Street"];
-	agentmap.zoned_units = getZonedUnits(agentmap, perimeter_streets, upper_streets);
+	let residential_streets = ["Wythe Lane", "Heyward Lane", "Lynch Lane", "Clymer Lane"],
+	commercial_streets = ["Heyward Place", "Heyward Drive", "Hooper Place"];
+	agentmap.zoned_units = getZonedUnits(agentmap, residential_streets, commercial_streets);
 
 	//Use only a subset of the zoned units.
 	agentmap.zoned_units.residential = pick_random_n(agentmap.zoned_units.residential, 100),

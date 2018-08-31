@@ -53,8 +53,9 @@ AgentMaps expects geographic data in the form of [GeoJSON](http://geojson.org/),
 so it would be useful to take a look at that.
 
 How do you get the GeoJSON data of some neighborhood you're interested in? I use [OpenStreetMap](https://www.openstreetmap.org/) (OSM), 
-a free, collaborative map of the world! You can get a JSON file by using the "export" tool on the OSM website; 
-you can also use it to get the coordinates of the two points bounding your neighborhood.
+a free, collaborative map of the world! You can get an OSM file by using the "export" tool on the OSM website; 
+you can also use it to get the coordinates of the two points bounding your neighborhood. Then, using [OSMToGeoJSON](https://tyrasd.github.io/osmtogeojson/),
+you can plug in your OSM file and get the JSON in return.
 
 All of the above is pretty important to be able to contribute to AgentMaps or understand its internal implementation as well.
 
@@ -75,9 +76,9 @@ These FeatureGroups can be looped through like any other Leaflet FeatureGroup (u
 
 To setup an Agentmap and build its streets and units, you need to provide some information about the neighborhood of interest:
 * [GeoJSON](http://geojson.org/) data representing its streets
-* The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood.
+* The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood, LatLng order
 
-This information is easily accessible via both the OpenStreetMap [web interface](http://openstreetmap.org) and its [Overpass API](http://overpass-api.de).
+You can get this information with both the OpenStreetMap [web interface](http://openstreetmap.org) its [Overpass API](http://overpass-api.de). For converting between formats, you can use [OSMToGeoJSON](https://tyrasd.github.io/osmtogeojson/).
 
 The [Agentmap.buildingify](./Agentmap.html#buildingify) method does this work. If the GeoJSON data for the neighborhood is
 stored in a variable `my_data` and the coordinates of the top left and bottom right corners of the bounding rectangle are `[43.3071, -88.0158]` and `[43.2884, -87.9759]` respectively, the corresponding call to `Agentmap.buildingify` would look something like:
@@ -93,6 +94,7 @@ Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network a
 
 The graph is stored in the `Agentmap.streets.graph` property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph [README](https://github.com/anvaka/ngraph.graph/blob/master/README.md).
 
+*Note*: `Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
 ## <a name="navigating-within-units"></a>Navigating Within Units
 
 Every Agentmap has an [Agentmap.getUnitPoint](./Agentmap.html#.getUnitPoint) method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. 
@@ -177,7 +179,7 @@ street.intersections = {
 The `Agentmap.agentify` [method](./Agentmap.html#agentify) creates and places agents on the map. Its first parameter is the number of agents to be created.
 Its second parameter is a kind of function called an [AgentFeatureMaker](./global.html#agentFeatureMaker) that specifies where the agents will be placed, what they look like, and what their properties are.
 
-The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
+The AgentFeatureMaker you provide should behave as follows: given the leaflet ID of the agent, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
 whose `properties.place` property is a valid [Place](https://noncomputable.github.io/AgentMaps/docs/global.html#Place) containing those coordinates,
 and whose `properties.layer_options` property is an object containing options for the agent's CircleMarker 
 (like color, outline, radius, and all the other options listed [here](https://leafletjs.com/reference-1.3.2.html#circlemarker-option)). 
@@ -185,7 +187,7 @@ Any other properties defined in the `properties` property (like, say, `feature.p
 
 For example, the AgentFeatureMaker in an epidemic simulation may look something like this:
 ```javascript
-function epidemicAgentMaker = function(i) {
+function epidemicAgentMaker = function(id) {
 	let feature = { 
 		"type": "Feature",
 		"properties": {
@@ -257,6 +259,14 @@ agentmap.agents.eachLayer(function(agent) {
 });
 ```
 \* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.
+
+You can start, pause, and resume an AgentMaps simulation using the [Agentmap.run](./Agentmap.html#.run) and [Agentmap.pause](./Agentmap.html#.pause) methods. When `Agentmap.run` is called, 
+the Agentmap and Agents will run their controller functions, the Agentmap will increment the tick counter (`Agentmap.state.ticks`), 
+a new animation frame will be requested to do the same thing over again.
+
+When `Agentmap.pause()` is called, the ticks will stop incrementing, the request for the next animation frame will be cancelled, and the controller functions will stop being called. Calling `Agentmap.run()` after pausing will set things back in motion.
+
+[Agentmap.clear](./Agentmap.html/#clear) will reset the Agentmap's state (including the tick counter) and remove all the AgentMaps layers from the map.
 
 ## <a name="animation-speed"></a>Animation Speed
 
