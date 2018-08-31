@@ -261,12 +261,12 @@ agentmap.agents.eachLayer(function(agent) {
 \* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.
 
 You can start, pause, and resume an AgentMaps simulation using the [Agentmap.run](./Agentmap.html#.run) and [Agentmap.pause](./Agentmap.html#.pause) methods. When `Agentmap.run` is called, 
-the Agentmap and Agents will run their controller functions, the Agentmap will increment the tick counter (`Agentmap.state.ticks`), 
-a new animation frame will be requested to do the same thing over again.
+the Agentmap and Agents will run their controller functions, the Agentmap will increment its tick clock (`Agentmap.state.ticks`), 
+and a new animation frame will be requested to do the same thing over again.
 
-When `Agentmap.pause()` is called, the ticks will stop incrementing, the request for the next animation frame will be cancelled, and the controller functions will stop being called. Calling `Agentmap.run()` after pausing will set things back in motion.
+After `Agentmap.pause()` is called, the tick will not be incremented, the request for the next animation frame will be cancelled, and the controller functions will stop being called. Calling `Agentmap.run()` after pausing will set things back in motion.
 
-[Agentmap.clear](./Agentmap.html/#clear) will reset the Agentmap's state (including the tick counter) and remove all the AgentMaps layers from the map.
+[Agentmap.clear](./Agentmap.html/clear) will reset the Agentmap's state (including the tick counter) and remove all the AgentMaps layers from the map.
 
 ## <a name="animation-speed"></a>Animation Speed
 
