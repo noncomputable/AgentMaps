@@ -9,6 +9,14 @@ Given a neighborhood, AgentMaps lets you quickly and easily:
 * Schedule them to move between places on the map.
 * Change their appearance and properties.
 
+AgentMaps lets you turn this:
+
+![noagentmaps](resources/noagentmaps.png)
+
+into something like this:
+
+![agentmaps](resources/agentmaps.png)
+
 ### Documentation
 
 Docs for people who want to use AgentMaps are available [here](https://noncomputable.github.io/AgentMaps/docs/index.html).
