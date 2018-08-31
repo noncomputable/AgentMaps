@@ -51,16 +51,33 @@ you will only see the items necessary for using AgentMaps. However, if you are l
 the <a href="https://noncomputable.github.io/AgentMaps/devdocs/">developer docs</a>, you will see
 everything, including functions used only in the internal implementation of AgentMaps.</p>
 <p>Here I'll explain some features of AgentMaps that the auto-generated docs probably aren't sufficiently helpful for.</p>
-<h4>Table of Contents</h4><p><a href="#basic-structure">Basic Structure of Agentmaps</a></p>
-<p><a href="#moving-to-places">Moving To Places</a></p>
+<h4>Table of Contents</h4><p><a href="#prerequisites">Prerequisites</a></p>
+<p><a href="#basic-structure">Basic Structure of Agentmaps</a></p>
+<p><a href="#generating-buildings">Generating Buildings</a></p>
+<p><a href="#navigating-streets">Navigating Streets</a></p>
+<p><a href="#navigating-within-units">Navigating Within Units</a></p>
+<p><a href="#feature-styling">Feature Styling</a></p>
 <p><a href="#neighbors">Neighbors</a></p>
 <p><a href="#intersections">Intersections</a></p>
 <p><a href="#agentfeaturemakers">AgentFeatureMakers</a></p>
+<p><a href="#moving-to-places">Moving To Places</a></p>
 <p><a href="#controllers">Controllers</a></p>
 <p><a href="#animation-speed">Animation Speed</a></p>
-<p><a href="#feature-styling">Feature Styling</a></p>
-<p><a href="#navigating-streets">Navigating Streets</a></p>
-<p><a href="#navigating-within-units">Navigating Within Units</a></p>
+<h2>Prerequisites</h2><p>You can find a bundle for AgentMaps here: <a href="https://unpkg.com/agentmaps@2.0.0/site/dist/agentmaps.js">https://unpkg.com/agentmaps@2.0.0/site/dist/agentmaps.js</a>.</p>
+<p>Making simulations with AgentMaps will be a lot easier for you if you can:</p>
+<ul>
+<li>Program with Javascript</li>
+<li>Use the <a href="https://leafletjs.com/">Leaflet</a> mapping library</li>
+</ul>
+<p>Leaflet doesn't come bundled with AgentMaps, so you'll have to either include it in your web page with its own \&lt;script> tag or
+install it with <a href="https://www.npmjs.com/package/leaflet">npm</a> and bundle it yourself.</p>
+<p>It might also help to be familiar with <a href="http://turfjs.org/">turf.js</a>, a library that contains lots of tools that make geospatial work (like intersection detection and line slicing) quick and easy.</p>
+<p>AgentMaps expects geographic data in the form of <a href="http://geojson.org/">GeoJSON</a>, a format for representing geospatial information, 
+so it would be useful to take a look at that.</p>
+<p>How do you get the GeoJSON data of some neighborhood you're interested in? I use <a href="https://www.openstreetmap.org/">OpenStreetMap</a> (OSM), 
+a free, collaborative map of the world! You can get a JSON file by using the &quot;export&quot; tool on the OSM website; 
+you can also use it to get the coordinates of the two points bounding your neighborhood.</p>
+<p>All of the above is pretty important to be able to contribute to AgentMaps or understand its internal implementation as well.</p>
 <h2><a name="basic-structure"></a>Basic Structure</h2><p>AgentMaps functions as an extension of <a href="https://github.com/Leaflet/Leaflet">Leaflet</a>. 
 Since everything in Leaflet is in the namespace <code>L</code> (e.g. <code>L.Map</code>, <code>L.latLng</code>), everything in AgentMaps is in its own namespace <code>A</code> inside of <code>L</code>, <code>L.A</code> (e.g. <code>L.A.Agentmap</code>, <code>L.A.agent</code>).</p>
 <p>The main object of AgentMaps is an Agentmap (<a href="./Agentmap.html">L.A.Agentmap</a>).
@@ -69,22 +86,32 @@ All the classes in AgentMaps have corresponding, lowercase factory functions tha
 constructor's arguments. For example, <code>L.A.agentmap(map)</code> is equivalent to <code>new L.A.Agentmap(map)</code>.</p>
 <p>An Agentmap stores its units, streets, and agents as Leaflet <a href="https://leafletjs.com/reference-1.3.4.html#featuregroup">FeatureGroups</a> (<code>Agentmap.units</code>, <code>Agentmap.streets</code>, and <code>Agentmap.agents</code>).
 These FeatureGroups can be looped through like any other Leaflet FeatureGroup (using the <a href="https://leafletjs.com/reference-1.3.4.html#featuregroup-eachlayer">FeatureGroup.eachLayer()</a> method).</p>
-<h2><a name="moving-to-places"></a>Moving To Places</h2><p>The agents' <a href="./Agent.html#.scheduleTrip">Agent.scheduleTrip</a> method makes scheduling trips between any places on the map very convenient. 
-<code>Agent.scheduleTrip</code> works by keeping track of the kind of place the agent is at and is going to at any given time. The <a href="./global.html#Place">place</a>
-can be either a unit, a street,
-or &quot;unanchored&quot;, meaning anywhere on the map with no relation to whatever features (streets or units) may or may not be there. </p>
-<p>Depending on where an agent is, and where it intends to travel to, the agent will travel in different ways. 
-If it's leaving from or going to an unanchored place, it will ignore the roads and travel directly. 
-If it's moving between streets or units, it will by default move along the roads and in and out through the front (&quot;doors&quot;) of the units.</p>
-<p>To schedule an agent to move somewhere, all you need to do is give <code>Agent.scheduleTrip</code> two arguments: the coordinates of where you want the agent to go and a <a href="./global.html#Place">Place</a> object describing what's there.
-Optionally you can provide three more arguments: </p>
+<h2><a name="generating-buildings"></a>Generating Buildings</h2><p>To setup an Agentmap and build its streets and units, you need to provide some information about the neighborhood of interest:</p>
 <ul>
-<li>A custom speed greater than or equal to .1 (1 by default)</li>
-<li>A true/false value specifying whether the agent should ignore the roads and move directly to its goal (false by default, and redundant if the agent is moving from or going to an unanchored place) </li>
-<li>A true/false value specifying whether the agent should give up on its current trip, emptying its schedule (false by default).</li>
+<li><a href="http://geojson.org/">GeoJSON</a> data representing its streets</li>
+<li>The coordinates of the top left and bottom right corners of a rectangle containing the neighborhood.</li>
 </ul>
-<p>Beyond just scheduling an agent to move somewhere, for information about actually <em>making</em> it move, see the section on <a href="#controllers">controllers</a>.</p>
-<p><em>Note</em>: Over long distances, as agent movements aren't precise enough for multi-hundred mile paths to slope properly, the agent's path may be very roundabout.</p>
+<p>This information is easily accessible via both the OpenStreetMap <a href="http://openstreetmap.org">web interface</a> and its <a href="http://overpass-api.de">Overpass API</a>.</p>
+<p>The <a href="./Agentmap.html#buildingify">Agentmap.buildingify</a> method does this work. If the GeoJSON data for the neighborhood is
+stored in a variable <code>my_data</code> and the coordinates of the top left and bottom right corners of the bounding rectangle are <code>[43.3071, -88.0158]</code> and <code>[43.2884, -87.9759]</code> respectively, the corresponding call to <code>Agentmap.buildingify</code> would look something like:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.buildingify(my_data, [[43.3071, -88.0158], [43.2884, -87.9759]]);</code></pre><p><code>Agentmap.buildingify</code> accepts more arguments specifying the dimension and appearance of the units and streets it will build. For more on that, see the section on <a href="#feature-styling">Feature Styling</a>.</p>
+<h2><a name="navigating-streets"></a>Navigating Streets</h2><p>Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics">graph</a> with the help of the <a href="https://github.com/anvaka/ngraph.graph">ngraph.graph</a> library. Then, it uses <a href="https://github.com/anvaka/ngraph.path">ngraph.path</a> to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.</p>
+<p>The graph is stored in the <code>Agentmap.streets.graph</code> property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph <a href="https://github.com/anvaka/ngraph.graph/blob/master/README.md">README</a>.</p>
+<h2><a name="navigating-within-units"></a>Navigating Within Units</h2><p>Every Agentmap has an <a href="./Agentmap.html#.getUnitPoint">Agentmap.getUnitPoint</a> method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. </p>
+<p>Given a unit ID, an x value between 0 and 1, and a y value between 0 and 1, <code>Agentmap.getUnitPoint</code> will get a position down the width and into the depth of a unit according to the supplied x and y values, and return the global coordinates of the position it lands on.
+More specifically, starting from the front corner of the unit that comes first along its street, getUnitPoint will effectively return a <a href="./Global.html#LatLng">LatLng</a> representing the position x <em> 100 percent along its width and y </em> 100 percent into its depth.</p>
+<h2><a name="feature-styling"></a>Feature Styling</h2><p>Every feature that AgentMaps places on the map is an instance of a Leaflet layer. Streets are L.Polylines, units are L.Polygons, and agents are L.CircleMarkers.</p>
+<p>The methods for creating agents (<a href="./Agentmap.html#agentify">agentify</a>), units (<a href="./Agentmap.html#buildingify">buildingify</a>), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
+specifying the style you want (colors, outlines, transparency, radius, etc.). 
+See the <a href="https://leafletjs.com/reference-1.3.2.html">Leaflet docs</a> for each of the aforementioned classes to learn about all the possible options.</p>
+<p>An options object may look something like this:</p>
+<pre class="prettyprint source lang-javascript"><code>let options = {
+    radius: .5,
+    color: &quot;pink&quot;,
+    weight: 3,
+    opacity: .5
+};</code></pre><p>Buildingify's unit_options parameter is different from the other options parameters: you can provide extra AgentMaps-only options to specify the length, depth, front-buffer (how far the front of a unit is from its street), and side-buffer (how far a unit is from adjacent units on the same street) of the units in meters.</p>
+<p>You can modify an individual street, unit, or agent's (Leaflet) style after it's already on the map by calling its <a href="https://leafletjs.com/reference-1.3.4.html#path-setstyle">setStyle</a> method and passing it an options object.</p>
 <h2><a name="neighbors"></a>Neighbors</h2><p>Every unit has a neighbors property, <code>unit.neighbors</code>: a three element array of layer IDs representing the previous unit, the next unit, and the
 unit directly across the street respectively.</p>
 <h2><a name="intersections"></a>Intersections</h2><p>Every street has an intersections property (street.intersections): an object mapping the ID of another street the given street has intersections with to an array of the specific intersections. Each individual intersection itself is a 2-element array whose first element is the coordinates of the intersection,
@@ -123,33 +150,54 @@ and whose second element is an object mapping the ID of each street to the index
         &quot;61&quot;: 0
       }
    ]
-};</code></pre><h2><a name="agentfeaturemakers"></a>AgentFeatureMakers</h2><p>The <code>Agentmap.agentify</code> <a href="./Agentmap.html#.agentify">method</a> creates and places agents on the map. Its first parameter is the number of agents to be created.
+};</code></pre><h2><a name="agentfeaturemakers"></a>AgentFeatureMakers</h2><p>The <code>Agentmap.agentify</code> <a href="./Agentmap.html#agentify">method</a> creates and places agents on the map. Its first parameter is the number of agents to be created.
 Its second parameter is a kind of function called an <a href="./global.html#agentFeatureMaker">AgentFeatureMaker</a> that specifies where the agents will be placed, what they look like, and what their properties are.</p>
 <p>The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
 whose <code>properties.place</code> property is a valid <a href="https://noncomputable.github.io/AgentMaps/docs/global.html#Place">Place</a> containing those coordinates,
 and whose <code>properties.layer_options</code> property is an object containing options for the agent's CircleMarker 
 (like color, outline, radius, and all the other options listed <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker-option">here</a>). 
 Any other properties defined in the <code>properties</code> property (like, say, <code>feature.properties.phone_number</code>) will be transferred to a new Agent instance. </p>
-<p>For example, the AgentFeatureMaker in an epidemic simulation may return something like this:</p>
-<pre class="prettyprint source lang-javascript"><code>let feature = { 
-    &quot;type&quot;: &quot;Feature&quot;,
-    &quot;properties&quot;: {
-        &quot;place&quot;: {
-            &quot;type&quot;: &quot;unit&quot;,
-            &quot;id&quot;: random_unit_id
+<p>For example, the AgentFeatureMaker in an epidemic simulation may look something like this:</p>
+<pre class="prettyprint source lang-javascript"><code>function epidemicAgentMaker = function(i) {
+    let feature = { 
+        &quot;type&quot;: &quot;Feature&quot;,
+        &quot;properties&quot;: {
+            &quot;place&quot;: {
+                &quot;type&quot;: &quot;unit&quot;,
+                &quot;id&quot;: random_unit_id
+            },
+            &quot;layer_options&quot;: {
+                &quot;color&quot;: &quot;blue&quot;,
+                &quot;radius&quot;: .5
+            },
+            &quot;infected&quot;: Math.random() > .15 ? false : true,
+            &quot;ticks_until_recovery&quot;: Math.random() * 2000,
         },
-        &quot;layer_options&quot;: {
-            &quot;color&quot;: &quot;blue&quot;,
-            &quot;radius&quot;: .5
+        &quot;geometry&quot;: {
+            &quot;type&quot;: &quot;Point&quot;,
+            &quot;coordinates&quot;: center_coords
         },
-        &quot;infected&quot;: Math.random() > .15 ? false : true,
-        &quot;ticks_until_recovery&quot;: Math.random() * 2000,
-    },
-    &quot;geometry&quot;: {
-        &quot;type&quot;: &quot;Point&quot;,
-        &quot;coordinates&quot;: center_coords
-    },
-};</code></pre><h2><a name="controllers"></a>Controllers</h2><p>What actually happens on the Agentmap and to each Agent is determined by the controller functions you define. On each tick of the simulation, the Agentmap calls its own <code>Agentmap.controller</code> and then each existing Agent's <code>Agent.controller</code>, all of which are by default empty.</p>
+    };
+
+    return feature;
+}</code></pre><p>The corresponding call to <code>Agentmap.agentify</code> might look something like this:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.agentify(100, epidemicAgentMaker);</code></pre><h2><a name="moving-to-places"></a>Moving To Places</h2><p>The agents' <a href="./Agent.html#.scheduleTrip">Agent.scheduleTrip</a> method makes scheduling trips between any places on the map very convenient. 
+<code>Agent.scheduleTrip</code> works by keeping track of the kind of place the agent is at and is going to at any given time. The <a href="./global.html#Place">place</a>
+can be either a unit, a street,
+or &quot;unanchored&quot;, meaning anywhere on the map with no relation to whatever features (streets or units) may or may not be there. </p>
+<p>Depending on where an agent is, and where it intends to travel to, the agent will travel in different ways. 
+If it's leaving from or going to an unanchored place, it will ignore the roads and travel directly. 
+If it's moving between streets or units, it will by default move along the roads and in and out through the front (&quot;doors&quot;) of the units.</p>
+<p>To schedule an agent to move somewhere, all you need to do is give <code>Agent.scheduleTrip</code> two arguments: the coordinates of where you want the agent to go and a <a href="./global.html#Place">Place</a> object describing what's there.
+Optionally you can provide three more arguments: </p>
+<ul>
+<li>A custom speed greater than or equal to .1 (1 by default)</li>
+<li>A true/false value specifying whether the agent should ignore the roads and move directly to its goal (false by default, and redundant if the agent is moving from or going to an unanchored place) </li>
+<li>A true/false value specifying whether the agent should give up on its current trip, emptying its schedule (false by default).</li>
+</ul>
+<p>Beyond just scheduling an agent to move somewhere, for information about actually <em>making</em> it move, see the section on <a href="#controllers">controllers</a>.</p>
+<p><em>Note</em>: Over long distances, as agent movements aren't precise enough for multi-hundred mile paths to slope properly, the agent's path may be very roundabout.</p>
+<h2><a name="controllers"></a>Controllers</h2><p>What actually happens on the Agentmap and to each Agent is determined by the controller functions you define. On each tick of the simulation, the Agentmap calls its own <code>Agentmap.controller</code> and then each existing Agent's <code>Agent.controller</code>, all of which are by default empty.</p>
 <p>Whatever trip an Agent has scheduled (with <code>Agent.scheduleTrip</code>), it will only actually move when its <code>Agent.moveIt</code> method is called (usually by its controller function). 
 You can place the call to <code>Agent.moveIt</code> anywhere within the controller function depending on what (if anything) you want to have happen before or after the agent moves.</p>
 <p>Since on each tick, an Agent will move according to the speed specified by the next point in its scheduled path, you may have an Agent move a large distance per tick, and only be able to access its position before and after you make the movement (by calling Agent.moveIt) within the controller function. If you would like more precision, at the cost of some performance, you can define an <code>Agent.fine_controller</code> function, which is called before and after each individual step an Agent makes (approximately half a meter).</p>
@@ -167,24 +215,7 @@ You can place the call to <code>Agent.moveIt</code> anywhere within the controll
 <p>To help deal with this, an Agentmap's constructor, along with a Leaflet map, accepts an &quot;animation_interval&quot; argument, a nonnegative integer. An Agent will only be animated every <code>Agentmap.animation_interval</code> steps, where a step is typically less than a meter. </p>
 <p>By default, it is 1, meaning it will be redrawn after every step. The higher the value, the choppier the animation will look, but the faster it should proceed. </p>
 <p>Zero is a special value: if <code>Agentmap.animation_interval</code> is 0, then the animation will stop completely while the simulation continues under-the-hood.</p>
-<p>You can also change the <code>animation_interval</code> after creating the Agentmap with the <a href="./Agentmap.html#setAnimationInterval">Agentmap.setAnimationInterval</a> method.</p>
-<h2><a name="feature-styling"></a>Feature Styling</h2><p>Every feature that AgentMaps places on the map is an instance of a Leaflet layer. Streets are L.Polylines, units are L.Polygons, and agents are L.CircleMarkers.</p>
-<p>The methods for creating agents (<a href="./Agentmap.html#agentify">agentify</a>), units (<a href="./Agentmap.html#buildingify">buildingify</a>), and streets (buildingify) provide options parameters to which you can pass a Leaflet options object 
-specifying the style you want (colors, outlines, transparency, radius, etc.). 
-See the <a href="https://leafletjs.com/reference-1.3.2.html">Leaflet docs</a> for each of the aforementioned classes to learn about all the possible options.</p>
-<p>An options object may look something like this:</p>
-<pre class="prettyprint source lang-javascript"><code>let options = {
-    radius: .5,
-    color: &quot;pink&quot;,
-    weight: 3,
-    opacity: .5
-};</code></pre><p>Buildingify's unit_options parameter is different from the other options parameters: you can provide extra AgentMaps-only options to specify the length, depth, front-buffer (how far the front of a unit is from its street), and side-buffer (how far a unit is from adjacent units on the same street) of the units in meters.</p>
-<p>You can modify an individual street, unit, or agent's (Leaflet) style after it's already on the map by calling its <a href="https://leafletjs.com/reference-1.3.4.html#path-setstyle">setStyle</a> method and passing it an options object.</p>
-<h2><a name="navigating-streets"></a>Navigating Streets</h2><p>Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics">graph</a> with the help of the <a href="https://github.com/anvaka/ngraph.graph">ngraph.graph</a> library. Then, it uses <a href="https://github.com/anvaka/ngraph.path">ngraph.path</a> to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.</p>
-<p>The graph is stored in the <code>Agentmap.streets.graph</code> property. It is a symmetric graph; for each edge between two points, an inversely directed edge between them also exists. That is, by default, there are no one-way streets. However, if you'd like to remove some of the directed edges of certain streets from the graph (i.e. for making one-way streets), a very accessible guide to manipulating the graphs is available in the ngraph.graph <a href="https://github.com/anvaka/ngraph.graph/blob/master/README.md">README</a>.</p>
-<h2><a name="navigating-within-units"></a>Navigating Within Units</h2><p>Every Agentmap has an <a href="./Agentmap.html#.getUnitPoint">Agentmap.getUnitPoint</a> method which makes it easy to specify a position inside of a unit, relative to one of its corners, and get back the global coordinates of that spot. </p>
-<p>Given a unit ID, an x value between 0 and 1, and a y value between 0 and 1, <code>Agentmap.getUnitPoint</code> will get a position down the width and into the depth of a unit according to the supplied x and y values, and return the global coordinates of the position it lands on.
-More specifically, starting from the front corner of the unit that comes first along its street, getUnitPoint will effectively return a <a href="./Global.html#LatLng">LatLng</a> representing the position x <em> 100 percent along its width and y </em> 100 percent into its depth.</p></article>
+<p>You can also change the <code>animation_interval</code> after creating the Agentmap with the <a href="./Agentmap.html#setAnimationInterval">Agentmap.setAnimationInterval</a> method.</p></article>
     </section>
 
 
@@ -195,13 +226,13 @@ More specifically, starting from the front corner of the unit that comes first a
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#checkEndExcess">checkEndExcess</a></li><li><a href="global.html#checkStartExcess">checkStartExcess</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 30 2018 11:47:34 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 31 2018 01:46:03 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

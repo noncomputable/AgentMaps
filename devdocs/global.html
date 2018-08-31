@@ -486,6 +486,276 @@
     
 
     
+    <h4 class="name" id="checkEndExcess"><span class="type-signature">(private) </span>checkEndExcess<span class="signature">(path)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    If the last two points before the goal point share the same street as the goal point, and thefirst point is closer to the third (goal) point than it is to the second point, remove the second point, as it's a superfluous detour.<br/><br/>Typically happens when the goal point's nearest intersection is beyond it on the street,and so the path would have an agent travel from the first point, then to the intersection (second point),then backwards to the (third) goal point.<br/><br/>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#LatLng">LatLng</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An array of LatLngs representing a path for an agent to travel along.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line215">line 215</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="checkStartExcess"><span class="type-signature">(private) </span>checkStartExcess<span class="signature">(path)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    If the first two points after the start point share the same street as the start point, and thethird point is closer to the first (start) point than it is to the second point, remove the second point, as it's a superfluous detour.<br/><br/>Typically happens when the start point's nearest intersection is beyond it on the street,and so the path would have an agent travel from the start, then to the intersection,then backwards to the third point.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#LatLng">LatLng</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An array of LatLngs representing a path for an agent to travel along.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line180">line 180</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="decodeCoordString"><span class="type-signature">(private) </span>decodeCoordString<span class="signature">(coord_string, place)</span><span class="type-signature"> &rarr; {<a href="global.html#LatLng">LatLng</a>}</span></h4>
     
 
@@ -610,7 +880,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line175">line 175</a>
+        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line257">line 257</a>
     </li></ul></dd>
     
 
@@ -767,7 +1037,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line163">line 163</a>
+        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line245">line 245</a>
     </li></ul></dd>
     
 
@@ -1238,323 +1508,6 @@ to the index of the intersecting coordinate-pair in that array.
     <dd>
         
 <span class="param-type">Array.&lt;Array.&lt;(number|Object.&lt;number, number>)>></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getPath"><span class="type-signature">(private) </span>getPath<span class="signature">(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_lng, sparse<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;Array.&lt;number>>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Get a path between two points on a graph.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>start_int_lat_lng</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#LatLng">LatLng</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The coordinates of the nearest intersection on the same street at the start_lat_lng.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>goal_int_lat_lng</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#LatLng">LatLng</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The coordinates of the nearest intersection on the same street as the goal_lat_lng.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>start_lat_lng</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#LatLng">LatLng</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The coordinates of the point on the street from which the agent will be traveling.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>goal_lat_lng</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#LatLng">LatLng</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The coordinates of the point on the street to which the agent should travel.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sparse</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Whether to exclude intersections between the first and last along a street-specific path (which are superfluous for extracting the necessary sub-street).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line104">line 104</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - An array of points along the graph, leading from the start to the end.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Array.&lt;Array.&lt;number>></span>
 
 
     </dd>
@@ -4577,13 +4530,13 @@ manually if we're preprocessing the GeoJSON data before passing it to L.geoJSON.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPath">getPath</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#checkEndExcess">checkEndExcess</a></li><li><a href="global.html#checkStartExcess">checkStartExcess</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 30 2018 11:47:34 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 31 2018 01:46:03 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

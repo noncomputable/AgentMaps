@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Tutorial: quickstart</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Tutorial: quickstart</h1>
+
+    <section>
+
+<header>
+    
+
+    <h2>quickstart</h2>
+</header>
+
+<article>
+    <p>Here we'll walk through building a simple AgentMaps simulation. I suggest looking at the detailed <a href="/">documentation</a> for
+all of the AgentMaps functions and classes used here to get a better understanding of how they work. 
+If you're not so familiar with Leaflet, I suggest doing the same with the <a href="https://leafletjs.com/reference-1.3.2.html">Leaflet docs</a>.</p>
+<p>First, create an HTML document that:</p>
+<ul>
+<li>Loads the Leaflet.js style and script</li>
+<li>Contains a <code>&lt;div&gt;</code> in which to embed the Leaflet map</li>
+<li>Loads the AgentMaps script at the end</li>
+</ul>
+<pre class="prettyprint source lang-HTML"><code>&lt;!DOCTYPE HTML>
+&lt;html>
+&lt;head>
+&lt;link rel=&quot;stylesheet&quot; href=&quot;leaflet_style.css&quot;>
+&lt;script src=&quot;leaflet_script.js&quot;>&lt;/script>
+&lt;/head>
+&lt;body>
+&lt;div id=&quot;demo_map&quot; style=&quot;height:400px&quot;>&lt;/div>
+&lt;script src=&quot;agentmaps.js&quot;>&lt;/script>
+&lt;/body>
+&lt;/html></code></pre><p>Assume we have the GeoJSON of a neighborhood stored in a variable like this, where the ellipses stand in for a list of map features (like streets):</p>
+<pre class="prettyprint source lang-javascript"><code>let map_data = {
+    &quot;type&quot;: &quot;FeatureCollection&quot;,
+    &quot;features&quot;: [
+        ...
+        ...
+        ...
+    ]
+};</code></pre><p>Have two opposite corners of a rectangle containing the neighborhood of interest stored as an array of the corners' coordinates (i.e. [[lat, lon], [lat, lon]]):</p>
+<pre class="prettyprint source lang-javascript"><code>let bounding_points = [[43.3071, -88.0158], [43.2884, -87.9759]];</code></pre><p>Create a Leaflet map in the &quot;demo_map&quot; \&lt;div> of our HTML document:</p>
+<pre class="prettyprint source lang-javascript"><code>let map = L.map(&quot;demo_map&quot;).fitBounds(bounding_points);</code></pre><p>The map will be empty, so tile it with OpenStreetMap's map tiles to see what's where:</p>
+<pre class="prettyprint source lang-javascript"><code>L.tileLayer(
+    &quot;http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+    {
+        attribution: &quot;Thanks to &lt;a href=\&quot;http://openstreetmap.org\&quot;>OpenStreetMap&lt;/a> community&quot;,
+    }
+).addTo(map);</code></pre><p>Now that we have our map in place and the geographic data for our neighborhood in hand, create an Agentmap from the map:</p>
+<pre class="prettyprint source lang-javascript"><code>let agentmap = L.A.agentmap(map);</code></pre><p>Now generate buildings and functional roads on the map based on the geographic data:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.buildingify(map_data, bounding_points);</code></pre><p>Now you can place agents on the map according to the rules of a custom agentFeatureMaker function. We'll use the built-in seqUnitAgentMaker,
+which just assigns a number to each agent it generates in sequence, counting up from 0 to the number of agents you want, and places each agent 
+in the center of the unit with the same index as that number in the list of units. We'll make 50:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.agentify(50, agentmap.seqUnitAgentMaker);</code></pre><p>The simulation will start once we call <code>agentmap.run()</code>. The simulation is divided into consecutive &quot;ticks&quot;, starting at tick 0.
+On each tick, the following happens:</p>
+<ul>
+<li>The Agentmap runs its user-defined <code>Agentmap.controller()</code> (which we haven't defined yet)</li>
+<li>Each agent runs its own user-defined <code>Agent.controller()</code> (we'll leave that empty)</li>
+<li>Before and after each step an agent takes during the tick, it runs its own user-defined <code>Agent.fine_controller()</code> (we'll leave that empty too)</li>
+</ul>
+<p>The number of ticks elapsed at any point in the simulation is set in <code>agentmap.state.ticks</code>, functioning as a kind of clock. 
+We can call <code>agentmap.pause()</code> to stop the simulation, during which the ticks elapsed won't change, and then <code>agentmap.run()</code> to continue it.</p>
+<p>So, let's define a controller function for our Agentmap:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.controller = function() {
+
+};</code></pre><p>What do we want to happen on each tick? That is, what will we put in the controller function's body?
+A simple simulation will involve the agents moving to a random unit every 300 ticks.</p>
+<p>So first, we will have the <code>Agentmap.controller</code> check if the current number of ticks is a multiple of 300,
+as we only want anything to happen every 300 ticks:</p>
+<pre class="prettyprint source lang-javascript"><code>if (agentmap.state.ticks % 300 === 0) {
+
+}</code></pre><p>Then, if number of ticks _is_ a multiple of 300, we want to tell each agent to do something,
+so we will set up a loop that operates on each agent:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.agents.eachLayer(function(agent) {
+
+}</code></pre><p>Now, for each agent, we'll generate a random number between 0 and the total number of units, and
+store the unit whose index is that number, its ID, and the coordinates of its center:</p>
+<pre class="prettyprint source lang-javascript"><code>let random_index = Math.floor(agentmap.units.count() * Math.random()),
+random_unit = agentmap.units.getLayers()[random_index],
+random_unit_id = agentmap.units.getLayerId(random_unit),
+random_unit_center = random_unit.getBounds().getCenter();</code></pre><p>Then we will schedule for the agent a trip to that unit's center at approximately 1 meter per tick:</p>
+<pre class="prettyprint source lang-javascript"><code>agent.scheduleTrip(random_unit_center, {type: &quot;unit&quot;, id: random_unit_id}, 1, false, true);</code></pre><p>We want the agent to move along whatever path it has scheduled at each tick, so we will add the following to the end of our
+controller function, outside of the 300 tick condition:</p>
+<pre class="prettyprint source lang-javascript"><code>agent.moveIt();</code></pre><p>Altogether, our Agentmap's controller will look like this:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.controller = function() {
+    if (agentmap.state.ticks % 300 === 0) {
+        agentmap.agents.eachLayer(function(agent) {
+            let random_index = Math.floor(agentmap.units.count() * Math.random()),
+            random_unit = agentmap.units.getLayers()[random_index],
+            random_unit_id = agentmap.units.getLayerId(random_unit),
+            random_unit_center = random_unit.getBounds().getCenter();
+
+            agent.scheduleTrip(random_unit_center, {type: &quot;unit&quot;, id: random_unit_id}, false, true);
+        }
+    }
+
+    agent.moveIt();
+}</code></pre><p>Finally, now that we've got our Agentmap, buildings and agents loaded, and a controller defined, we can add:</p>
+<pre class="prettyprint source lang-javascript"><code>agentmap.run();</code></pre><p>Once we load our HTML document, the simulation should begin and we can watch our agents move around the neighborhood.</p>
+<p>For all the features of Agentmaps, look through the more detailed documentation discussed in the next section.</p>
+</article>
+
+</section>
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#checkEndExcess">checkEndExcess</a></li><li><a href="global.html#checkStartExcess">checkStartExcess</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 31 2018 01:46:03 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

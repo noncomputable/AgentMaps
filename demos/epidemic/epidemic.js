@@ -36,11 +36,11 @@ function setup() {
 	agentmap.zoned_units = getZonedUnits(agentmap, perimeter_streets, upper_streets);
 
 	//Use only a subset of the zoned units.
-	agentmap.zoned_units.residential = pick_random_n(agentmap.zoned_units.residential, 50),
-	agentmap.zoned_units.commercial = pick_random_n(agentmap.zoned_units.commercial, 15);
+	agentmap.zoned_units.residential = pick_random_n(agentmap.zoned_units.residential, 100),
+	agentmap.zoned_units.commercial = pick_random_n(agentmap.zoned_units.commercial, 20);
 
-	//Generate 150 agents according to the rules of epidemicAgentMaker, displaying them as blue, .5 meter radius circles.
-	agentmap.agentify(100, epidemicAgentMaker);
+	//Generate 200 agents according to the rules of epidemicAgentMaker, displaying them as blue, .5 meter radius circles.
+	agentmap.agentify(300, epidemicAgentMaker);
 
 	//Attach a popup to show when any agent is clicked.
 	agentmap.agents.bindPopup(agentPopupMaker);
@@ -52,7 +52,7 @@ function setup() {
 	agentmap.infection_probability = .00001;
 
 	//Set the default speed for the agent.
-	agentmap.speed_controller = 1;
+	agentmap.speed_controller = 3;
 	
 	//Do the following on each tick of the simulation.
 	agentmap.controller = agentmapController;
@@ -130,30 +130,39 @@ function getZonedUnits(agentmap, residential_streets, commercial_streets) {
 
 //Return a GeoJSON feature representing an agent.
 function epidemicAgentMaker(i) {
+	//Decide whether the agent will be homebound.
+	let homebound = Math.random() < .25 ? true : false;
+
 	//Get a random residential unit and its center.
 	let random_residential_index = Math.floor(Math.random() * this.zoned_units.residential.length),
 	random_residential_unit_id = this.zoned_units.residential[random_residential_index];
 	
 	//Store the residential unit's ID as the agent's home ID.
-	let home_id = random_residential_unit_id;
+	let home_id = random_residential_unit_id,
+	go_home_interval = null,
+	workplace_id = null,
+	go_work_interval = null;
 
-	//Get a random commercial unit and its ID.
-	let random_workplace_index = Math.floor(this.zoned_units.commercial.length * Math.random()),
-	random_workplace_id = this.zoned_units.commercial[random_workplace_index];
+	if (!homebound) {
+		//Get a random commercial unit and its ID.
+		let random_workplace_index = Math.floor(this.zoned_units.commercial.length * Math.random()),
+		random_workplace_id = this.zoned_units.commercial[random_workplace_index];
 
-	//Store the commercial unit's ID as the agent's workplace ID.
-	let workplace_id = random_workplace_id;
-	
-	//Approximately many ticks until any agent goes to work or back home will be based on these numbers.
-	let go_work_base_time = 500,
-	go_home_base_time = 1000;
-	
-	//Randomize how early or late agents make their commute.
-	let sign = Math.random() < .5 ? 1 : -1,
-	travel_randomizer = sign * Math.floor(Math.random() * 250);
+		//Store the commercial unit's ID as the agent's workplace ID.
+		workplace_id = random_workplace_id;
+		
+		//Approximately many ticks until any agent goes to work or back home will be based on these numbers.
+		let go_work_base_interval = 800,
+		go_home_base_interval = 1000;
+		
+		//Randomize how early or late agents make their commute.
+		let sign = Math.random() < .5 ? 1 : -1,
+		go_home_randomizer = sign * Math.floor(Math.random() * 200),
+		go_work_randomizer = -sign * Math.floor(Math.random() * 200);
 
-	let go_work_time = go_work_base_time + travel_randomizer,
-	go_home_time = go_home_base_time + travel_randomizer;
+		go_work_interval = go_work_base_interval + go_work_randomizer,
+		go_home_interval = go_home_base_interval - go_home_randomizer;
+	}
 
 	//Get the agent's starting position.
 	let home_unit = this.units.getLayer(home_id),
@@ -171,18 +180,21 @@ function epidemicAgentMaker(i) {
 				"radius": .5
 			},
 			"recent_unit_id": home_id,
-			"commuting_to": null,
+			"homebound": homebound,
+			"next_commute": "work",
+			"commuting": false,
 			"home_id": home_id,
 			"workplace_id": workplace_id,
-			"go_work_time": go_work_time,
-			"go_home_time": go_home_time,
+			"go_work_interval": go_work_interval,
+			"go_home_interval": go_home_interval,
+			"commute_alarm": go_work_interval,
 			"infected": false,
 			"recovery_tick": 0,
 		},
 		"geometry": {
 			"type": "Point",
 			"coordinates": home_center_coords
-		},
+		}
 	};
 
 	return feature;
@@ -214,19 +226,26 @@ function updateResidency(agent) {
 function setAgentController(agent) {
 	//Do the following on each tick of the simulation for the agent.
 	agent.controller = function() {
-		//Do this every every go_work_time ticks, starting from the start of the simulation, unless the agent is either
-		//already at work or commuting home.
-		//Also, apply the agentmap's speed control whenever it starts on a new path.
-		if (agent.agentmap.state.ticks % agent.go_work_time === 0 && agent.commuting_to !== "home" && agent.place.id !== agent.workplace) {
-			commuteToWork(agent);
+		//Do this when the commute_alarm tick is reached.
+		if (!agent.homebound && agent.agentmap.state.ticks % agent.commute_alarm === 0 && agent.agentmap.state.ticks !== 0) {
+			if (agent.next_commute === "work") {
+				commuteToWork(agent);
+			}
+			else if (agent.next_commute === "home") {
+				commuteToHome(agent);
+			}
+
+			//Apply the agentmap's speed control whenever the agent decides to commute.
 			agent.setSpeed(agent.agentmap.speed_controller);
 		}
-		//Do this every other go_home_time ticks, unless the agent is either already at home or commuting to work.
-		else if (agent.agentmap.state.ticks % agent.go_home_time === 0 && agent.commuting_to !== "work" && agent.place.id !== agent.home) {
-			commuteToHome(agent);
-			agent.setSpeed(agent.agentmap.speed_controller);
+		//If the agent isn't already scheduled to commute, give it a chance to randomly move around its unit.
+		else if (!agent.commuting) {
+			if (Math.random() < .001) {
+				let random_unit_point = agent.agentmap.getUnitPoint(agent.place.id, Math.random(), Math.random());
+				agent.scheduleTrip(random_unit_point, agent.place, 1);
+			}
 		}
-		
+
 		checkCommute(agent);
 		updateResidency(agent);
 		checkInfection(agent);
@@ -282,7 +301,7 @@ function checkInfection(agent) {
 function infectAgent(agent) {
 	agent.infected = true,
 	//Have the agent recover in a random number of ticks under 2000 from the time it is infected.
-	agent.recovery_tick = agent.agentmap.state.ticks + Math.floor(Math.random() * 4000);
+	agent.recovery_tick = agent.agentmap.state.ticks + Math.floor(Math.random() * 2000);
 	agent.setStyle({color: "red"});
 
 	agent.agentmap.infected_count++;
@@ -315,26 +334,31 @@ function updateEpidemicStats(agentmap) {
 }
 
 function commuteToWork(agent) {
-	agent.commuting_to = "work";
-	
 	//Schedule the agent to move to a random point in its workplace and replace the currently scheduled trip.
 	let random_workplace_point = agent.agentmap.getUnitPoint(agent.workplace_id, Math.random(), Math.random());
-	agent.scheduleTrip(random_workplace_point, {"type": "unit", "id": agent.workplace_id}, 1);
+	agent.scheduleTrip(random_workplace_point, {"type": "unit", "id": agent.workplace_id}, 3, false, true);
+	
+	agent.commuting = true;
+	agent.next_commute = "home";
+	agent.commute_alarm += agent.go_home_interval; 
 }
 
 function commuteToHome(agent) {
-	agent.commuting_to = "home";
-
 	//Schedule the agent to move to a random point in its home and replace the currently scheduled trip.
 	let random_home_point = agent.agentmap.getUnitPoint(agent.home_id, Math.random(), Math.random());
-	agent.scheduleTrip(random_home_point, {"type": "unit", "id": agent.home_id}, 1);
+	agent.scheduleTrip(random_home_point, {"type": "unit", "id": agent.home_id}, 3, false, true);
+
+	agent.commuting = true;
+	agent.next_commute = "work";
+	agent.commute_alarm += agent.go_work_interval;
 }
 
-//See whether the agent has arrived at its target place and mark its commute as ended.
 function checkCommute(agent) {
-	if ((agent.place.id === agent.home_id && agent.commuting_to === "home") ||
-		(agent.place.id === agent.workplace_id && agent.commuting_to === "work")) {
-		agent.commuting_to = null;
+	if (agent.commuting_to === "home" && agent.place.id === agent.home_id) {
+		agent.commuting = false;
+	}
+	else if (agent.commuting_to === "work" && agent.place.id === agent.workplace_id) {
+		agent.commuting = false;
 	}
 }
 
