@@ -15,7 +15,7 @@ AgentMaps lets you turn this:
 
 into something like this:
 
-![agentmaps](resources/agentmaps.png)
+![agentmaps](resources/agentmaps-small.png)
 
 ### Documentation
 
