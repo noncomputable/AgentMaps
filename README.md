@@ -11,11 +11,11 @@ Given a neighborhood, AgentMaps lets you quickly and easily:
 
 AgentMaps lets you turn this:
 
-![noagentmaps](resources/noagentmaps.png | width = 100)
+![noagentmaps](resources/noagentmaps.png =50x50)
 
 into something like this:
 
-![agentmaps](resources/agentmaps-small.png)
+![agentmaps](resources/agentmaps-small.png =50x50)
 
 ### Documentation
 
