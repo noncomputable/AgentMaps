@@ -11,12 +11,11 @@ Given a neighborhood, AgentMaps lets you quickly and easily:
 
 ### Documentation
 
-Docs for people who want to use AgentMaps are available at <https://noncomputable.github.io/AgentMaps/docs/index.html>.
+Docs for people who want to use AgentMaps are available [here](https://noncomputable.github.io/AgentMaps/docs/index.html).
 
-For people who want to contribute to AgentMaps or understand its internals, see <https://noncomputable.github.io/AgentMaps/devdocs/index.html>.
+Docs people who want to understand its internals are [here](https://noncomputable.github.io/AgentMaps/devdocs/index.html).
 
-
-A basic walkthrough for creating an AgentMaps simulation is here: <https://noncomputable.github.io/AgentMaps/docs/tutorial-quickstart.html>. 
+A basic walkthrough for creating an AgentMaps simulation can be found [here](https://noncomputable.github.io/AgentMaps/docs/tutorial-quickstart.html). 
 
 ### Demos
 
