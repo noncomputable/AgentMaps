@@ -1,4 +1,4 @@
-Here we'll walk through building a simple AgentMaps simulation. I suggest looking at the detailed [documentation](/) for
+Here we'll walk through building a simple AgentMaps simulation. I suggest looking at the detailed [documentation](./) for
 all of the AgentMaps functions and classes used here to get a better understanding of how they work. 
 If you're not so familiar with Leaflet, I suggest doing the same with the [Leaflet docs](https://leafletjs.com/reference-1.3.2.html).
 

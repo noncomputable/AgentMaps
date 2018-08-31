@@ -1,7 +1,5 @@
 # AgentMaps Documentation
 
-For a basic walkthrough on using AgentMaps, see [this](https://noncomputable.github.io/AgentMaps/#basic-walkthrough) section of the README.
-
 The sidebar of this page contains a list of classes and functions used by Agentmaps. 
 Click them to see their methods and properties, their purposes, and their types.
 If you are looking at the [normal docs](https://noncomputable.github.io/AgentMaps/docs),
