@@ -40,7 +40,7 @@ Have two opposite corners of a rectangle containing the neighborhood of interest
 let bounding_points = [[43.3071, -88.0158], [43.2884, -87.9759]];
 ```
 
-Create a Leaflet map in the "demo\_map" \<div\> of our HTML document:
+Create a Leaflet map in the "demo\_map" `<div>` of our HTML document:
 
 ```javascript
 let map = L.map("demo_map").fitBounds(bounding_points);

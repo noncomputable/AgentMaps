@@ -128,6 +128,24 @@ function getZonedUnits(agentmap, residential_streets, commercial_streets) {
 	return zoned_units;
 }
 
+//The controller function for the Agentmap.
+function agentmapController() {
+	//Set the tick display box to display the number of the current tick.
+	ticks_display.textContent = agentmap.state.ticks;
+
+	//Check if any of the options have been changed in the interface and update the Agentmap accordingly.
+	if (agentmap.animation_interval !== Number(animation_interval_map[animation_interval_input.value])) {
+		agentmap.setAnimationInterval(animation_interval_map[animation_interval_input.value]);
+	}
+	if (agentmap.speed_controller !== Number(speed_controller_input.value)) {
+		agentmap.speed_controller = Number(speed_controller_input.value);
+		agentmap.agents.eachLayer(agent => agent.setSpeed(agentmap.speed_controller));
+	}
+	if (agentmap.infection_probability !== Number(infection_probability_input.value)) {
+		agentmap.infection_probability = Number(infection_probability_input.value);
+	}
+}
+
 //Return a GeoJSON feature representing an agent.
 function epidemicAgentMaker(i) {
 	//Decide whether the agent will be homebound.
@@ -138,9 +156,11 @@ function epidemicAgentMaker(i) {
 	random_residential_unit_id = this.zoned_units.residential[random_residential_index];
 	
 	//Store the residential unit's ID as the agent's home ID.
-	let home_id = random_residential_unit_id,
-	go_home_interval = null,
+	let home_id = random_residential_unit_id;
+
+	let go_home_interval = null,
 	workplace_id = null,
+	first_go_work_interval = null;
 	go_work_interval = null;
 
 	if (!homebound) {
@@ -152,14 +172,17 @@ function epidemicAgentMaker(i) {
 		workplace_id = random_workplace_id;
 		
 		//Approximately many ticks until any agent goes to work or back home will be based on these numbers.
-		let go_work_base_interval = 600,
-		go_home_base_interval = 800;
+		//Make the first commute to work come quicker than any subsequent ones.
+		let first_go_work_base_interval = 300,
+		go_work_base_interval = 900,
+		go_home_base_interval = 900;
 		
 		//Randomize how early or late agents make their commute.
 		let sign = Math.random() < .5 ? 1 : -1,
 		go_home_randomizer = sign * Math.floor(Math.random() * 200),
 		go_work_randomizer = -sign * Math.floor(Math.random() * 200);
 
+		first_go_work_interval = first_go_work_base_interval + go_work_randomizer,
 		go_work_interval = go_work_base_interval + go_work_randomizer,
 		go_home_interval = go_home_base_interval - go_home_randomizer;
 	}
@@ -185,9 +208,10 @@ function epidemicAgentMaker(i) {
 			"commuting": false,
 			"home_id": home_id,
 			"workplace_id": workplace_id,
+			"first_go_work_interval": first_go_work_interval,
 			"go_work_interval": go_work_interval,
 			"go_home_interval": go_home_interval,
-			"commute_alarm": go_work_interval,
+			"commute_alarm": first_go_work_interval,
 			"infected": false,
 			"recovery_tick": 0,
 		},
@@ -198,6 +222,41 @@ function epidemicAgentMaker(i) {
 	};
 
 	return feature;
+}
+
+//Given an agent, define its controller in a way conducive to the epidemic simulation.
+function setAgentController(agent) {
+	//Do the following on each tick of the simulation for the agent.
+	agent.controller = function() {
+		//Do this when the commute_alarm tick is reached.
+		if (!agent.homebound && agent.agentmap.state.ticks !== 0) {
+			if (agent.agentmap.state.ticks % agent.commute_alarm === 0) {
+				if (agent.next_commute === "work") {
+					commuteToWork(agent);
+				}
+				else if (agent.next_commute === "home") {
+					commuteToHome(agent);
+				}
+
+				//Apply the agentmap's speed control whenever the agent decides to commute.
+				agent.setSpeed(agent.agentmap.speed_controller);
+			}
+		}
+		//If the agent isn't already scheduled to commute, give it a chance to randomly move around its unit.
+		else if (!agent.commuting) {
+			if (Math.random() < .001) {
+				let random_unit_point = agent.agentmap.getUnitPoint(agent.place.id, Math.random(), Math.random());
+				agent.scheduleTrip(random_unit_point, agent.place, 1);
+			}
+		}
+
+		checkCommute(agent);
+		updateResidency(agent);
+		checkInfection(agent);
+
+		//Have the agent move along its scheduled trip.
+		agent.moveIt();
+	};
 }
 
 //Track an agent's transitions between units and update the units' resident_ids array accordingly.
@@ -219,57 +278,6 @@ function updateResidency(agent) {
 		recent_unit.resident_ids.pop(agent_resident_index);
 		
 		agent.recent_unit_id = -1;
-	}
-}
-
-//Given an agent, define its controller in a way conducive to the epidemic simulation.
-function setAgentController(agent) {
-	//Do the following on each tick of the simulation for the agent.
-	agent.controller = function() {
-		//Do this when the commute_alarm tick is reached.
-		if (!agent.homebound && agent.agentmap.state.ticks % agent.commute_alarm === 0 && agent.agentmap.state.ticks !== 0) {
-			if (agent.next_commute === "work") {
-				commuteToWork(agent);
-			}
-			else if (agent.next_commute === "home") {
-				commuteToHome(agent);
-			}
-
-			//Apply the agentmap's speed control whenever the agent decides to commute.
-			agent.setSpeed(agent.agentmap.speed_controller);
-		}
-		//If the agent isn't already scheduled to commute, give it a chance to randomly move around its unit.
-		else if (!agent.commuting) {
-			if (Math.random() < .001) {
-				let random_unit_point = agent.agentmap.getUnitPoint(agent.place.id, Math.random(), Math.random());
-				agent.scheduleTrip(random_unit_point, agent.place, 1);
-			}
-		}
-
-		checkCommute(agent);
-		updateResidency(agent);
-		checkInfection(agent);
-
-		//Have the agent move along its scheduled trip.
-		agent.moveIt();
-	};
-}
-
-//The controller function for the Agentmap.
-function agentmapController() {
-	//Set the tick display box to display the number of the current tick.
-	ticks_display.textContent = agentmap.state.ticks;
-
-	//Check if any of the options have been changed in the interface and update the Agentmap accordingly.
-	if (agentmap.animation_interval !== Number(animation_interval_map[animation_interval_input.value])) {
-		agentmap.setAnimationInterval(animation_interval_map[animation_interval_input.value]);
-	}
-	if (agentmap.speed_controller !== Number(speed_controller_input.value)) {
-		agentmap.speed_controller = Number(speed_controller_input.value);
-		agentmap.agents.eachLayer(agent => agent.setSpeed(agentmap.speed_controller));
-	}
-	if (agentmap.infection_probability !== Number(infection_probability_input.value)) {
-		agentmap.infection_probability = Number(infection_probability_input.value);
 	}
 }
 

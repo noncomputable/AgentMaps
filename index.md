@@ -31,7 +31,7 @@ You can find the corresponding code under /demos in the gh-pages branch [here](h
 
 ### Acknowledgements
 
-I've only had a few extended conversations which involved me talking and thinking about this project outloud over the last few months, and those probably influenced how I went forward with it. The people I've had those discussions with are:
+I've only had a few extended conversations talking and thinking about this project outloud over the last few months, and those probably influenced how I went forward with it. The people I've had those discussions with are:
 
 * I. ("Wheels") Errati
 * M. ("dont ask me, ask gagan") Singh

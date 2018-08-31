@@ -177,7 +177,7 @@ street.intersections = {
 The `Agentmap.agentify` [method](./Agentmap.html#agentify) creates and places agents on the map. Its first parameter is the number of agents to be created.
 Its second parameter is a kind of function called an [AgentFeatureMaker](./global.html#agentFeatureMaker) that specifies where the agents will be placed, what they look like, and what their properties are.
 
-The AgentFeatureMaker you provide should behave as follows: given a number i, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
+The AgentFeatureMaker you provide should behave as follows: given the leaflet ID of the agent, return a GeoJSON Point feature whose coordinates are where the agent should be placed, 
 whose `properties.place` property is a valid [Place](https://noncomputable.github.io/AgentMaps/docs/global.html#Place) containing those coordinates,
 and whose `properties.layer_options` property is an object containing options for the agent's CircleMarker 
 (like color, outline, radius, and all the other options listed [here](https://leafletjs.com/reference-1.3.2.html#circlemarker-option)). 
@@ -185,7 +185,7 @@ Any other properties defined in the `properties` property (like, say, `feature.p
 
 For example, the AgentFeatureMaker in an epidemic simulation may look something like this:
 ```javascript
-function epidemicAgentMaker = function(i) {
+function epidemicAgentMaker = function(id) {
 	let feature = { 
 		"type": "Feature",
 		"properties": {
@@ -257,6 +257,14 @@ agentmap.agents.eachLayer(function(agent) {
 });
 ```
 \* I didn't follow this rule of thumb in the Basic Walkthrough to spice things up.
+
+You can start, pause, and resume an AgentMaps simulation using the [Agentmap.run](./Agentmap.html#.run) and [Agentmap.pause](./Agentmap.html#.pause) methods. When `Agentmap.run` is called, 
+the Agentmap and Agents will run their controller functions, the Agentmap will increment the tick counter (`Agentmap.state.ticks`), 
+a new animation frame will be requested to do the same thing over again.
+
+When `Agentmap.pause()` is called, the ticks will stop incrementing, the request for the next animation frame will be cancelled, and the controller functions will stop being called. Calling `Agentmap.run()` after pausing will set things back in motion.
+
+[Agentmap.clear](./Agentmap.html/#clear) will reset the Agentmap's state (including the tick counter) and remove all the AgentMaps layers from the map.
 
 ## <a name="animation-speed"></a>Animation Speed
 
