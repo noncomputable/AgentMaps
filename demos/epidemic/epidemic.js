@@ -141,7 +141,7 @@ function agentmapController() {
 		agentmap.speed_controller = Number(speed_controller_input.value);
 		agentmap.agents.eachLayer(function(agent) {
 			agent.setSpeed(agentmap.speed_controller);
-		};
+		});
 	}
 	if (agentmap.infection_probability !== Number(infection_probability_input.value)) {
 		agentmap.infection_probability = Number(infection_probability_input.value);
