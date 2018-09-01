@@ -3,15 +3,15 @@
 /*						     */ 
 
 //Get some interface features.
-let animation_interval_input = document.getElementById("animation_interval"),
+var animation_interval_input = document.getElementById("animation_interval"),
 speed_controller_input = document.getElementById("speed_controller"),
 infection_probability_input = document.getElementById("infection_probability");
 
 //Set bounds for the area on the map where the simulation will run (gotten from openstreetmap.org).
-let bounding_box = [[39.9058, -86.0910], [39.8992, -86.1017]];
+var bounding_box = [[39.9058, -86.0910], [39.8992, -86.1017]];
 
-//Create and setup the Leaflet map object.
-let map = L.map("map").fitBounds(bounding_box).setZoom(16);
+//Create and setup the Leafvar map object.
+var map = L.map("map").fitBounds(bounding_box).setZoom(16);
 
 //Get map graphics by adding OpenStreetMap tiles to the map object.
 L.tileLayer(
@@ -23,7 +23,7 @@ L.tileLayer(
 ).addTo(map);
 
 //Create an Agentmap.
-let agentmap = L.A.agentmap(map);
+var agentmap = L.A.agentmap(map);
 
 //Setup the epidemic simulation.
 function setup() {
@@ -31,7 +31,7 @@ function setup() {
 	agentmap.buildingify(bounding_box, map_data, undefined, {"color": "black", "weight": 1.5, "opacity": .6});
 
 	//Split the map's units into residential and commercial zones.
-	let residential_streets = ["Wythe Lane", "Heyward Lane", "Lynch Lane", "Clymer Lane"],
+	var residential_streets = ["Wythe Lane", "Heyward Lane", "Lynch Lane", "Clymer Lane"],
 	commercial_streets = ["Heyward Place", "Heyward Drive", "Hooper Place"];
 	agentmap.zoned_units = getZonedUnits(agentmap, residential_streets, commercial_streets);
 
@@ -60,7 +60,7 @@ function setup() {
 	//Set each Agent up.
 	agentmap.agents.eachLayer(function(agent) {
 		//Add the agent's ID to its home unit's resident_ids array to help keep track of which agents are in the same unit.
-		let home_unit = agentmap.units.getLayer(agent.home_id);
+		var home_unit = agentmap.units.getLayer(agent.home_id);
 		home_unit.resident_ids.push(agent._leaflet_id);
 
 		//Define the update_func for the agent.
@@ -88,7 +88,7 @@ function defaultInterface() {
 
 //Given an agent, return an HTML string to embed in a popup.
 function agentPopupMaker(agent) {
-	let string = "Infected: " + agent.infected + "</br>";
+	var string = "Infected: " + agent.infected + "</br>";
 
 	if (agent.infected) {
 		string += "Recovers at tick: " + agent.recovery_tick;
@@ -100,7 +100,7 @@ function agentPopupMaker(agent) {
 //Given two arrays of streets and their agentmap, split their units into residential and commercial zones,
 //and return their division.
 function getZonedUnits(agentmap, residential_streets, commercial_streets) {
-	let zoned_units = {
+	var zoned_units = {
 		residential: [],
 		commercial: []
 	};
@@ -108,7 +108,7 @@ function getZonedUnits(agentmap, residential_streets, commercial_streets) {
 	//Find and store the units on the perimeter of the lower part of the neighborhood,
 	//and along the streets in the upper part of the neighborhood.
 	agentmap.units.eachLayer(function(unit) {
-		let street_id = unit.street_id,
+		var street_id = unit.street_id,
 		street = agentmap.streets.getLayer(street_id),
 		street_name = street.feature.properties.name;
 
@@ -149,23 +149,23 @@ function agentmapController() {
 //Return a GeoJSON feature representing an agent.
 function epidemicAgentMaker(i) {
 	//Decide whether the agent will be homebound.
-	let homebound = Math.random() < .25 ? true : false;
+	var homebound = Math.random() < .25 ? true : false;
 
 	//Get a random residential unit and its center.
-	let random_residential_index = Math.floor(Math.random() * this.zoned_units.residential.length),
+	var random_residential_index = Math.floor(Math.random() * this.zoned_units.residential.length),
 	random_residential_unit_id = this.zoned_units.residential[random_residential_index];
 	
 	//Store the residential unit's ID as the agent's home ID.
-	let home_id = random_residential_unit_id;
+	var home_id = random_residential_unit_id;
 
-	let go_home_interval = null,
+	var go_home_interval = null,
 	workplace_id = null,
 	first_go_work_interval = null;
 	go_work_interval = null;
 
 	if (!homebound) {
 		//Get a random commercial unit and its ID.
-		let random_workplace_index = Math.floor(this.zoned_units.commercial.length * Math.random()),
+		var random_workplace_index = Math.floor(this.zoned_units.commercial.length * Math.random()),
 		random_workplace_id = this.zoned_units.commercial[random_workplace_index];
 
 		//Store the commercial unit's ID as the agent's workplace ID.
@@ -173,12 +173,12 @@ function epidemicAgentMaker(i) {
 		
 		//Approximately many ticks until any agent goes to work or back home will be based on these numbers.
 		//Make the first commute to work come quicker than any subsequent ones.
-		let first_go_work_base_interval = 300,
+		var first_go_work_base_interval = 300,
 		go_work_base_interval = 900,
 		go_home_base_interval = 900;
 		
 		//Randomize how early or late agents make their commute.
-		let sign = Math.random() < .5 ? 1 : -1,
+		var sign = Math.random() < .5 ? 1 : -1,
 		go_home_randomizer = sign * Math.floor(Math.random() * 200),
 		go_work_randomizer = -sign * Math.floor(Math.random() * 200);
 
@@ -188,10 +188,10 @@ function epidemicAgentMaker(i) {
 	}
 
 	//Get the agent's starting position.
-	let home_unit = this.units.getLayer(home_id),
+	var home_unit = this.units.getLayer(home_id),
 	home_center_coords = L.A.pointToCoordinateArray(home_unit.getCenter());
 
-	let feature = { 
+	var feature = { 
 		"type": "Feature",
 		"properties": {
 			"place": {
@@ -245,7 +245,7 @@ function setAgentController(agent) {
 		//If the agent isn't already scheduled to commute, give it a chance to randomly move around its unit.
 		else if (!agent.commuting) {
 			if (Math.random() < .001) {
-				let random_unit_point = agent.agentmap.getUnitPoint(agent.place.id, Math.random(), Math.random());
+				var random_unit_point = agent.agentmap.getUnitPoint(agent.place.id, Math.random(), Math.random());
 				agent.scheduleTrip(random_unit_point, agent.place, 1);
 			}
 		}
@@ -264,7 +264,7 @@ function updateResidency(agent) {
 	//If the agent is in a unit and came from another place, add its ID to the unit's resident_ids.
 	if (agent.place.type === "unit") {
 		if (agent.place.id !== agent.recent_unit_id) {
-			let current_unit = agent.agentmap.units.getLayer(agent.place.id);
+			var current_unit = agent.agentmap.units.getLayer(agent.place.id);
 			current_unit.resident_ids.push(agent._leaflet_id);
 		
 			agent.recent_unit_id = agent.place.id;
@@ -272,7 +272,7 @@ function updateResidency(agent) {
 	}
 	//Otherwise, if an agent wasn't just on a street, remove its ID from its recent unit's resident_ids.
 	else if (agent.recent_unit_id !== -1) {
-		let recent_unit = agent.agentmap.units.getLayer(agent.recent_unit_id),
+		var recent_unit = agent.agentmap.units.getLayer(agent.recent_unit_id),
 		agent_resident_index = recent_unit.resident_ids.indexOf(agent._leaflet_id);
 
 		recent_unit.resident_ids.pop(agent_resident_index);
@@ -286,10 +286,10 @@ function checkInfection(agent) {
 	//Check whether the agent is in a unit. If so, if any other agents in the unit are infected,
 	//infect it with a certain probability.
 	if (agent.place.type === "unit" && agent.infected === false) {
-		let resident_ids = agent.agentmap.units.getLayer(agent.place.id).resident_ids;
+		var resident_ids = agent.agentmap.units.getLayer(agent.place.id).resident_ids;
 
-		for (let i = 0; i < resident_ids.length; i++) {
-			let resident = agent.agentmap.agents.getLayer(resident_ids[i]);
+		for (var i = 0; i < resident_ids.length; i++) {
+			var resident = agent.agentmap.agents.getLayer(resident_ids[i]);
 			if (resident.infected) {
 				if (Math.random() < agent.agentmap.infection_probability) {
 					infectAgent(agent);
@@ -327,23 +327,23 @@ function uninfectAgent(agent) {
 
 //Infect a certain percent of the population, randomly.
 function infect(agentmap, percent) {
-	let number_of_infectees = Math.ceil(agentmap.agents.count() * percent),
+	var number_of_infectees = Math.ceil(agentmap.agents.count() * percent),
 	infectees = pick_random_n(agentmap.agents.getLayers(), number_of_infectees);
 	infectees.forEach(infectee => infectAgent(infectee));
 }
 
 //Update the numbers in the display boxes in the HTML document.
 function updateEpidemicStats(agentmap) {
-	let infected_display = document.getElementById("infected_value");
+	var infected_display = document.getElementById("infected_value");
 	infected_display.textContent = agentmap.infected_count;
 
-	let healthy_display = document.getElementById("healthy_value");
+	var healthy_display = document.getElementById("healthy_value");
 	healthy_display.textContent = agentmap.agents.count() - agentmap.infected_count;
 }
 
 function commuteToWork(agent) {
 	//Schedule the agent to move to a random point in its workplace and replace the currently scheduled trip.
-	let random_workplace_point = agent.agentmap.getUnitPoint(agent.workplace_id, Math.random(), Math.random());
+	var random_workplace_point = agent.agentmap.getUnitPoint(agent.workplace_id, Math.random(), Math.random());
 	agent.scheduleTrip(random_workplace_point, {"type": "unit", "id": agent.workplace_id}, 3, false, true);
 	
 	agent.commuting = true;
@@ -353,7 +353,7 @@ function commuteToWork(agent) {
 
 function commuteToHome(agent) {
 	//Schedule the agent to move to a random point in its home and replace the currently scheduled trip.
-	let random_home_point = agent.agentmap.getUnitPoint(agent.home_id, Math.random(), Math.random());
+	var random_home_point = agent.agentmap.getUnitPoint(agent.home_id, Math.random(), Math.random());
 	agent.scheduleTrip(random_home_point, {"type": "unit", "id": agent.home_id}, 3, false, true);
 
 	agent.commuting = true;
@@ -376,10 +376,10 @@ function pick_random_n(array, n) {
 		throw new Error("n cannot be bigger than the number of elements in the array!");
 	}
 
-	let random_indices = [];
+	var random_indices = [];
 
-	for (let i = 0; i < n; i++) {
-		let random_index = Math.floor(Math.random() * array.length);
+	for (var i = 0; i < n; i++) {
+		var random_index = Math.floor(Math.random() * array.length);
 		if (!random_indices.includes(random_index)) {
 			random_indices.push(random_index);
 		}
@@ -388,7 +388,7 @@ function pick_random_n(array, n) {
 		}
 	}
 
-	let random_n = random_indices.map(index => array[index]);
+	var random_n = random_indices.map(index => array[index]);
 
 	return random_n;
 }

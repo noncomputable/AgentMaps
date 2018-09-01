@@ -1,4 +1,4 @@
-let reset_button = document.getElementById("reset"),
+var reset_button = document.getElementById("reset"),
 run_button = document.getElementById("run");
 
 //Disable the "Run" button at first.
@@ -27,10 +27,10 @@ run_button.onclick = function() {
 	}
 }
 
-let ticks_display = document.getElementById("tick_value");
+var ticks_display = document.getElementById("tick_value");
 
 //Map slider values to animation_gap values.
-let animation_interval_map = {
+var animation_interval_map = {
 	1: 0,
 	2: 1000,
 	3: 100,
