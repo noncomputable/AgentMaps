@@ -159,8 +159,37 @@ function setupUnitFeatures(OSM_data, bounding_box, unit_options = {}) {
 		unit.street_id = unit.feature.properties.street_id,
 		unit.street_anchors = unit.feature.properties.street_anchors,
 		//Change the IDs of each unit in this unit's neighbours array into the appropriate Leaflet IDs.
-		unit.neighbors = getUnitNeighborLayerIDs.call(this, unit.feature.properties.neighbors);
+		unit.neighbors = getUnitNeighborLayerIDs.call(this, unit.feature.properties.neighbors),
+		unit.feature.properties.neighbors = unit.neighbors;
 	}, this);
+}
+
+/**
+ * Given an array of pre-layer IDs, check if any of them correspond to the pre-layer IDs of unit layers, and if so
+ * return an array of the corresponding layer IDs.
+ * @private
+ *
+ * @param {Array<?number>} - An array of pre-layer feature IDs for a unit's neighbors.
+ * @returns {Array<?number>} - An array of Leaflet layer IDs corresponding to the unit's neighbors.
+ */
+function getUnitNeighborLayerIDs(neighbors) {
+	let neighbor_layer_ids = neighbors.map(function(neighbor) {
+		if (neighbor !== null) {
+			let neighbor_layer_id = null;
+			this.units.eachLayer(function(possible_neighbor_layer) {
+				if (possible_neighbor_layer.feature.properties.id === neighbor.properties.id) {
+					neighbor_layer_id = this.units.getLayerId(possible_neighbor_layer);
+				}
+			}, this);
+
+			return neighbor_layer_id;
+		}
+		else {
+			return null;
+		}
+	}, this);
+
+	return neighbor_layer_ids;
 }
 
 /**
@@ -363,34 +392,6 @@ function noOverlaps(reference_polygon_feature, polygon_feature_array) {
 	}
 
 	return true;
-}
-
-/**
- * Given an array of pre-layer IDs, check if any of them correspond to the pre-layer IDs of unit layers, and if so
- * return an array of the corresponding layer IDs.
- * @private
- *
- * @param {Array<?number>} - An array of pre-layer feature IDs for a unit's neighbors.
- * @returns {Array<?number>} - An array of Leaflet layer IDs corresponding to the unit's neighbors.
- */
-function getUnitNeighborLayerIDs(neighbors) {
-	let neighbor_layer_ids = neighbors.map(function(neighbor) {
-		if (neighbor !== null) {
-			let neighbor_layer_id = null;
-			this.units.eachLayer(function(possible_neighbor_layer) {
-				if (possible_neighbor_layer.feature.properties.id === neighbor.properties.id) {
-					neighbor_layer_id = this.units.getLayerId(possible_neighbor_layer);
-				}
-			}, this);
-
-			return neighbor_layer_id;
-		}
-		else {
-			return null;
-		}
-	}, this);
-	
-	return neighbor_layer_ids;
 }
 
 Agentmap.prototype.buildingify = buildingify;

@@ -249,6 +249,28 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	return closest_intersection_point;
 }
 
+/*
+ * Since units may take a noticeably long time to generate while typically staying the same over simulations,
+ * downloadUnits makes it easy to get a JS file containing the units object, so it can be included with an
+ * AgentMaps app and imported into Agentmap.buildingify so that they do not need to be regenerated.
+ */
+Agentmap.prototype.downloadUnits = function() {
+	let file_content = "let units_data = ",
+	units_json = this.units.toGeoJSON();
+	file_content += JSON.stringify(units_json),
+	file = new Blob([file_content]);
+
+	var element = document.createElement("a");
+	element.setAttribute("href", URL.createObjectURL(file)),
+	element.setAttribute("download", "units_data.js"),
+	element.style.display = "none";
+	document.body.appendChild(element);
+	
+	element.click();
+	
+	document.body.removeChild(element);
+}
+
 /**
  * Generates an agentmap for the given map.
  *
