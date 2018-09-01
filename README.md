@@ -27,7 +27,7 @@ A basic walkthrough for creating an AgentMaps simulation can be found [here](htt
 
 ### Demos
 
-[Simple](https://noncomputable.github.io/AgentMaps/demos/simple/simple.html): Demonstrates all the different ways agents can travel around a map.
+[Simple](https://noncomputable.github.io/AgentMaps/demos/simple/simple.html): Shows all the different ways agents can travel around a map.
 
 [Epidemic](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html): Agents commute between different parts of a neighborhood while an infection spreads between them.
 
