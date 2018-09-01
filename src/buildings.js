@@ -130,11 +130,9 @@ function addStreetLayerIntersections(street) {
  */
 function setupUnitFeatures(OSM_data, bounding_box, unit_options = {}) {
 	let default_options = {
-		//	style: {
-				"color": "green",
-				"weight": 1,
-				"opacity": .87,
-	//	},
+			"color": "green",
+			"weight": 1,
+			"opacity": .87,
 			"front_buffer": 6,
 			"side_buffer": 3,
 			"length": 14,
