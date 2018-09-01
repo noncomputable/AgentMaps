@@ -130,7 +130,7 @@ function getPath(start_int_lat_lng, goal_int_lat_lng, start_lat_lng, goal_lat_ln
 				
 			//If the last place on the path to the goal is labeled with a different street id than the goal,
 			//add it to the sparse path.	
-			if (i === encoded_path.length - 2 && goal_lat_lng.new_place.id !== encoded_path[i + 1]) {
+			if (i === encoded_path.length - 2) {
 				let decoded_coords = decodeCoordString(encoded_path[i + 1].id, current_street.data.place);
 				sparse_path.push(decoded_coords);
 			}
