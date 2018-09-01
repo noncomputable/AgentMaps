@@ -1,4 +1,4 @@
-let map_data = {
+var map_data = {
 "type": "FeatureCollection",
 "features": [
 {
