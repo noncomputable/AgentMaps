@@ -44,12 +44,11 @@
     "@turf/line-intersect": "^6.0.2",
     "@turf/line-slice": "^5.1.5",
     "@turf/nearest-point-on-line": "^6.0.2",
+    "babel-core": "^6.26.3",
     "ngraph.graph": "0.0.14",
     "ngraph.path": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.0",
     "gh-pages": "^1.2.0",

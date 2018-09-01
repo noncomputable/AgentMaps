@@ -20,5 +20,4 @@ module.exports = {
 		    }
 		  ]
 		},
-	entry: ["@babel/polyfill", path.resolve("src/index.js")]
 }
