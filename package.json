@@ -48,6 +48,9 @@
     "ngraph.path": "^1.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-loader": "^8.0.0",
     "gh-pages": "^1.2.0",
     "jsdoc": "^3.5.5",
     "webpack": "^4.17.1",
