@@ -139,7 +139,9 @@ function agentmapController() {
 	}
 	if (agentmap.speed_controller !== Number(speed_controller_input.value)) {
 		agentmap.speed_controller = Number(speed_controller_input.value);
-		agentmap.agents.eachLayer(agent => agent.setSpeed(agentmap.speed_controller));
+		agentmap.agents.eachLayer(function(agent) {
+			agent.setSpeed(agentmap.speed_controller);
+		};
 	}
 	if (agentmap.infection_probability !== Number(infection_probability_input.value)) {
 		agentmap.infection_probability = Number(infection_probability_input.value);
@@ -329,7 +331,9 @@ function uninfectAgent(agent) {
 function infect(agentmap, percent) {
 	var number_of_infectees = Math.ceil(agentmap.agents.count() * percent),
 	infectees = pick_random_n(agentmap.agents.getLayers(), number_of_infectees);
-	infectees.forEach(infectee => infectAgent(infectee));
+	infectees.forEach(function(infectee) {
+		infectAgent(infectee);
+	});
 }
 
 //Update the numbers in the display boxes in the HTML document.
@@ -388,7 +392,9 @@ function pick_random_n(array, n) {
 		}
 	}
 
-	var random_n = random_indices.map(index => array[index]);
+	var random_n = random_indices.map(function(index) {
+		return array[index];
+	});
 
 	return random_n;
 }
