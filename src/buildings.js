@@ -38,15 +38,13 @@ function buildingify(bounding_box, streets_data, street_options, unit_options, u
 function setupStreetFeatures(streets_data, street_options) {
 	let street_features = getStreetFeatures(streets_data);
 	
-	if (typeof street_options === "undefined") {
-		street_options = {
-			style: {
-				"color": "yellow",
-				"weight": 4,
-				"opacity": .5
-			},
-		};
-	}
+	default_options = {
+		"color": "yellow",
+		"weight": 4,
+		"opacity": .5
+	};
+
+	street_options = Object.assign(default_options, street_options);
 
 	let street_feature_collection = {
 		type: "FeatureCollection",
