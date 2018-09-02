@@ -47,7 +47,7 @@ function isPointCoordinates(array) {
  * Given either a GeoJSON feature, L.latLng, or coordinate array containing the coordinates of a point,
  * return an array of the coordinates.
  *
- * @params {Point|Array<number>|LatLng} point - The data containing the point's coordinates (latitude & longitude).
+ * @param {Point|Array<number>|LatLng} point - The data containing the point's coordinates (latitude & longitude).
  * @returns {Array<number>} - Array of the point's coordinates. I.e.: [lng, lat].
  */
 function pointToCoordinateArray(point) {
@@ -70,16 +70,16 @@ function pointToCoordinateArray(point) {
 }
 
 /**
- * Given two coordinate arrays, get their intersection.
+ * Given two coordinate arrays, get their intersections.
  * 
  * @param {array<array<number>>} arr_a - Array of coordinate pairs.
  * @param {array<array<number>>} arr_b - Array of coordinate pairs.
  * @param {array<number>} ids - 2-element array whose elements are IDs for arr_a and arr_b respectively.
  *
- * @returns {Array<Array<number|Object<number, number>>>} - Array whose elements are the intersections' cooridinates if
+ * @returns {Array<Array<number|Object<number, number>>>} - Array whose elements are the intersections' cooridinate-pairs if
  * ids is empty, or otherwise whose elements are arrays each of whose first element is an
- * intersection's coordinates and whose second element is an object mapping each array's ID (supplied by ids) 
- * to the index of the intersecting coordinate-pair in that array.
+ * intersection's coordinate-pair and whose second element is an object mapping each array's ID (supplied by ids) 
+ * to the index of the intersection's coordinate-pair in that array.
  */
 function getIntersections(arr_a, arr_b, ids = []) {
 	let intersections = [];
