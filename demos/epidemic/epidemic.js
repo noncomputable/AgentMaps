@@ -2,6 +2,8 @@
 /* Setup the AgentMaps simulation and its interface. */
 /*						     */ 
 
+/* map_data.js and units_data.js should be in the document. */
+
 //Get some interface features.
 var animation_interval_input = document.getElementById("animation_interval"),
 speed_controller_input = document.getElementById("speed_controller"),
@@ -27,8 +29,9 @@ var agentmap = L.A.agentmap(map);
 
 //Setup the epidemic simulation.
 function setup() {
-	//Generate and display streets and buildings on the map (map_data is defined in map_data.js).
-	agentmap.buildingify(bounding_box, map_data, undefined, {"color": "black", "weight": 1.5, "opacity": .6});
+	//Generate and display streets and units on the map.
+	//Load the units from units_data instead of generating them from scratch to speed things up.
+	agentmap.buildingify(bounding_box, map_data, undefined, {"color": "black", "weight": 1.5, "opacity": .6}, units_data);
 
 	//Split the map's units into residential and commercial zones.
 	var residential_streets = ["Wythe Lane", "Heyward Lane", "Lynch Lane", "Clymer Lane"],
@@ -149,7 +152,7 @@ function agentmapController() {
 }
 
 //Return a GeoJSON feature representing an agent.
-function epidemicAgentMaker(i) {
+function epidemicAgentMaker(id) {
 	//Decide whether the agent will be homebound.
 	var homebound = Math.random() < .25 ? true : false;
 

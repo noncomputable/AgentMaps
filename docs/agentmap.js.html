@@ -36,7 +36,7 @@ lineDistance = require('@turf/line-distance');
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
- * @param {number} [animation_interval=1] - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be an integer.
+ * @param {number} [animation_interval=1] - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be a nonnegative integer.
  * @property {object} map - A Leaflet Map instance.
  * @property {FeatureGroup} agents - A featureGroup containing all agents.
  * @property {FeatureGroup} units - A featureGroup containing all units.
@@ -46,7 +46,7 @@ lineDistance = require('@turf/line-distance');
  * @property {boolean} state.paused - Whether the simulation is paused.
  * @property {?number} state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
  * @property {?number} state.ticks - The number of ticks elapsed since the start of the simulation.
- * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be an integer.
+ * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be a nonnegative integer.
  * @property {?function} controller - User-defined function to be called on each update.
  */
 Agentmap = function (map, animation_interval = 1) {
@@ -70,7 +70,7 @@ Agentmap = function (map, animation_interval = 1) {
 /**
  * Change the animation interval of the simulation &amp; redraw the agents.
  *
- * @param {number} animation_interval - The desired animation interval to give the simulation. Must be an integer.
+ * @param {number} animation_interval - The desired animation interval to give the simulation. Must be a nonnegative integer.
  */
 Agentmap.prototype.setAnimationInterval = function(animation_interval) {
 	Agentmap.checkAnimIntervalOption(animation_interval);
@@ -243,7 +243,6 @@ Agentmap.prototype.getUnitPoint = function(unit_id, x, y) {
 Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	let street_id,
 	street_feature;
-	start_coords = L.A.pointToCoordinateArray(lat_lng);
 
 	if (place.type === "street") {
 		street_id = place.id;
@@ -261,9 +260,14 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	for (let intersection in intersections) { 
 		for (let cross_point of intersections[intersection]) {
 			let intersection_point = cross_point[0],
-			intersection_coords = L.A.pointToCoordinateArray(intersection_point),
-			segment = lineSlice(start_coords, intersection_coords, street_feature),
-			distance = lineDistance(segment);
+			distance = lat_lng.distanceTo(intersection_point);
+
+			/* More precise, but slower, distance detection -- not necessary yet. 
+			 	let start_coords = L.A.pointToCoordinateArray(lat_lng);
+				intersection_coords = L.A.pointToCoordinateArray(intersection_point),
+				segment = lineSlice(start_coords, intersection_coords, street_feature),
+				distance = lineDistance(segment); 
+			*/
 			
 			intersection_points.push(intersection_point);
 			intersection_distances.push(distance);
@@ -275,6 +279,28 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	closest_intersection_point = L.latLng(intersection_points[smallest_distance_index]);
 	
 	return closest_intersection_point;
+}
+
+/**
+ * Since units may take a noticeably long time to generate while typically staying the same over simulations,
+ * downloadUnits makes it easy to get a JS file containing the units object, so it can be included with an
+ * AgentMaps app and imported into Agentmap.buildingify so they will not need to be regenerated.
+ */
+Agentmap.prototype.downloadUnits = function() {
+	let file_content = "let units_data = ",
+	units_json = this.units.toGeoJSON(20);
+	file_content += JSON.stringify(units_json),
+	file = new Blob([file_content]);
+
+	var element = document.createElement("a");
+	element.setAttribute("href", URL.createObjectURL(file)),
+	element.setAttribute("download", "units_data.js"),
+	element.style.display = "none";
+	document.body.appendChild(element);
+	
+	element.click();
+	
+	document.body.removeChild(element);
 }
 
 /**
@@ -311,13 +337,13 @@ exports.agentmap = agentmapFactory;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Aug 31 2018 18:14:47 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Sep 02 2018 15:00:26 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

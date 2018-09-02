@@ -17,6 +17,8 @@ into something like this:
 
 <img src="resources/agentmaps.png" width="500" height="387" />
 
+You can install it via npm (`npm install agentmaps`) and bundle it yourself, or you can get a premade bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) to include directly in a webpage.
+
 ### Documentation
 
 Docs for people who want to use AgentMaps are available [here](https://noncomputable.github.io/AgentMaps/docs/index.html).
@@ -27,7 +29,7 @@ A basic walkthrough for creating an AgentMaps simulation can be found [here](htt
 
 ### Demos
 
-[Simple](https://noncomputable.github.io/AgentMaps/demos/simple/simple.html): Demonstrates all the different ways agents can travel around a map.
+[Simple](https://noncomputable.github.io/AgentMaps/demos/simple/simple.html): Shows all the different ways agents can travel around a map.
 
 [Epidemic](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html): Agents commute between different parts of a neighborhood while an infection spreads between them.
 

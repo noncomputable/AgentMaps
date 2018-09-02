@@ -37,7 +37,7 @@ agentmap.controller = function() {
 
 function setup() {
 	//Generate and display streets and buildings on the map (map_data is defined in map_data.js).
-	agentmap.buildingify(bounding_box, map_data, undefined, {"weight": 1, "opacity": .8});
+	agentmap.buildingify(bounding_box, map_data, {"weight": 1, "opacity": .8}, undefined, units_data);
 
 	//Generate 100 agents according to the rules of epidemicAgentMaker, displaying them as blue, .5 meter radius circles.
 	agentmap.agentify(100, agentmap.seqUnitAgentMaker);

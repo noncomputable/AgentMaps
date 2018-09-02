@@ -37,7 +37,7 @@ Here I'll explain some features of AgentMaps that the auto-generated docs probab
 
 ## Prerequisites
 
-You can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@2.0.0/site/dist/agentmaps.js>.
+You can find a bundle for AgentMaps here: <https://unpkg.com/agentmaps@2/site/dist/agentmaps.js>.
 
 Making simulations with AgentMaps will be a lot easier for you if you can:
 
@@ -88,7 +88,12 @@ agentmap.buildingify(my_data, [[43.3071, -88.0158], [43.2884, -87.9759]]);
 ```
 `Agentmap.buildingify` accepts more arguments specifying the dimension and appearance of the units and streets it will build. For more on that, see the section on [Feature Styling](#feature-styling).
 
-*Note*: `Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
+`Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
+To compensate for this and help make your simulation more responsive, `Agentmap.buildingify`'s last parameter, after the styling options, accepts a `units_data` object: a GeoJSON FeatureGroup of units. 
+If one is passed as an argument, instead of generating the units from scratch, `Agentmap.buildingify` will more quickly just use the blueprints in `units_data`.
+
+How do you get a `units_data` object? Agentmaps have an [Agentmap.downloadUnits](./Agentmap.html#downloadUnits) method which, when called, will generate a *js* file containing a single variable named `units_data` defined as the vale of `Agentmap.units.toGeoJSON()`.
+
 ## <a name="navigating-streets"></a>Navigating Streets
 
 Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a [graph](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics) with the help of the [ngraph.graph](https://github.com/anvaka/ngraph.graph) library. Then, it uses [ngraph.path](https://github.com/anvaka/ngraph.path) to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.
