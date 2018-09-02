@@ -17,6 +17,8 @@ into something like this:
 
 <img src="resources/agentmaps.png" width="500" height="387" />
 
+You can install it via npm (`npm install agentmaps`) and bundle it yourself, or you can get a premade bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) to include directly in a webpage.
+
 ### Documentation
 
 Docs for people who want to use AgentMaps are available [here](https://noncomputable.github.io/AgentMaps/docs/index.html).
