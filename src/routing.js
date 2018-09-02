@@ -3,7 +3,7 @@
 let path = require("ngraph.path"),
 createGraph = require("ngraph.graph"),
 lineSlice = require('@turf/line-slice').default,
-lineDistance = require('@turf/line-distance'),
+length = require('@turf/length').default,
 Agentmap = require('./agentmap').Agentmap;
 
 /**
@@ -73,7 +73,7 @@ function streetToGraph(graph, street) {
 		start_coords = L.A.pointToCoordinateArray(node_a),
 		end_coords = L.A.pointToCoordinateArray(node_b),
 		segment = lineSlice(start_coords, end_coords, street.toGeoJSON()),
-		distance = lineDistance(segment);
+		distance = length(segment);
 		graph.addLink(a_string, b_string, {
 			distance: distance,
 			place: { type: "street",

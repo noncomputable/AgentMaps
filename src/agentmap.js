@@ -1,7 +1,7 @@
 /* The Agentmap class, which turns a Leaflet map into a simulation platform. */
 
 let lineSlice = require('@turf/line-slice').default,
-lineDistance = require('@turf/line-distance');
+length = require('@turf/length').default;
 
 /**
  * The main class for building, storing, simulating, and manipulating agent-based models on Leaflet maps.
@@ -238,7 +238,7 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 			 	let start_coords = L.A.pointToCoordinateArray(lat_lng);
 				intersection_coords = L.A.pointToCoordinateArray(intersection_point),
 				segment = lineSlice(start_coords, intersection_coords, street_feature),
-				distance = lineDistance(segment); 
+				distance = length(segment); 
 			*/
 			
 			intersection_points.push(intersection_point);
