@@ -268,7 +268,7 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_leafl
 			street_buffer = unit_options.front_buffer / 1000, //Distance between center of street and start of unit.
 			house_depth = unit_options.depth / 1000,
 			angle = bearing(anchor_a, anchor_b),
-			new_angle = angle <= 90 ? angle + i * 90 : angle - i * 90, //Angle of line perpendicular to the anchor segment.
+			new_angle = angle + i * 90, //Angle of line perpendicular to the anchor segment.
 			unit_feature = { 
 				type: "Feature",
 				properties: {
@@ -300,9 +300,9 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_leafl
 				
 				if (unit_features[i].length !== 0) {
 					//Make previous unit_feature this unit_feature's first neighbor.
-					unit_feature.properties.neighbors[0] = unit_features[i][unit_features[i].length - 1].id,
+					unit_feature.properties.neighbors[0] = unit_features[i][unit_features[i].length - 1].properties.id,
 					//Make this unit_feature the previous unit_feature's second neighbor.
-					unit_features[i][unit_features[i].length - 1].properties.neighbors[1] = unit_feature.id;
+					unit_features[i][unit_features[i].length - 1].properties.neighbors[1] = unit_feature.properties.id;
 				}
 				
 				if (i === 0) {
@@ -311,9 +311,9 @@ function generateUnitFeatures(unit_anchors, proposed_unit_features, street_leafl
 				else {
 					if (unit_pair[0] !== null) {
 						//Make unit_feature opposite to this unit_feature on the street its third neighbor.
-						unit_feature.properties.neighbors[2] = unit_pair[0].id,
+						unit_feature.properties.neighbors[2] = unit_pair[0].properties.id,
 						//Make unit_feature opposite to this unit_feature on the street's third neighbor this unit_feature.
-						unit_pair[0].properties.neighbors[2] = unit_feature.id;
+						unit_pair[0].properties.neighbors[2] = unit_feature.properties.id;
 					}
 					
 					unit_pair[1] = unit_feature;
