@@ -215,7 +215,6 @@ Agentmap.prototype.getUnitPoint = function(unit_id, x, y) {
 Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	let street_id,
 	street_feature;
-	start_coords = L.A.pointToCoordinateArray(lat_lng);
 
 	if (place.type === "street") {
 		street_id = place.id;
@@ -233,9 +232,14 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	for (let intersection in intersections) { 
 		for (let cross_point of intersections[intersection]) {
 			let intersection_point = cross_point[0],
-			intersection_coords = L.A.pointToCoordinateArray(intersection_point),
-			segment = lineSlice(start_coords, intersection_coords, street_feature),
-			distance = lineDistance(segment);
+			distance = lat_lng.distanceTo(intersection_point);
+
+			/* More precise, but slower, distance detection -- not necessary yet. 
+			 	let start_coords = L.A.pointToCoordinateArray(lat_lng);
+				intersection_coords = L.A.pointToCoordinateArray(intersection_point),
+				segment = lineSlice(start_coords, intersection_coords, street_feature),
+				distance = lineDistance(segment); 
+			*/
 			
 			intersection_points.push(intersection_point);
 			intersection_distances.push(distance);
@@ -256,7 +260,7 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
  */
 Agentmap.prototype.downloadUnits = function() {
 	let file_content = "let units_data = ",
-	units_json = this.units.toGeoJSON();
+	units_json = this.units.toGeoJSON(20);
 	file_content += JSON.stringify(units_json),
 	file = new Blob([file_content]);
 
