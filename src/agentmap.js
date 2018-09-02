@@ -8,7 +8,7 @@ lineDistance = require('@turf/line-distance');
  *
  * @class Agentmap
  * @param {object} map - A Leaflet Map instance.
- * @param {number} [animation_interval=1] - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be an integer.
+ * @param {number} [animation_interval=1] - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Must be a nonnegative integer.
  * @property {object} map - A Leaflet Map instance.
  * @property {FeatureGroup} agents - A featureGroup containing all agents.
  * @property {FeatureGroup} units - A featureGroup containing all units.
@@ -18,7 +18,7 @@ lineDistance = require('@turf/line-distance');
  * @property {boolean} state.paused - Whether the simulation is paused.
  * @property {?number} state.animation_frame_id - The id of the agentmap's update function in the queue of functions to call for the coming animation frame.
  * @property {?number} state.ticks - The number of ticks elapsed since the start of the simulation.
- * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be an integer.
+ * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be a nonnegative integer.
  * @property {?function} controller - User-defined function to be called on each update.
  */
 Agentmap = function (map, animation_interval = 1) {
@@ -42,7 +42,7 @@ Agentmap = function (map, animation_interval = 1) {
 /**
  * Change the animation interval of the simulation & redraw the agents.
  *
- * @param {number} animation_interval - The desired animation interval to give the simulation. Must be an integer.
+ * @param {number} animation_interval - The desired animation interval to give the simulation. Must be a nonnegative integer.
  */
 Agentmap.prototype.setAnimationInterval = function(animation_interval) {
 	Agentmap.checkAnimIntervalOption(animation_interval);
@@ -253,10 +253,10 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
 	return closest_intersection_point;
 }
 
-/*
+/**
  * Since units may take a noticeably long time to generate while typically staying the same over simulations,
  * downloadUnits makes it easy to get a JS file containing the units object, so it can be included with an
- * AgentMaps app and imported into Agentmap.buildingify so that they do not need to be regenerated.
+ * AgentMaps app and imported into Agentmap.buildingify so they will not need to be regenerated.
  */
 Agentmap.prototype.downloadUnits = function() {
 	let file_content = "let units_data = ",
