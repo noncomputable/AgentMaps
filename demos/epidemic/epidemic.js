@@ -31,7 +31,7 @@ var agentmap = L.A.agentmap(map);
 function setup() {
 	//Generate and display streets and units on the map.
 	//Load the units from units_data instead of generating them from scratch to speed things up.
-	agentmap.buildingify(bounding_box, map_data, undefined, {"color": "black", "weight": 1.5, "opacity": .6}, units_data);
+	agentmap.buildingify(bounding_box, map_data, undefined, {"color": "black", "weight": 1.5, "opacity": .6});
 
 	//Split the map's units into residential and commercial zones.
 	var residential_streets = ["Wythe Lane", "Heyward Lane", "Lynch Lane", "Clymer Lane"],
