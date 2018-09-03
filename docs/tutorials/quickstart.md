@@ -34,7 +34,7 @@ let map_data = {
 };
 ```
 
-You can use the sample data from the demos [here](../demos/simple/map_data.js).
+You can use the sample data from the demos [here](../resources/map_data.js).
 
 Have the top left and bottom right corners of a rectangle containing the neighborhood stored as an array of the corners' coordinates (i.e. [[lat, lon], [lat, lon]]):
 
