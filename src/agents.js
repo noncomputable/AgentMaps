@@ -29,7 +29,6 @@ let Agent = {};
  * @param {LatLng} lat_lng - A pair of coordinates to place the agent at.
  * @param {Object} options - An array of options for the agent, namely its layer.
  * @param {Agentmap} agentmap - The agentmap instance in which the agent exists.
- * @property {number} feature.AgentMap_id - The agent's instance id, so it can be accessed from inside the Leaflet layer. To avoid putting the actual instance inside the feature object.
  * @property {Agentmap} agentmap - The agentmap instance in which the agent exists.
  * @property {Place} place - A place object specifying where the agent is currently at.
  * @property {number} [steps_made=0] - The number of steps the agent has moved since the beginning.
