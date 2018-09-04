@@ -17,7 +17,8 @@ into something like this:
 
 <img src="resources/agentmaps.png" width="500" height="387" />
 
-You can install it via npm (`npm install agentmaps`) and bundle it yourself, or you can get a premade bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) to include directly in a webpage.
+You can install it via npm (`npm install agentmaps`) and bundle it yourself, or you can get a premade bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) to include directly in a webpage. 
+You'll need to [include Leaflet](https://leafletjs.com/download.html) separately.
 
 ### Documentation
 

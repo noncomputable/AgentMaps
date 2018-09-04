@@ -2,6 +2,8 @@ Here we'll walk through building a simple AgentMaps simulation. I suggest lookin
 all of the AgentMaps functions and classes used here to get a better understanding of how they work. 
 If you're not so familiar with Leaflet, I suggest doing the same with the [Leaflet docs](https://leafletjs.com/reference-1.3.2.html).
 
+You'll need AgentMaps, which you can get in a bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) or install via npm (`npm install agentmaps`). You'll also need the Leaflet script and style files, which you can get [here](https://leafletjs.com/download.html).
+
 First, create an HTML document that:
 * Loads the Leaflet.js style and script
 * Contains a `<div>` in which to embed the Leaflet map
