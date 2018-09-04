@@ -1,5 +1,7 @@
 # AgentMaps - Social Simulations on Interactive Maps
 
+<img src="resources/agentgif.gif" width="500" height="387" />
+
 AgentMaps is a Javascript library for building and visualizing dynamic social systems on maps.
 It is based on the [Leaflet](https://leafletjs.com/) interactive mapping [library](https://github.com/Leaflet/Leaflet).
 Given a neighborhood, AgentMaps lets you quickly and easily:
