@@ -166,5 +166,3 @@ agentmap.run();
 ```
 
 Once we load our HTML document, the simulation should begin and we can watch our agents move around the neighborhood.
-
-For all the features of Agentmaps, look through the more detailed documentation discussed in the next section.

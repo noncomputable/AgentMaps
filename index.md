@@ -47,3 +47,5 @@ I've only had a few extended conversations talking and thinking about this proje
 * M. ("dont ask me, ask gagan") Singh
 
 Thank you to anyone who somehow benefits from this.
+
+**AgentMaps: Geospatial Agent-based Modeling and Simulation for JavaScript.**
