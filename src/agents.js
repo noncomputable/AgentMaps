@@ -670,8 +670,8 @@ function agent(lat_lng, options, agentmap) {
  *
  * @callback agentFeatureMaker
  * @param {number} id - The agent's Leaflet layer ID.
- * @returns {Point} - a GeoJSON Point feature with properties and coordinates for the agent, including
- * a "place" property that will set the agent's initial {@link Place} and an object "layer_options" property
+ * @returns {Point} - A GeoJSON Point object with geometry and other properties for the agent, including
+ * a "place" property that will set the agent's initial {@link Place} and a "layer_options" property
  * that will specify the feature's Leaflet options (like its color, size, etc.). All other provided properties 
  * will be transferred to the Agent object once it is created.
  * See {@link https://leafletjs.com/reference-1.3.2.html#circlemarker} for all possible layer options.
