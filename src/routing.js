@@ -1,4 +1,4 @@
-//** Here we have utilities to convert OSM geojson data into a distance-weighted graph and find the shortest path between two points. **//
+/* Here we have utilities to convert OSM geojson data into a distance-weighted graph and find the shortest path between two points. */
 
 let path = require("ngraph.path"),
 createGraph = require("ngraph.graph"),
@@ -28,6 +28,8 @@ function streetsToGraph(streets) {
 /**
  * Process a street layer and add it into a graph.
  *
+ * @param {ngraph.graph} graph - An ngraph.graph representing a street network.
+ * @param {L.Polyline} street - A Leaflet Polyline layer for a street.
  */
 function streetToGraph(graph, street) {
 	let street_id = street._leaflet_id,
