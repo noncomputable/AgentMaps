@@ -42,13 +42,6 @@ You can find the corresponding code under _/demos_ in the gh-pages branch [here]
 
 * Andrew - came up with & built AgentMaps
 
-### Acknowledgements
-
-I've only had a few extended conversations talking and thinking about this project outloud over the last few months, and those probably influenced how I went forward with it. The people I've had those discussions with are:
-
-* I. ("Wheels") Errati
-* M. ("dont ask me, ask gagan") Singh
-
 Thank you to anyone who somehow benefits from this.
 
 **AgentMaps: Geospatial Agent-based Modeling and Simulation for JavaScript.**
