@@ -1,5 +1,7 @@
 # AgentMaps - Social Simulations on Interactive Maps
 
+<img src="resources/agentgif.gif" width="500" height="387" />
+
 AgentMaps is a Javascript library for building and visualizing dynamic social systems on maps.
 It is based on the [Leaflet](https://leafletjs.com/) interactive mapping [library](https://github.com/Leaflet/Leaflet).
 Given a neighborhood, AgentMaps lets you quickly and easily:
@@ -39,13 +41,6 @@ You can find the corresponding code under _/demos_ in the gh-pages branch [here]
 ### Authors
 
 * Andrew - came up with & built AgentMaps
-
-### Acknowledgements
-
-I've only had a few extended conversations talking and thinking about this project outloud over the last few months, and those probably influenced how I went forward with it. The people I've had those discussions with are:
-
-* I. ("Wheels") Errati
-* M. ("dont ask me, ask gagan") Singh
 
 Thank you to anyone who somehow benefits from this.
 
