@@ -21,7 +21,7 @@ length = require('@turf/length').default;
  * @property {number} animation_interval - The number of steps agents must move before being redrawn. Given 1, they will be redrawn after every step. Given 0, the animation will not update at all. 1 by default. Will be a nonnegative integer.
  * @property {?function} controller - User-defined function to be called on each update.
  */
-Agentmap = function (map, animation_interval = 1) {
+Agentmap = function(map, animation_interval = 1) {
 	Agentmap.checkAnimIntervalOption(animation_interval);
 
 	this.map = map,
