@@ -26,7 +26,7 @@
     "spatial"
   ],
   "author": "Andrew Gregory Tsesis",
-  "license": "ISC",
+  "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/noncomputable/AgentMaps/issues"
   },
