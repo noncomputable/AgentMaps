@@ -38,9 +38,9 @@ A basic walkthrough for creating an AgentMaps simulation can be found [here](htt
 
 You can find the corresponding code under _/demos_ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos).
 
-### Authors
+### Plugins
 
-* Andrew - came up with & built AgentMaps
+[Spritegents](https://github.com/noncomputable/AgentMaps-Spritegents): Lets you depict agents with custom icons instead of circles. 
 
 Thank you to anyone who somehow benefits from this.
 
