@@ -44,7 +44,7 @@ Making simulations with AgentMaps will be a lot easier for you if you can:
 * Program with Javascript
 * Use the [Leaflet](https://leafletjs.com/) mapping library
 
-Leaflet doesn't come bundled with AgentMaps, so you'll have to either include it in your web page with its own \<script\> tag or
+Leaflet doesn't come bundled with AgentMaps, so you'll have to either include it in your web page with its own `<script\>` tag or
 install it with [npm](https://www.npmjs.com/package/leaflet) and bundle it yourself.
 
 It might also help to be familiar with [turf.js](http://turfjs.org/), a library that contains lots of tools that make geospatial work (like intersection detection and line slicing) quick and easy.

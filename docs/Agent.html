@@ -802,6 +802,72 @@
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="scheduleTrip"><span class="type-signature"></span>scheduleTrip<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line176">line 176</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -913,7 +979,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line483">line 483</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line485">line 485</a>
     </li></ul></dd>
     
 
@@ -1048,7 +1114,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line464">line 464</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line466">line 466</a>
     </li></ul></dd>
     
 
@@ -1134,7 +1200,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line634">line 634</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line636">line 636</a>
     </li></ul></dd>
     
 
@@ -1269,7 +1335,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line444">line 444</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line446">line 446</a>
     </li></ul></dd>
     
 
@@ -1662,310 +1728,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line423">line 423</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id=".setTravelToPlace"><span class="type-signature">(static) </span>setTravelToPlace<span class="signature">(goal_lat_lng, goal_place, speed<span class="signature-attributes">opt</span>, move_directly<span class="signature-attributes">opt</span>, replace_trip<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>goal_lat_lng</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#LatLng">LatLng</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The point within the place to which the agent is to travel.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>goal_place</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Place">Place</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The place to which the agent will travel.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>speed</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    1
-                
-                </td>
-            
-
-            <td class="description last">The speed in meters per tick that the agent should try to travel. Must be >= .1.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>move_directly</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Whether to ignore the streets & roads and move directly to the goal.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>replace_trip</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Whether to empty the currently scheduled path and replace it with this new trip; false by default (the new trip issimply appended to the current scheduled path).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line188">line 188</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line425">line 425</a>
     </li></ul></dd>
     
 
@@ -2095,13 +1858,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-extra.html">extra</a></li><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-extra.html">extra</a></li><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 06 2018 11:58:26 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Sep 12 2018 22:42:32 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -317,7 +317,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line664">line 664</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line666">line 666</a>
     </li></ul></dd>
     
 
@@ -537,6 +537,163 @@
     <dd>
         
 <span class="param-type">Array.&lt;Array.&lt;(number|Object.&lt;number, number>)>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getPathFinder"><span class="type-signature"></span>getPathFinder<span class="signature">(graph)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Given a street network (graph), return a pathfinder that can operate on it.Useful if you modify the street graph during the simulation.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>graph</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An ngraph graph representing an OSM street network.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line94">line 94</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - An A* pathfinder for the graph.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
 
 
     </dd>
@@ -1395,7 +1552,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line136">line 136</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line140">line 140</a>
     </li></ul></dd>
     
 
@@ -1418,6 +1575,163 @@
 
 
 
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="streetsToGraph"><span class="type-signature"></span>streetsToGraph<span class="signature">(streets)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Convert a layerGroup of streets into a graph. Useful if you modify the street layers during the simulationand want routing to work with the new street network.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>streets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">LayerGroup</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A Leaflet layerGroup of streets, forming a street network.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="routing.js.html">routing.js</a>, <a href="routing.js.html#line16">line 16</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - A graph representing the street network, operable by the ngraph pathfinder.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1694,7 +2008,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line668">line 668</a>
+        <a href="agents.js.html">agents.js</a>, <a href="agents.js.html#line670">line 670</a>
     </li></ul></dd>
     
 
@@ -1721,7 +2035,7 @@
 
         
 <div class="param-desc">
-    - a GeoJSON Point feature with properties and coordinates for the agent, includinga "place" property that will set the agent's initial <a href="global.html#Place">Place</a> and an object "layer_options" propertythat will specify the feature's Leaflet options (like its color, size, etc.). All other provided properties will be transferred to the Agent object once it is created.See <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker">https://leafletjs.com/reference-1.3.2.html#circlemarker</a> for all possible layer options.
+    - A GeoJSON Point object with geometry and other properties for the agent, includinga "place" property that will set the agent's initial <a href="global.html#Place">Place</a> and a "layer_options" propertythat will specify the feature's Leaflet options (like its color, size, etc.). All other provided properties will be transferred to the Agent object once it is created.See <a href="https://leafletjs.com/reference-1.3.2.html#circlemarker">https://leafletjs.com/reference-1.3.2.html#circlemarker</a> for all possible layer options.
 </div>
 
 
@@ -2474,13 +2788,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-extra.html">extra</a></li><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-extra.html">extra</a></li><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 06 2018 11:58:26 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Sep 12 2018 22:42:32 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

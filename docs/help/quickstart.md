@@ -153,7 +153,7 @@ agentmap.controller = function() {
 			random_unit_id = agentmap.units.getLayerId(random_unit),
 			random_unit_center = random_unit.getBounds().getCenter();
 
-			agent.scheduleTrip(random_unit_center, {type: "unit", id: random_unit_id}, false, true);
+			agent.scheduleTrip(random_unit_center, {type: "unit", id: random_unit_id}, 1, false, true);
 		}
 	}
 

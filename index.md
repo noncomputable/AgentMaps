@@ -38,15 +38,9 @@ A basic walkthrough for creating an AgentMaps simulation can be found [here](htt
 
 You can find the corresponding code under _/demos_ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos).
 
-### Authors
+### Plugins
 
-* Andrew - came up with & built AgentMaps
-
-### Acknowledgements 
-
-This project is based on my study of social simulation with [Jennifer Mangels](https://www.gc.cuny.edu/Page-Elements/Academics-Research-Centers-Initiatives/Doctoral-Programs/Psychology/Faculty-Bios/Jennifer-Mangels) at the [Dynamic Learning Lab](http://www.mangelslab.org/). I was simulating epidemics on my desktop and thought it'd be great to do on a real neighborhood and share it with others. It turned out that wasn't feasible! So after some discussion with Professor Mangels, I decided to work on AgentMaps, to solve the problem of making accessible, map-based agent simulations. Her guidance and discussions during our independent study were a serious influence on this project.
-
-And thank you to Ilias Errati, Md Malsi, Dillion Verma, and Manny Singh for discussions which probably influenced the direction and development of AgentMaps.
+[Spritegents](https://github.com/noncomputable/AgentMaps-Spritegents): Lets you depict agents with custom icons instead of circles. 
 
 Thank you to anyone who somehow benefits from this.
 
