@@ -175,6 +175,7 @@ Agent.setTravelInUnit = function(goal_lat_lng, goal_place, speed) {
 
 /**
  * Schedule the agent to travel directly from any point (e.g. of a street or unit) to a point (e.g. of another street or unit).
+ * @name scheduleTrip
  * @memberof Agent
  * @instance
  *
