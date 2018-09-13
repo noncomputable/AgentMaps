@@ -193,6 +193,7 @@ Agent.setTravelToPlace = function(goal_lat_lng, goal_place, speed = 1, move_dire
 	goal_lat_lng = L.latLng(goal_lat_lng);
 	
 	if (replace_trip === true) {
+		start_place = this.place;
 		this.resetTrip();
 	}
 
