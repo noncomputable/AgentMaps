@@ -65,6 +65,10 @@ function setupStreetFeatures(streets_data, street_options) {
 		
 		addStreetLayerIntersections.call(this, street);
 	}, this);
+
+	//Add general graph-making and path-finder-making methods to Agentmap, in case streets are added, removed, or modified mid-simulation.
+	this.streetsToGraph = streetsToGraph,
+	this.getPathFinder = getPathFinder;
 	
 	this.streets.graph = streetsToGraph(this.streets),
 	this.pathfinder = getPathFinder(this.streets.graph);

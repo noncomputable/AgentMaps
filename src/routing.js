@@ -7,8 +7,8 @@ length = require('@turf/length').default,
 Agentmap = require('./agentmap').Agentmap;
 
 /**
- * Convert a layerGroup of streets into a graph.
- * @private
+ * Convert a layerGroup of streets into a graph. Useful if you modify the street layers during the simulation
+ * and want routing to work with the new street network.
  *
  * @param {LayerGroup} streets - A Leaflet layerGroup of streets, forming a street network.
  * @returns {Object} - A graph representing the street network, operable by the ngraph pathfinder. 
@@ -85,8 +85,8 @@ function streetToGraph(graph, street) {
 }
 
 /**
- * Given an OSM street network (graph), return an A* pathfinder that can operate on it.
- * @private
+ * Given a street network (graph), return a pathfinder that can operate on it.
+ * Useful if you modify the street graph during the simulation.
  * 
  * @param {object} graph - An ngraph graph representing an OSM street network.
  * @returns {object} - An A* pathfinder for the graph.
