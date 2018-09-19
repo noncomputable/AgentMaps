@@ -42,6 +42,8 @@ You can find the corresponding code under _/demos_ in the gh-pages branch [here]
 
 [IconAgents](https://github.com/noncomputable/AgentMaps-IconAgents): Lets you depict agents with custom icons instead of circles. 
 
+---
+
 Thank you to anyone who somehow benefits from this.
 
 **AgentMaps: Geospatial Agent-based Modeling and Simulation for JavaScript.**
