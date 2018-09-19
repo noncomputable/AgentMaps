@@ -40,7 +40,7 @@ You can find the corresponding code under _/demos_ in the gh-pages branch [here]
 
 ### Plugins
 
-[Spritegents](https://github.com/noncomputable/AgentMaps-Spritegents): Lets you depict agents with custom icons instead of circles. 
+[IconAgents](https://github.com/noncomputable/AgentMaps-IconAgents): Lets you depict agents with custom icons instead of circles. 
 
 Thank you to anyone who somehow benefits from this.
 
