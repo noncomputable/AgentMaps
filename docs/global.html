@@ -1188,7 +1188,7 @@
     
 
     
-    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(streets_data, street_options)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(OSM_data, street_options, street_layers<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1220,6 +1220,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -1232,7 +1234,7 @@
 
         <tr>
             
-                <td class="name"><code>streets_data</code></td>
+                <td class="name"><code>OSM_data</code></td>
             
 
             <td class="type">
@@ -1244,6 +1246,14 @@
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -1268,10 +1278,51 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">An object containing the Leaflet styling options for streets.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>street_layers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If you want to load a previously generated AgentMaps.streets object instead of generating one from scratch: A GeoJSON Feature Collection of an AgentMaps.streets featureGroup.</td>
         </tr>
 
     
@@ -1312,7 +1363,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line38">line 38</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line40">line 40</a>
     </li></ul></dd>
     
 
@@ -1346,7 +1397,7 @@
     
 
     
-    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, streets_data, unit_options, units_data<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, OSM_data, unit_options, unit_layers<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1423,7 +1474,7 @@
 
         <tr>
             
-                <td class="name"><code>streets_data</code></td>
+                <td class="name"><code>OSM_data</code></td>
             
 
             <td class="type">
@@ -1485,7 +1536,7 @@
 
         <tr>
             
-                <td class="name"><code>units_data</code></td>
+                <td class="name"><code>unit_layers</code></td>
             
 
             <td class="type">
@@ -1511,7 +1562,7 @@
 
             
 
-            <td class="description last">If you want to load a previously generated AgentMaps.units object instead of generating one from scarch: A GeoJSON Feature Collection of an AgentMaps.units featureGroup.</td>
+            <td class="description last">If you want to load a previously generated AgentMaps.units object instead of generating one from scratch: A GeoJSON Feature Collection of an AgentMaps.units featureGroup.</td>
         </tr>
 
     
@@ -1552,7 +1603,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line140">line 140</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line149">line 149</a>
     </li></ul></dd>
     
 
@@ -2788,13 +2839,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-extra.html">extra</a></li><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Sep 12 2018 22:42:32 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 27 2018 12:52:08 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

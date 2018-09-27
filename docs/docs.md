@@ -89,10 +89,18 @@ agentmap.buildingify(my_data, [[43.3071, -88.0158], [43.2884, -87.9759]]);
 `Agentmap.buildingify` accepts more arguments specifying the dimension and appearance of the units and streets it will build. For more on that, see the section on [Feature Styling](#feature-styling).
 
 `Agentmap.buildingify` does a lot of work checking for and removing overlapping units, and so the bigger your neighborhood, the noticeably longer it will take. 
-To compensate for this and help make your simulation more responsive, `Agentmap.buildingify`'s last parameter, after the styling options, accepts a `units_data` object: a GeoJSON FeatureGroup of units. 
-If one is passed as an argument, instead of generating the units from scratch, `Agentmap.buildingify` will more quickly just use the blueprints in `units_data`.
+To compensate for this and help make your simulation more responsive, `Agentmap.buildingify`'s last two parameters, after the styling options, accept a `unit_layers` object and `street_layers` object respectively: a GeoJSON FeatureGroup of units or streets exported from a previous AgentMaps simulation. 
+If either of these is passed as an argument, instead of generating the unit or street layers from scratch, `Agentmap.buildingify` will more quickly just use the blueprints in `unit_layers` and `street_layers`.
 
-How do you get a `units_data` object? Agentmaps have an [Agentmap.downloadUnits](./Agentmap.html#downloadUnits) method which, when called, will generate a *js* file containing a single variable named `units_data` defined as the vale of `Agentmap.units.toGeoJSON()`.
+How do you get a `unit_layers` or `street_layers` object? Agentmaps have an 
+[Agentmap.downloadUnits](./Agentmap.html#downloadUnits) method and a [Agentmap.downloadStreets](./Agentmap.html#downloadStreets)
+method which, when called, will generate a *js* file containing a single variable named `unit_data` or `street_data` defined as the vale of `Agentmap.units.toGeoJSON(20)` or `Agentmap.streets.toGeoJSON(20)` respectively.
+
+What if your OSM street data is too big for a browser to feasibly generate all the appropriate building layers?
+The npm package comes with a command line tool named "featuretool" which, given the bounding coordinates and path to a file containing OSM-style GeoJSON, generates all the appropriate layers and exports them to files similar to those that `Agentmap.downloadUnits` and `Agentmap.downloadStreets` generate.
+To use it, you need to have installed AgentMaps globally with `npm install -g AgentMaps`.
+
+To use featuretool, you'd do something like this: `featuretool --bbox [[39.9058,-86.0910],[39.8992,-86.1017]] --streets data/townmap.js`.
 
 ## <a name="navigating-streets"></a>Navigating Streets
 

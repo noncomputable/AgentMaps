@@ -271,7 +271,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line106">line 106</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -1286,7 +1286,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line256">line 256</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line265">line 265</a>
     </li></ul></dd>
     
 
@@ -1702,7 +1702,7 @@
     
 
     
-    <h4 class="name" id="getStreetFeatures"><span class="type-signature">(private) </span>getStreetFeatures<span class="signature">(streets_data)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
+    <h4 class="name" id="getStreetFeatures"><span class="type-signature">(private) </span>getStreetFeatures<span class="signature">(OSM_data)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
     
 
     
@@ -1746,7 +1746,7 @@
 
         <tr>
             
-                <td class="name"><code>streets_data</code></td>
+                <td class="name"><code>OSM_data</code></td>
             
 
             <td class="type">
@@ -1803,7 +1803,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line84">line 84</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line93">line 93</a>
     </li></ul></dd>
     
 
@@ -1983,7 +1983,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line349">line 349</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line358">line 358</a>
     </li></ul></dd>
     
 
@@ -2039,7 +2039,7 @@
     
 
     
-    <h4 class="name" id="getUnitFeatures"><span class="type-signature">(private) </span>getUnitFeatures<span class="signature">(bounding_box, streets_data, unit_options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
+    <h4 class="name" id="getUnitFeatures"><span class="type-signature">(private) </span>getUnitFeatures<span class="signature">(bounding_box, OSM_data, unit_options)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="global.html#Feature">Feature</a>>}</span></h4>
     
 
     
@@ -2106,7 +2106,7 @@
 
         <tr>
             
-                <td class="name"><code>streets_data</code></td>
+                <td class="name"><code>OSM_data</code></td>
             
 
             <td class="type">
@@ -2186,7 +2186,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line227">line 227</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line236">line 236</a>
     </li></ul></dd>
     
 
@@ -2213,7 +2213,7 @@
 
         
 <div class="param-desc">
-    -  array of features representing real estate units.
+    - Array of features representing real estate units.
 </div>
 
 
@@ -2343,7 +2343,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line197">line 197</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line206">line 206</a>
     </li></ul></dd>
     
 
@@ -2680,7 +2680,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line412">line 412</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line421">line 421</a>
     </li></ul></dd>
     
 
@@ -3056,7 +3056,7 @@
     
 
     
-    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(streets_data, street_options)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setupStreetFeatures"><span class="type-signature"></span>setupStreetFeatures<span class="signature">(OSM_data, street_options, street_layers<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3088,6 +3088,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -3100,7 +3102,7 @@
 
         <tr>
             
-                <td class="name"><code>streets_data</code></td>
+                <td class="name"><code>OSM_data</code></td>
             
 
             <td class="type">
@@ -3112,6 +3114,14 @@
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -3136,10 +3146,51 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">An object containing the Leaflet styling options for streets.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>street_layers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If you want to load a previously generated AgentMaps.streets object instead of generating one from scratch: A GeoJSON Feature Collection of an AgentMaps.streets featureGroup.</td>
         </tr>
 
     
@@ -3180,7 +3231,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line38">line 38</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line40">line 40</a>
     </li></ul></dd>
     
 
@@ -3214,7 +3265,7 @@
     
 
     
-    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, streets_data, unit_options, units_data<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setupUnitFeatures"><span class="type-signature"></span>setupUnitFeatures<span class="signature">(bounding_box, OSM_data, unit_options, unit_layers<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3291,7 +3342,7 @@
 
         <tr>
             
-                <td class="name"><code>streets_data</code></td>
+                <td class="name"><code>OSM_data</code></td>
             
 
             <td class="type">
@@ -3353,7 +3404,7 @@
 
         <tr>
             
-                <td class="name"><code>units_data</code></td>
+                <td class="name"><code>unit_layers</code></td>
             
 
             <td class="type">
@@ -3379,7 +3430,7 @@
 
             
 
-            <td class="description last">If you want to load a previously generated AgentMaps.units object instead of generating one from scarch: A GeoJSON Feature Collection of an AgentMaps.units featureGroup.</td>
+            <td class="description last">If you want to load a previously generated AgentMaps.units object instead of generating one from scratch: A GeoJSON Feature Collection of an AgentMaps.units featureGroup.</td>
         </tr>
 
     
@@ -3420,7 +3471,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line140">line 140</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line149">line 149</a>
     </li></ul></dd>
     
 
@@ -3893,7 +3944,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line385">line 385</a>
+        <a href="buildings.js.html">buildings.js</a>, <a href="buildings.js.html#line394">line 394</a>
     </li></ul></dd>
     
 
@@ -4836,13 +4887,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-extra.html">extra</a></li><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#checkEndExcess">checkEndExcess</a></li><li><a href="global.html#checkStartExcess">checkStartExcess</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Agent.html">Agent</a></li><li><a href="Agentmap.html">Agentmap</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-quickstart.html">quickstart</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addStreetLayerIntersections">addStreetLayerIntersections</a></li><li><a href="global.html#agent">agent</a></li><li><a href="global.html#agentmap">agentmap</a></li><li><a href="global.html#checkEndExcess">checkEndExcess</a></li><li><a href="global.html#checkStartExcess">checkStartExcess</a></li><li><a href="global.html#decodeCoordString">decodeCoordString</a></li><li><a href="global.html#encodeLatLng">encodeLatLng</a></li><li><a href="global.html#generateUnitFeatures">generateUnitFeatures</a></li><li><a href="global.html#getIntersections">getIntersections</a></li><li><a href="global.html#getPathFinder">getPathFinder</a></li><li><a href="global.html#getStreetFeatures">getStreetFeatures</a></li><li><a href="global.html#getUnitAnchors">getUnitAnchors</a></li><li><a href="global.html#getUnitFeatures">getUnitFeatures</a></li><li><a href="global.html#getUnitNeighborLayerIDs">getUnitNeighborLayerIDs</a></li><li><a href="global.html#isPointCoordinates">isPointCoordinates</a></li><li><a href="global.html#noOverlaps">noOverlaps</a></li><li><a href="global.html#pointToCoordinateArray">pointToCoordinateArray</a></li><li><a href="global.html#reversedCoordinates">reversedCoordinates</a></li><li><a href="global.html#setupStreetFeatures">setupStreetFeatures</a></li><li><a href="global.html#setupUnitFeatures">setupUnitFeatures</a></li><li><a href="global.html#streetsToGraph">streetsToGraph</a></li><li><a href="global.html#streetToGraph">streetToGraph</a></li><li><a href="global.html#unitsOutOfStreets">unitsOutOfStreets</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Sep 12 2018 22:42:34 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 27 2018 12:52:10 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
