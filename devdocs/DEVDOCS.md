@@ -100,8 +100,10 @@ What if your OSM street data is too big for a browser to feasibly generate all t
 The npm package comes with a command line tool named "featuretool" which, given the bounding coordinates and path to a file containing OSM-style GeoJSON, generates all the appropriate layers and exports them to files similar to those that `Agentmap.downloadUnits` and `Agentmap.downloadStreets` generate.
 To use it, you need to have installed AgentMaps globally with `npm install -g AgentMaps`.
 
-To use featuretool, you'd do something like this: `featuretool --bbox [[39.9058,-86.0910],[39.8992,-86.1017]] --streets data/townmap.js`.
-
+To use featuretool, you'd do something like this:
+```shell
+featuretool --bbox [[39.9058,-86.0910],[39.8992,-86.1017]] --streets data/townmap.js
+```
 ## <a name="navigating-streets"></a>Navigating Streets
 
 Given a neighborhood's streets in GeoJSON, AgentMaps extracts a street network and converts it to a [graph](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics) with the help of the [ngraph.graph](https://github.com/anvaka/ngraph.graph) library. Then, it uses [ngraph.path](https://github.com/anvaka/ngraph.path) to find an (approximately) shortest path. The graph itself is made out of the start point, end point, and intersections of each street.
