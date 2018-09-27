@@ -13,6 +13,9 @@
     "publish-pages": "cp README.md site\\index.md & gh-pages -d site"
   },
   "main": "src/index.js",
+  "bin": {
+    "featuretool": "tool/featuretool.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/noncomputable/AgentMaps.git"
@@ -45,8 +48,10 @@
     "@turf/line-intersect": "^6.0.2",
     "@turf/line-slice": "^5.1.5",
     "@turf/nearest-point-on-line": "^6.0.2",
+    "leaflet": "^1.3.4",
     "ngraph.graph": "0.0.14",
-    "ngraph.path": "^1.0.2"
+    "ngraph.path": "^1.0.2",
+    "optimist": "^0.6.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.0.0",
