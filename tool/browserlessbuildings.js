@@ -26,8 +26,8 @@ getPathFinder = require('./browserlessrouting').getPathFinder;
  * @param {number} [unit_options.side_buffer = 3] - The number of meters between two units on the same street.
  * @param {number} [unit_options.length = 14] - The length of the unit in meters along the street.
  * @param {number} [unit_options.depth = 18] - The depth of the unit in meters out from its front.
- * @param {object} [unit_layers]- If you want to load a previously generated AgentMaps.units object instead of generating one from scarch: A GeoJSON Feature Collection of an AgentMaps.units featureGroup.
- * @param {object} [street_layers]- If you want to load a previously generated AgentMaps.streets object instead of generating one from scarch: A GeoJSON Feature Collection of an AgentMaps.streets featureGroup.
+ * @param {object} [unit_layers] - If you want to load a previously generated AgentMaps.units object instead of generating one from scarch: A GeoJSON Feature Collection of an AgentMaps.units featureGroup.
+ * @param {object} [street_layers] - If you want to load a previously generated AgentMaps.streets object instead of generating one from scarch: A GeoJSON Feature Collection of an AgentMaps.streets featureGroup.
  */
 function buildingify(bounding_box, OSM_data, street_options, unit_options, unit_layers, street_layers) {
 	setupStreetFeatures.call(this, OSM_data, street_options);
