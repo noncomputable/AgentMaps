@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* Core of a command line tool that runs buildingify and exports the resulting street and unit layers. */
+
 let optimist = require("optimist"),
 fs = require("fs"),
 path = require("path");
