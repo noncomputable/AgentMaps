@@ -259,7 +259,7 @@ Agentmap.prototype.getNearestIntersection = function(lat_lng, place) {
  * AgentMaps app and imported into Agentmap.buildingify so they will not need to be regenerated.
  */
 Agentmap.prototype.downloadUnits = function() {
-	let file_content = "let units_data = ",
+	let file_content = "var units_data = ",
 	units_json = this.units.toGeoJSON(20);
 	file_content += JSON.stringify(units_json),
 	file = new Blob([file_content]);
@@ -267,6 +267,28 @@ Agentmap.prototype.downloadUnits = function() {
 	var element = document.createElement("a");
 	element.setAttribute("href", URL.createObjectURL(file)),
 	element.setAttribute("download", "units_data.js"),
+	element.style.display = "none";
+	document.body.appendChild(element);
+	
+	element.click();
+	
+	document.body.removeChild(element);
+}
+
+/**
+ * Since street layers may take a noticeably long time to generate while typically staying the same over simulations,
+ * downloadStreets makes it easy to get a JS file containing the streets object, so it can be included with an
+ * AgentMaps app and imported into Agentmap.buildingify so they will not need to be regenerated.
+ */
+Agentmap.prototype.downloadStreets = function() {
+	let file_content = "var streets_data = ",
+	streets_json = this.streets.toGeoJSON(20);
+	file_content += JSON.stringify(streets_json),
+	file = new Blob([file_content]);
+
+	var element = document.createElement("a");
+	element.setAttribute("href", URL.createObjectURL(file)),
+	element.setAttribute("download", "streets_data.js"),
 	element.style.display = "none";
 	document.body.appendChild(element);
 	
