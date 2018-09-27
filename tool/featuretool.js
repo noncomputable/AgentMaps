@@ -55,10 +55,10 @@ function AgentMock() {
 	this.units = null;
 }
 
-let agentmock = new AgentMock();
-
 let browserlessbuildings = require("./browserlessbuildings");
 AgentMock.prototype.buildingify = browserlessbuildings.buildingify;
+
+let agentmock = new AgentMock();
 
 //Accept as input an array specifying the bounding box and
 //the name of a file containing the GeoJSON of streets wihin it.
