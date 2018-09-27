@@ -1,6 +1,6 @@
 {
   "name": "agentmaps",
-  "version": "2.1.3",
+  "version": "2.2.0",
   "description": "Geospatial agent-based modeling extension for Leaflet.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
