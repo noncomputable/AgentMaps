@@ -231,7 +231,7 @@ function getUnitNeighborLayerIDs(neighbors) {
  * @param {Array.<Array.<number>>} bounding_box - The map's top-left and bottom-right coordinates.
  * @param {Object} OSM_data - A GeoJSON Feature Collection object containing the OSM street features inside the bounding box.
  * @param {object} unit_options - An object containing the AgentMaps styling options for units.
- * @returns {Array<Feature>} -  array of features representing real estate units.
+ * @returns {Array<Feature>} - Array of features representing real estate units.
  */
 function getUnitFeatures(bounding_box, OSM_data, unit_options) {
 	let proposed_unit_features = [];
