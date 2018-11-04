@@ -79,7 +79,7 @@ function setupStreetFeatures(OSM_data, street_options, street_layers) {
 	new_status()
 	let i = 1;
 	this.streets.eachLayer(function(street) {
-		status_update("Relating "+ i + " of " + this.streets.count() + " streets...");
+		status_update("Relating " + i + " of " + this.streets.count() + " streets...");
 		this.streets.id_map[street.feature.id] = street._leaflet_id; 
 
 		addStreetLayerIntersections.call(this, street);
@@ -278,7 +278,6 @@ function getUnitFeatures(bounding_box, OSM_data, unit_options) {
 
 	end_status();
 	
-	console.log("Finding and removing superfluous units...");
 	unit_features = unitsOutOfStreets(proposed_unit_features, this.streets);
 	
 	return unit_features;
@@ -412,7 +411,7 @@ function getUnitAnchors(street_feature, bounding_box, unit_options) {
 		start_anchor = along(street_feature, distance_along + unit_buffer);
 		end_anchor = along(street_feature, distance_along + unit_buffer + unit_length);
 		
-		distance_along += unit_buffer + unit_length
+		distance_along += unit_buffer + unit_length;
 	}
 
 	return unit_anchors;
@@ -429,9 +428,12 @@ function getUnitAnchors(street_feature, bounding_box, unit_options) {
 function unitsOutOfStreets(unit_features, street_layers) {
 	let processed_unit_features = unit_features.slice();
 	
+	new_status();
+	let i = 1;
 	street_layers.eachLayer(function(street_layer) {
 		let street_feature = street_layer.feature;
 		for (let unit_feature of processed_unit_features) {
+			status_update("Removing superfluous units. Checking unit " + i + " of " + unit_features.length + "...");
 			let intersection_exists = lineIntersect(street_feature, unit_feature).features.length > 0;
 			if (intersection_exists) {
 				processed_unit_features.splice(processed_unit_features.indexOf(unit_feature), 1, null);
@@ -441,6 +443,7 @@ function unitsOutOfStreets(unit_features, street_layers) {
 		processed_unit_features = processed_unit_features.filter(feature => feature === null ? false : true);
 	});
 	
+	end_status();
 
 	return processed_unit_features;
 }
