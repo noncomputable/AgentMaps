@@ -26,7 +26,7 @@ getPathFinder = require('./routing').getPathFinder;
  * @param {object} [street_layers]- If you want to load a previously generated AgentMaps.streets object instead of generating one from scratch: A GeoJSON Feature Collection of an AgentMaps.streets featureGroup.
  */
 function buildingify(bounding_box, OSM_data, street_options, unit_options, unit_layers, street_layers) {
-	setupStreetFeatures.call(this, OSM_data, street_options);
+	setupStreetFeatures.call(this, OSM_data, street_options, street_layers);
 	setupUnitFeatures.call(this, bounding_box, OSM_data, unit_options, unit_layers);
 }
 
