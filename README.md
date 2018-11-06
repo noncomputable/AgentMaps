@@ -26,7 +26,7 @@ You'll need to [include Leaflet](https://leafletjs.com/download.html) separately
 
 Docs for people who want to use AgentMaps are available [here](https://noncomputable.github.io/AgentMaps/docs/index.html).
 
-Docs people who want to understand its internals are [here](https://noncomputable.github.io/AgentMaps/devdocs/index.html).
+Docs for people who want to understand its internals are [here](https://noncomputable.github.io/AgentMaps/devdocs/index.html).
 
 A basic walkthrough for creating an AgentMaps simulation can be found [here](https://noncomputable.github.io/AgentMaps/docs/tutorial-quickstart.html). 
 
