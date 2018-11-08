@@ -34,7 +34,7 @@ A basic walkthrough for creating an AgentMaps simulation can be found [here](htt
 
 [Simple](https://noncomputable.github.io/AgentMaps/demos/simple/simple.html): Shows all the different ways agents can travel around a map.
 
-[Epidemic](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html): Agents commute between different parts of a neighborhood while an infection spreads between them.
+<!--[Epidemic](https://noncomputable.github.io/AgentMaps/demos/epidemic/epidemic.html): Agents commute between different parts of a neighborhood while an infection spreads between them.-->
 
 You can find the corresponding code under _/demos_ in the gh-pages branch [here](https://github.com/noncomputable/AgentMaps/tree/gh-pages/demos).
 
