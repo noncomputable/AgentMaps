@@ -4,12 +4,12 @@
 
 AgentMaps is a Javascript library for building and visualizing dynamic social systems on maps.
 It is based on the [Leaflet](https://leafletjs.com/) interactive mapping [library](https://github.com/Leaflet/Leaflet).
-Given a neighborhood, AgentMaps lets you quickly and easily:
+Provided a neighborhood, AgentMaps lets you quickly and easily:
 
-* Build units along the streets.
-* Spawn agents onto the map.
-* Schedule them to move between places on the map.
-* Change their appearance and properties.
+* Build houses along the streets.
+* Put agents on the map.
+* Schedule them to move between places.
+* Change their appearance and internal properties.
 
 AgentMaps lets you turn this:
 
