@@ -1,11 +1,14 @@
 ---
 name: Bug report
-about: Submit a report to help us improve
+about: Tell us about bugs to help us improve
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
 **Describe the bug**
-A clear, quick description of the bug.
+A quick, clear description of the bug.
 
 **How to reproduce it**
 Code or UI interactions that cause the bug.
