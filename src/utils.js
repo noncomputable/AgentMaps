@@ -34,9 +34,9 @@ function reversedCoordinates(coordinates) {
  * @returns {boolean} - Whether the array can be the coordinates of a point.
  */
 function isPointCoordinates(array) {
-	if (array.length !== 2 || 
-		typeof(array[0]) !== "number" ||
-		typeof(array[1]) !== "number") {
+	if (array.length !== 2 && 
+		!(typeof(array[0]) == "number" &&
+		typeof(array[1]) == "number")) {
 		return false;
 	}
 
