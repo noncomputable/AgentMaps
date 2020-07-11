@@ -7,7 +7,7 @@ fs = require("fs"),
 path = require("path");
 
 //Mock a browser environment.
-window = {
+var window = {
 	screen: {}
 },
 document = {
@@ -98,12 +98,14 @@ function processFile(data) {
 
 function writeError(error) {
 	if (error) {
-		return console.log(error);
+		let prefix = "There was an issue saving your data: ";
+		return console.log(prefix + error);
 	}
 }
 
 function readError(error) {
 	if (error) {
-		return console.log(error);
+		let prefix = "There was an issue accessing your data: ";
+		return console.log(prefix + error);
 	}
 }
