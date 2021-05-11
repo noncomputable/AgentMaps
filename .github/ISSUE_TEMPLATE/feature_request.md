@@ -10,10 +10,10 @@ assignees: noncomputable
 ---
 
 **Did a problem you had inspire this feature request?**
-A clear, quick description of the problem.
+A clear description of the problem.
 
 **Describe the solution you'd like**
-A clear, quick description of your proposed feature and how it will be incorporated.
+A clear description of your proposed feature and how it will be incorporated.
 
 **More details**
 Any other ideas, workarounds, or screenshots that could clarify things.

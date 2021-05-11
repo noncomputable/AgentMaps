@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A quick, clear description of the bug.
+Quick, clear description of the bug.
 
 **How to reproduce it**
 Code or UI interactions that cause the bug.
