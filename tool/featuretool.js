@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 /* Core of a command line tool that runs buildingify and exports the resulting street and unit layers. */
 
 let optimist = require("optimist"),

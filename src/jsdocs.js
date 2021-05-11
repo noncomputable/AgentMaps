@@ -1,3 +1,5 @@
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 /* Extra documentation that isn't particular to any module */
 
 /**

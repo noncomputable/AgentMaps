@@ -1,3 +1,5 @@
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 /* Here we have utilities to convert OSM geojson data into a distance-weighted graph and find the shortest path between two points. */
 
 let path = require("ngraph.path"),

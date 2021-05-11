@@ -1,3 +1,5 @@
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 /* Here we define agentify, the agent base class, and everything they uniquely rely on. */
 
 let centroid = require('@turf/centroid').default,

@@ -1,3 +1,5 @@
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 /* The Agentmap class, which turns a Leaflet map into a simulation platform. */
 
 let lineSlice = require('@turf/line-slice').default,

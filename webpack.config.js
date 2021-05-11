@@ -1,3 +1,5 @@
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 const path = require('path');
  
 module.exports = {

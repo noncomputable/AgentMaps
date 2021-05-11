@@ -1,3 +1,5 @@
+/* This file is part of AgentMaps which is released under the Simplified BSD License. */
+
 /* Functions that help design and generate building units onto the map. */
 
 let L = require("./featuretool").L,

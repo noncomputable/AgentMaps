@@ -11,7 +11,7 @@ Provided a neighborhood, AgentMaps lets you quickly and easily:
 * Schedule them to move between places.
 * Change their appearance and internal properties.
 
-AgentMaps lets you turn this:
+AgentMaps lets you turn a map like this:
 
 <img src="resources/noagentmaps.png" width="500" height="387" />
 
