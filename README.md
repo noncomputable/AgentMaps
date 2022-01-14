@@ -1,21 +1,14 @@
-# AgentMaps - Social Simulations on Interactive Maps
+# AgentMaps - Social Simulations on Real World Maps
 
-<img src="resources/agentgif.gif" width="500" height="387" />
-
-AgentMaps is a JS library for building and visualizing simulations on maps.
-It is based on the [Leaflet](https://leafletjs.com/) interactive mapping [library](https://github.com/Leaflet/Leaflet).
-Provided a neighborhood, AgentMaps lets you quickly and easily:
-
-* Build houses along the streets.
-* Put agents on the map.
-* Schedule them to move between places.
-* Change their appearance and internal properties.
+AgentMaps is a library for building and visualizing agent-based simulations on real world maps.
+Agents are arbitrarily programmable at multiple levels of granularity.
+They can represent people, vehicles, animals, infectious agents, and more.
 
 AgentMaps lets you turn a map like this:
 
 <img src="resources/noagentmaps.png" width="500" height="387" />
 
-into something like this:
+into a simulation like this:
 
 <img src="resources/agentmaps.png" width="500" height="387" />
 
