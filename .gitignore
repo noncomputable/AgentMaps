@@ -2,7 +2,7 @@
 [._]*.s[a-v][a-z]
 [._]*.sw[a-p]
 [._]s[a-v][a-z]
-[._]sw[a-p]
+[._]sw[a-z]
 
 # Session
 Session.vim
