@@ -12,7 +12,7 @@ into a simulation like this:
 
 <img src="resources/agentmaps.png" width="500" height="387" />
 
-You can install it via npm (`npm install agentmaps`) and bundle it yourself, or you can get a premade bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) to include directly in a webpage. 
+You can install it via npm (`npm install agentmaps`) and bundle it yourself, or you can get a premade bundle [here](https://unpkg.com/agentmaps@2/site/dist/agentmaps.js) to include directly in a webpage.
 You'll need to [include Leaflet](https://leafletjs.com/download.html) separately.
 
 ### Documentation
@@ -21,7 +21,7 @@ Docs for people who want to use AgentMaps are available [here](https://noncomput
 
 Docs for people who want to understand its internals are [here](https://noncomputable.github.io/AgentMaps/devdocs/index.html).
 
-A basic walkthrough for creating an AgentMaps simulation can be found [here](https://noncomputable.github.io/AgentMaps/docs/tutorial-quickstart.html). 
+A basic walkthrough for creating an AgentMaps simulation can be found [here](https://noncomputable.github.io/AgentMaps/docs/tutorial-quickstart.html).
 
 ### Demos
 
@@ -33,7 +33,7 @@ You can find the corresponding code under _/demos_ in the gh-pages branch [here]
 
 ### Plugins
 
-[IconAgents](https://github.com/noncomputable/AgentMaps-IconAgents): Lets you depict agents with custom icons instead of circles. 
+[IconAgents](https://github.com/noncomputable/AgentMaps-IconAgents): Lets you depict agents with custom icons instead of circles.
 
 ---
 
